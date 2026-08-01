@@ -1,4 +1,5 @@
-import type { McpStatus, McpToolSummary, StudioConfig } from "../domain/contracts.js";
+import type { McpStatus, McpToolSummary, StoredAsset, StudioConfig } from "../domain/contracts.js";
+import type { AssetStoragePort } from "../ports/AssetStoragePort.js";
 import type { ConfigStorePort } from "../ports/ConfigStorePort.js";
 import type { ToolSessionPort } from "../ports/ToolSessionPort.js";
 import type { WorkspaceValidatorPort } from "../ports/WorkspaceValidatorPort.js";
@@ -8,6 +9,7 @@ export class ServerSetupService {
     private readonly session: ToolSessionPort,
     private readonly validator: WorkspaceValidatorPort<StudioConfig>,
     private readonly configStore: ConfigStorePort<StudioConfig>,
+    private readonly assetStorage: AssetStoragePort,
   ) {}
 
   public status(): McpStatus { return this.toMcpStatus(this.session.status()); }
@@ -29,6 +31,7 @@ export class ServerSetupService {
   public async stop(): Promise<McpStatus> { return this.toMcpStatus(await this.session.stop()); }
   public async tools(): Promise<McpToolSummary[]> { return this.session.listTools(); }
   public callTool(name: string, args: Record<string, unknown>): Promise<unknown> { return this.session.call(name, args); }
+  public uploadAsset(filename: string, data: Uint8Array): Promise<StoredAsset> { return this.assetStorage.store(filename, data); }
 
   private toMcpStatus(status: ReturnType<ToolSessionPort["status"]>): McpStatus {
     return { state: status.state, pid: status.pid, serverName: status.providerName, serverVersion: status.providerVersion, toolCount: status.toolCount, message: status.message };

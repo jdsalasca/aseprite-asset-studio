@@ -1,4 +1,4 @@
-import type { AssetGateway, McpStatus, StudioConfig } from "../domain/contracts.js";
+import type { AssetGateway, McpStatus, StoredAsset, StudioConfig } from "../domain/contracts.js";
 
 export class AssetStudioService {
   public constructor(private readonly gateway: AssetGateway) {}
@@ -9,4 +9,5 @@ export class AssetStudioService {
   public stopMcp(): Promise<McpStatus> { return this.gateway.stopMcp(); }
   public tools() { return this.gateway.tools(); }
   public callTool(name: string, args: Record<string, unknown>) { return this.gateway.callTool(name, args); }
+  public upload(file: File): Promise<StoredAsset> { return this.gateway.upload(file); }
 }

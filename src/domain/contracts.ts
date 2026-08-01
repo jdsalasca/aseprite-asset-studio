@@ -27,6 +27,12 @@ export interface HealthResponse {
   mcp: McpStatus;
 }
 
+export interface StoredAsset {
+  filename: string;
+  path: string;
+  sizeBytes: number;
+}
+
 export interface AssetGateway {
   health(): Promise<HealthResponse>;
   config(): Promise<StudioConfig>;
@@ -34,4 +40,5 @@ export interface AssetGateway {
   stopMcp(): Promise<McpStatus>;
   tools(): Promise<McpToolSummary[]>;
   callTool(name: string, args: Record<string, unknown>): Promise<unknown>;
+  upload(file: File): Promise<StoredAsset>;
 }

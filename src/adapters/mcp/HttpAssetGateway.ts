@@ -1,4 +1,4 @@
-import type { AssetGateway, HealthResponse, McpStatus, McpToolSummary, StudioConfig } from "../../domain/contracts.js";
+import type { AssetGateway, HealthResponse, McpStatus, McpToolSummary, StoredAsset, StudioConfig } from "../../domain/contracts.js";
 
 export class HttpAssetGateway implements AssetGateway {
   public constructor(private readonly baseUrl = "http://127.0.0.1:3765") {}
@@ -9,6 +9,12 @@ export class HttpAssetGateway implements AssetGateway {
   public stopMcp() { return this.request<McpStatus>("/api/mcp/stop", { method: "POST" }); }
   public tools() { return this.request<McpToolSummary[]>("/api/mcp/tools"); }
   public callTool(name: string, args: Record<string, unknown>) { return this.request<unknown>("/api/mcp/call", { method: "POST", body: JSON.stringify({ name, args }) }); }
+  public async upload(file: File): Promise<StoredAsset> {
+    const response = await fetch(`${this.baseUrl}/api/assets/upload?filename=${encodeURIComponent(file.name)}`, { method: "POST", headers: { "content-type": file.type || "application/octet-stream" }, body: await file.arrayBuffer() });
+    const payload = await response.json() as { data?: StoredAsset; error?: string };
+    if (!response.ok) throw new Error(payload.error ?? `Upload failed (${response.status})`);
+    return payload.data as StoredAsset;
+  }
 
   private async request<T>(path: string, init?: RequestInit): Promise<T> {
     const response = await fetch(`${this.baseUrl}${path}`, { headers: { "content-type": "application/json" }, ...init });

@@ -24,4 +24,7 @@ Variables opcionales:
 MCP_REPO_PATH=C:\\Users\\jdsal\\Documents\\Programming-personal\\aseprite-mcp
 ASEPRITE_PATH=C:\\Program Files\\Aseprite\\Aseprite.exe
 ASSET_STUDIO_GATEWAY_PORT=3765
+ASSET_STUDIO_UPLOAD_DIR=C:\\Users\\jdsal\\Documents\\Programming-personal\\asset-studio\\.asset-studio\\uploads
 ```
+
+Los assets cargados se validan por extensión, limitan a 32 MB y se guardan mediante el adaptador `LocalAssetStore`; el navegador no escribe directamente en el filesystem.

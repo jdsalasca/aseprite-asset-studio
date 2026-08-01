@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ServerSetupService } from "../src/application/ServerSetupService.js";
 import type { StudioConfig } from "../src/domain/contracts.js";
 import type { ConfigStorePort } from "../src/ports/ConfigStorePort.js";
+import type { AssetStoragePort } from "../src/ports/AssetStoragePort.js";
 import type { ToolSessionLaunchOptions, ToolSessionPort, ToolSessionStatus } from "../src/ports/ToolSessionPort.js";
 import type { WorkspaceValidatorPort } from "../src/ports/WorkspaceValidatorPort.js";
 
@@ -28,11 +29,15 @@ class FakeStore implements ConfigStorePort<StudioConfig> {
   public async save(configToSave: StudioConfig) { this.saved = configToSave; }
 }
 
+class FakeAssetStorage implements AssetStoragePort {
+  public async store(filename: string, data: Uint8Array) { return { filename, path: `/tmp/${filename}`, sizeBytes: data.byteLength }; }
+}
+
 describe("ServerSetupService", () => {
   it("maps human configuration to a generic session port and persists it", async () => {
     const session = new FakeSession();
     const store = new FakeStore();
-    const service = new ServerSetupService(session, new FakeValidator(), store);
+    const service = new ServerSetupService(session, new FakeValidator(), store, new FakeAssetStorage());
 
     const status = await service.start(config);
 
@@ -46,7 +51,7 @@ describe("ServerSetupService", () => {
     const validator = new FakeValidator();
     validator.error = "invalid workspace";
     const store = new FakeStore();
-    const service = new ServerSetupService(session, validator, store);
+    const service = new ServerSetupService(session, validator, store, new FakeAssetStorage());
 
     await expect(service.start(config)).rejects.toThrow("invalid workspace");
     expect(session.options).toBeUndefined();

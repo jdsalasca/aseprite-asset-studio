@@ -14,6 +14,7 @@ export class StudioHttpController {
       if (request.method === "GET" && url.pathname === "/api/config") return this.send(response, 200, { data: await this.setup.loadConfig(this.defaultConfig) }, origin);
       if (request.method === "GET" && url.pathname === "/api/mcp/status") return this.send(response, 200, { data: this.setup.status() }, origin);
       if (request.method === "GET" && url.pathname === "/api/mcp/tools") return this.send(response, 200, { data: await this.setup.tools() }, origin);
+      if (request.method === "POST" && url.pathname === "/api/assets/upload") return this.send(response, 200, { data: await this.setup.uploadAsset(url.searchParams.get("filename") ?? "asset.png", await this.readBuffer(request)) }, origin);
       if (request.method === "POST" && url.pathname === "/api/mcp/start") return this.send(response, 200, { data: await this.setup.start(await this.readBody(request) as StudioConfig) }, origin);
       if (request.method === "POST" && url.pathname === "/api/mcp/stop") return this.send(response, 200, { data: await this.setup.stop() }, origin);
       if (request.method === "POST" && url.pathname === "/api/mcp/call") { const input = await this.readBody(request) as { name?: string; args?: Record<string, unknown> }; return this.send(response, 200, { data: await this.setup.callTool(input.name ?? "", input.args ?? {}) }, origin); }
@@ -24,6 +25,7 @@ export class StudioHttpController {
   }
 
   private async readBody(request: IncomingMessage): Promise<unknown> { let raw = ""; for await (const chunk of request) raw += chunk; return raw ? JSON.parse(raw) : {}; }
+  private async readBuffer(request: IncomingMessage): Promise<Uint8Array> { const chunks: Buffer[] = []; let total = 0; for await (const chunk of request) { const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk); total += buffer.length; if (total > 32 * 1024 * 1024) throw new Error("Asset exceeds the 32 MB upload limit"); chunks.push(buffer); } return Buffer.concat(chunks); }
   private send(response: ServerResponse, status: number, data: unknown, origin?: string): void {
     const allowedOrigin = origin && /^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/.test(origin) ? origin : "null";
     response.writeHead(status, { "content-type": "application/json; charset=utf-8", "access-control-allow-origin": allowedOrigin, "access-control-allow-headers": "content-type", "access-control-allow-methods": "GET,POST,OPTIONS", vary: "origin" });
