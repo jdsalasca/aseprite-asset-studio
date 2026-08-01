@@ -1,4 +1,4 @@
-import type { AssetGateway, McpStatus, StoredAsset, StudioConfig } from "../domain/contracts.js";
+import type { AssetGateway, EnhancementApplyView, EnhancementPlanView, McpStatus, StoredAsset, StudioConfig } from "../domain/contracts.js";
 
 export class AssetStudioService {
   public constructor(private readonly gateway: AssetGateway) {}
@@ -10,4 +10,21 @@ export class AssetStudioService {
   public tools() { return this.gateway.tools(); }
   public callTool(name: string, args: Record<string, unknown>) { return this.gateway.callTool(name, args); }
   public upload(file: File): Promise<StoredAsset> { return this.gateway.upload(file); }
+
+  public async suggestEnhancementPlan(filename: string): Promise<EnhancementPlanView> {
+    await this.gateway.callTool("inspect_reference", { filename });
+    const response = await this.gateway.callTool("suggest_enhancement_plan", { filename, goals: ["cleanup", "terrain_grain", "water_flow", "directional_lighting", "particles"] }) as { content?: Array<{ text?: string }> };
+    const text = response.content?.[0]?.text;
+    if (!text) throw new Error("El MCP no devolvió un plan de mejora");
+    return JSON.parse(text) as EnhancementPlanView;
+  }
+
+  public async applyEnhancementPlan(filename: string, outputFilename: string): Promise<EnhancementApplyView> {
+    const response = await this.gateway.callTool("apply_enhancement_plan", { filename, output_filename: outputFilename, format: "png", goals: ["cleanup", "terrain_grain", "water_flow", "directional_lighting", "particles"] }) as { content?: Array<{ text?: string }> };
+    const text = response.content?.[0]?.text;
+    if (!text) throw new Error("El MCP no devolvió el resultado de aplicación");
+    const parsed = JSON.parse(text) as { applied?: EnhancementApplyView };
+    if (!parsed.applied) throw new Error("El MCP devolvió una aplicación incompleta");
+    return parsed.applied;
+  }
 }

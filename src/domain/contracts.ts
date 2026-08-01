@@ -44,6 +44,15 @@ export interface EnhancementPlanView {
   destructive: false;
 }
 
+export interface EnhancementApplyView {
+  planId: string;
+  outputFilename: string;
+  format: "png" | "gif";
+  frames: number;
+  passesApplied: string[];
+  sourcePreserved: true;
+}
+
 export interface AssetGateway {
   health(): Promise<HealthResponse>;
   config(): Promise<StudioConfig>;
