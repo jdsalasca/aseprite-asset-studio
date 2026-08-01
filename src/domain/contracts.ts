@@ -57,6 +57,7 @@ export interface EnhancementApplyView {
   frames: number;
   passesApplied: string[];
   sourcePreserved: true;
+  quality: { valid: boolean; violations?: string[] };
 }
 
 export interface AssetGateway {

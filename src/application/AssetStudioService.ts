@@ -23,9 +23,9 @@ export class AssetStudioService {
     const response = await this.gateway.callTool("apply_enhancement_plan", { filename, output_filename: outputFilename, format: "png", goals: ["cleanup", "terrain_grain", "water_flow", "directional_lighting", "particles"] }) as { content?: Array<{ text?: string }> };
     const text = response.content?.[0]?.text;
     if (!text) throw new Error("El MCP no devolvió el resultado de aplicación");
-    const parsed = JSON.parse(text) as { applied?: EnhancementApplyView };
-    if (!parsed.applied) throw new Error("El MCP devolvió una aplicación incompleta");
-    return parsed.applied;
+    const parsed = JSON.parse(text) as { applied?: EnhancementApplyView; quality?: EnhancementApplyView["quality"] };
+    if (!parsed.applied || !parsed.quality) throw new Error("El MCP devolvió una aplicación sin quality gate");
+    return { ...parsed.applied, quality: parsed.quality };
   }
 
   public assetPreviewUrl(path: string): string { return this.gateway.assetPreviewUrl(path); }
