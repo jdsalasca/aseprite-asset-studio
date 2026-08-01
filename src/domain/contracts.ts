@@ -33,6 +33,17 @@ export interface StoredAsset {
   sizeBytes: number;
 }
 
+export interface EnhancementPlanView {
+  planId: string;
+  algorithmVersion: string;
+  filename: string;
+  seed: number;
+  detectedSignals: string[];
+  warnings: string[];
+  passes: Array<{ id: string; reason: string; parameters: Record<string, number | string | boolean> }>;
+  destructive: false;
+}
+
 export interface AssetGateway {
   health(): Promise<HealthResponse>;
   config(): Promise<StudioConfig>;
