@@ -15,7 +15,8 @@ El navegador no conoce `child_process`, MCP SDK ni rutas de Aseprite. El proceso
 3. `StudioHttpController` es delgado y solo traduce HTTP;
 4. el upload de assets pasa por un puerto y valida tamaño/formato;
 5. `ToolResponseParser` centraliza la lectura de respuestas de herramientas, preserva `isError` y diagnostica JSON inválido;
-6. las pruebas TDD cubren los casos de uso de mejora y los límites de almacenamiento.
+6. `QualityGatePanel` muestra resultado y violaciones con una primitive reusable, sin reglas de dominio en React;
+7. las pruebas TDD cubren los casos de uso de mejora y los límites de almacenamiento.
 
 ## Plan de implementación
 

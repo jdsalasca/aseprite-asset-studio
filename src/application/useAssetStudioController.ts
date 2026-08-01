@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AssetStudioService } from "./AssetStudioService.js";
 import { HttpAssetGateway } from "../adapters/mcp/HttpAssetGateway.js";
 import { ConsoleOperationLogger } from "../adapters/observability/ConsoleOperationLogger.js";
-import type { EnhancementPlanView, RuntimeConfig, ToolDescriptor, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { EnhancementApplyView, EnhancementPlanView, RuntimeConfig, ToolDescriptor, ToolRuntimeStatus } from "../domain/contracts.js";
 
 const defaultConfig: RuntimeConfig = { workspacePath: "", executablePath: "", gatewayPort: 3765 };
 const offlineStatus: ToolRuntimeStatus = { state: "offline", pid: null, serverName: null, serverVersion: null, toolCount: 0, message: "Gateway local no iniciado" };
@@ -17,6 +17,7 @@ export interface AssetStudioController {
   plan: EnhancementPlanView | null;
   previewUrl: string | null;
   enhancedPreviewUrl: string | null;
+  quality: EnhancementApplyView["quality"] | null;
   notice: string;
   updateConfig(config: RuntimeConfig): void;
   start(): Promise<void>;
@@ -40,6 +41,7 @@ export function useAssetStudioController(): AssetStudioController {
   const [plan, setPlan] = useState<EnhancementPlanView | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [enhancedPreviewUrl, setEnhancedPreviewUrl] = useState<string | null>(null);
+  const [quality, setQuality] = useState<EnhancementApplyView["quality"] | null>(null);
   const [notice, setNotice] = useState("Inicia el gateway para conectar Aseprite MCP.");
 
   useEffect(() => {
@@ -75,6 +77,7 @@ export function useAssetStudioController(): AssetStudioController {
     setBusy(true); setNotice("Aplicando plan y ejecutando quality gate...");
     try {
       const result = await service.applyEnhancementPlan(assetPath, outputFilename);
+      setQuality(result.quality);
       setEnhancedPreviewUrl(service.assetPreviewUrl(result.outputFilename));
       const qualityMessage = result.quality.valid ? "quality gate OK" : `quality gate con ${result.quality.violations?.length ?? 0} alertas`;
       setNotice(`Salida creada: ${result.outputFilename} · ${result.passesApplied.length} pasadas · ${qualityMessage}.`);
@@ -85,11 +88,11 @@ export function useAssetStudioController(): AssetStudioController {
   function upload(files: File[]): void {
     const file = files[0];
     if (!file) return;
-    setAssetName(file.name); setPlan(null); setEnhancedPreviewUrl(null); setNotice(`Subiendo ${file.name}...`);
+    setAssetName(file.name); setPlan(null); setEnhancedPreviewUrl(null); setQuality(null); setNotice(`Subiendo ${file.name}...`);
     void service.upload(file).then((stored) => {
       setAssetPath(stored.path); setPreviewUrl(service.assetPreviewUrl(stored.path)); setNotice(`${stored.filename} cargado (${stored.sizeBytes} bytes).`);
     }).catch((error) => setNotice(errorMessage(error)));
   }
 
-  return { config, status, tools, busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, notice, updateConfig: setConfig, start, stop, inspect, applyPlan, upload };
+  return { config, status, tools, busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, notice, updateConfig: setConfig, start, stop, inspect, applyPlan, upload };
 }
