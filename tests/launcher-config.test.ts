@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildLaunchPlan } from "../server/McpProcessController.js";
+import { buildLaunchPlan, validateLaunchConfig } from "../server/McpProcessController.js";
 
 describe("MCP launcher", () => {
   it("uses the Windows npm launcher and forwards Aseprite configuration", () => {
@@ -14,5 +14,13 @@ describe("MCP launcher", () => {
     const plan = buildLaunchPlan({ mcpRepoPath: "/work/aseprite-mcp", asepritePath: "", gatewayPort: 3765 }, "linux");
     expect(plan.command).toBe("npm");
     expect(plan.env).toEqual({});
+  });
+
+  it("rejects a repository that cannot launch the MCP script", () => {
+    expect(validateLaunchConfig({ mcpRepoPath: "C:\\does-not-exist", asepritePath: "", gatewayPort: 3765 })).toBe("La carpeta seleccionada no contiene package.json");
+  });
+
+  it("accepts the real aseprite-mcp repository contract", () => {
+    expect(validateLaunchConfig({ mcpRepoPath: "C:\\Users\\jdsal\\Documents\\Programming-personal\\aseprite-mcp", asepritePath: "", gatewayPort: 3765 })).toBeUndefined();
   });
 });

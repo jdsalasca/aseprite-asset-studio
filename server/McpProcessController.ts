@@ -1,5 +1,7 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import type { McpStatus, StudioConfig } from "../src/domain/contracts.js";
 
 export interface LaunchPlan { command: string; args: string[]; cwd: string; env: Record<string, string>; }
@@ -11,6 +13,21 @@ export function buildLaunchPlan(config: StudioConfig, platform = process.platfor
   return { command, args: ["run", "mcp"], cwd: config.mcpRepoPath.trim(), env };
 }
 
+export function validateLaunchConfig(config: StudioConfig): string | undefined {
+  const repoPath = config.mcpRepoPath.trim();
+  if (!repoPath) return "Selecciona la carpeta del repositorio aseprite-mcp";
+  const packagePath = join(repoPath, "package.json");
+  if (!existsSync(packagePath)) return "La carpeta seleccionada no contiene package.json";
+  try {
+    const packageJson = JSON.parse(readFileSync(packagePath, "utf8")) as { scripts?: Record<string, unknown> };
+    if (typeof packageJson.scripts?.mcp !== "string") return "El package.json no contiene el script npm 'mcp'";
+  } catch {
+    return "No se pudo leer el package.json del repositorio";
+  }
+  if (config.asepritePath.trim() && !existsSync(config.asepritePath.trim())) return "La ruta de Aseprite configurada no existe";
+  return undefined;
+}
+
 export class McpProcessController {
   private client: Client | null = null;
   private transport: StdioClientTransport | null = null;
@@ -19,7 +36,8 @@ export class McpProcessController {
   public status(): McpStatus { return { ...this.current }; }
 
   public async start(config: StudioConfig): Promise<McpStatus> {
-    if (!config.mcpRepoPath.trim()) throw new Error("Selecciona la carpeta del repositorio aseprite-mcp");
+    const validationError = validateLaunchConfig(config);
+    if (validationError) throw new Error(validationError);
     if (this.current.state === "online") return this.status();
     this.current = { ...this.current, state: "starting", message: "Iniciando aseprite-mcp..." };
     const launchPlan = buildLaunchPlan(config);
