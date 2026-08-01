@@ -1,8 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { AssetStudioService } from "../src/application/AssetStudioService.js";
 import type { AssetGateway, HealthResponse, McpStatus, McpToolSummary, StoredAsset, StudioConfig } from "../src/domain/contracts.js";
+import type { OperationEvent, OperationLogPort } from "../src/ports/OperationLogPort.js";
 
 const status: McpStatus = { state: "online", pid: 7, serverName: "fake", serverVersion: "1", toolCount: 1, message: "online" };
+
+class FakeLogger implements OperationLogPort {
+  public events: OperationEvent[] = [];
+  public record(event: OperationEvent): void { this.events.push(event); }
+}
 
 class FakeGateway implements AssetGateway {
   public calls: Array<{ name: string; args: Record<string, unknown> }> = [];
@@ -23,9 +29,13 @@ class FakeGateway implements AssetGateway {
 describe("AssetStudioService enhancement use cases", () => {
   it("inspects before suggesting a typed plan", async () => {
     const gateway = new FakeGateway();
-    const plan = await new AssetStudioService(gateway).suggestEnhancementPlan("source.png");
+    const logger = new FakeLogger();
+    const plan = await new AssetStudioService(gateway, logger).suggestEnhancementPlan("source.png");
     expect(plan.planId).toBe("plan-1");
     expect(gateway.calls.map((call) => call.name)).toEqual(["inspect_reference", "suggest_enhancement_plan"]);
+    expect(logger.events).toHaveLength(1);
+    expect(logger.events[0]).toMatchObject({ operation: "suggest_enhancement_plan", outcome: "success" });
+    expect(logger.events[0]?.correlationId).toContain("suggest_enhancement_plan-");
   });
 
   it("applies to a separate output and returns a typed outcome", async () => {

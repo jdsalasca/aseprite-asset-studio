@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { AssetStudioService } from "./AssetStudioService.js";
 import { HttpAssetGateway } from "../adapters/mcp/HttpAssetGateway.js";
+import { ConsoleOperationLogger } from "../adapters/observability/ConsoleOperationLogger.js";
 import type { EnhancementPlanView, McpStatus, McpToolSummary, StudioConfig } from "../domain/contracts.js";
 
 const defaultConfig: StudioConfig = { mcpRepoPath: "", asepritePath: "", gatewayPort: 3765 };
@@ -29,7 +30,7 @@ function errorMessage(error: unknown): string { return error instanceof Error ? 
 function enhancedFilename(filename: string): string { return /\.[^./\\]+$/.test(filename) ? filename.replace(/\.[^./\\]+$/, "-enhanced.png") : `${filename}-enhanced.png`; }
 
 export function useAssetStudioController(): AssetStudioController {
-  const service = useMemo(() => new AssetStudioService(new HttpAssetGateway()), []);
+  const service = useMemo(() => new AssetStudioService(new HttpAssetGateway(), new ConsoleOperationLogger()), []);
   const [config, setConfig] = useState(defaultConfig);
   const [status, setStatus] = useState(offlineStatus);
   const [tools, setTools] = useState<McpToolSummary[]>([]);
