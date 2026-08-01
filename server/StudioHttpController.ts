@@ -14,6 +14,7 @@ export class StudioHttpController {
       if (request.method === "GET" && url.pathname === "/api/config") return this.send(response, 200, { data: await this.setup.loadConfig(this.defaultConfig) }, origin);
       if (request.method === "GET" && url.pathname === "/api/mcp/status") return this.send(response, 200, { data: this.setup.status() }, origin);
       if (request.method === "GET" && url.pathname === "/api/mcp/tools") return this.send(response, 200, { data: await this.setup.tools() }, origin);
+      if (request.method === "GET" && url.pathname === "/api/assets/preview") return this.sendAsset(response, await this.setup.previewAsset(url.searchParams.get("path") ?? ""), origin);
       if (request.method === "POST" && url.pathname === "/api/assets/upload") return this.send(response, 200, { data: await this.setup.uploadAsset(url.searchParams.get("filename") ?? "asset.png", await this.readBuffer(request)) }, origin);
       if (request.method === "POST" && url.pathname === "/api/mcp/start") return this.send(response, 200, { data: await this.setup.start(await this.readBody(request) as StudioConfig) }, origin);
       if (request.method === "POST" && url.pathname === "/api/mcp/stop") return this.send(response, 200, { data: await this.setup.stop() }, origin);
@@ -30,5 +31,10 @@ export class StudioHttpController {
     const allowedOrigin = origin && /^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/.test(origin) ? origin : "null";
     response.writeHead(status, { "content-type": "application/json; charset=utf-8", "access-control-allow-origin": allowedOrigin, "access-control-allow-headers": "content-type", "access-control-allow-methods": "GET,POST,OPTIONS", vary: "origin" });
     response.end(JSON.stringify(data));
+  }
+  private sendAsset(response: ServerResponse, asset: { contentType: string; data: Uint8Array }, origin?: string): void {
+    const allowedOrigin = origin && /^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/.test(origin) ? origin : "null";
+    response.writeHead(200, { "content-type": asset.contentType, "content-length": asset.data.byteLength, "access-control-allow-origin": allowedOrigin, vary: "origin" });
+    response.end(Buffer.from(asset.data));
   }
 }

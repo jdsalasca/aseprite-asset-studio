@@ -17,6 +17,7 @@ class FakeGateway implements AssetGateway {
     return { content: [{ text: JSON.stringify({ applied: { planId: "plan-1", outputFilename: args.output_filename, format: "png", frames: 1, passesApplied: ["cleanup"], sourcePreserved: true } }) }] };
   }
   public async upload(file: File): Promise<StoredAsset> { return { filename: file.name, path: `/tmp/${file.name}`, sizeBytes: file.size }; }
+  public assetPreviewUrl(path: string): string { return `/preview?path=${encodeURIComponent(path)}`; }
 }
 
 describe("AssetStudioService enhancement use cases", () => {

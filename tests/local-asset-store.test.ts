@@ -7,9 +7,12 @@ import { LocalAssetStore } from "../server/persistence/LocalAssetStore.js";
 describe("LocalAssetStore", () => {
   it("stores an allowed asset under the configured root", async () => {
     const root = await mkdtemp(join(tmpdir(), "asset-studio-"));
-    const stored = await new LocalAssetStore(root).store("beach.png", new Uint8Array([1, 2, 3]));
+    const store = new LocalAssetStore(root);
+    const stored = await store.store("beach.png", new Uint8Array([1, 2, 3]));
     expect(stored.path.startsWith(root)).toBe(true);
     expect(await readFile(stored.path)).toEqual(Buffer.from([1, 2, 3]));
+    await expect(store.read(stored.path)).resolves.toMatchObject({ filename: "beach.png", contentType: "image/png" });
+    await expect(store.read(join(root, "..", "escape.png"))).rejects.toThrow("escapes");
   });
 
   it("rejects unsupported formats and oversized data", async () => {

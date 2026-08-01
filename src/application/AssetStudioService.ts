@@ -27,4 +27,6 @@ export class AssetStudioService {
     if (!parsed.applied) throw new Error("El MCP devolvió una aplicación incompleta");
     return parsed.applied;
   }
+
+  public assetPreviewUrl(path: string): string { return this.gateway.assetPreviewUrl(path); }
 }

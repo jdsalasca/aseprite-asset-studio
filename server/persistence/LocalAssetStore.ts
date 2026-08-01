@@ -1,6 +1,6 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
-import type { StoredAsset } from "../../src/domain/contracts.js";
+import type { AssetContent, StoredAsset } from "../../src/domain/contracts.js";
 import type { AssetStoragePort } from "../../src/ports/AssetStoragePort.js";
 
 const MAX_UPLOAD_BYTES = 32 * 1024 * 1024;
@@ -20,5 +20,15 @@ export class LocalAssetStore implements AssetStoragePort {
     await mkdir(root, { recursive: true });
     await writeFile(target, data);
     return { filename: safeFilename, path: target, sizeBytes: data.byteLength };
+  }
+
+  public async read(assetPath: string): Promise<AssetContent> {
+    const root = resolve(this.directory);
+    const target = resolve(assetPath);
+    if (!target.startsWith(`${root}${process.platform === "win32" ? "\\" : "/"}`)) throw new Error("Asset path escapes the storage directory");
+    const data = await readFile(target);
+    const extension = target.toLowerCase().slice(target.lastIndexOf("."));
+    const contentType = extension === ".png" ? "image/png" : extension === ".gif" ? "image/gif" : extension === ".webp" ? "image/webp" : "application/octet-stream";
+    return { filename: basename(target), contentType, data };
   }
 }

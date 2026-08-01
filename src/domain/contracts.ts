@@ -33,6 +33,12 @@ export interface StoredAsset {
   sizeBytes: number;
 }
 
+export interface AssetContent {
+  filename: string;
+  contentType: string;
+  data: Uint8Array;
+}
+
 export interface EnhancementPlanView {
   planId: string;
   algorithmVersion: string;
@@ -61,4 +67,5 @@ export interface AssetGateway {
   tools(): Promise<McpToolSummary[]>;
   callTool(name: string, args: Record<string, unknown>): Promise<unknown>;
   upload(file: File): Promise<StoredAsset>;
+  assetPreviewUrl(path: string): string;
 }

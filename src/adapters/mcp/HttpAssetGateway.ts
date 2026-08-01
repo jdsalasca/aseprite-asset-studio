@@ -15,6 +15,7 @@ export class HttpAssetGateway implements AssetGateway {
     if (!response.ok) throw new Error(payload.error ?? `Upload failed (${response.status})`);
     return payload.data as StoredAsset;
   }
+  public assetPreviewUrl(path: string): string { return `${this.baseUrl}/api/assets/preview?path=${encodeURIComponent(path)}`; }
 
   private async request<T>(path: string, init?: RequestInit): Promise<T> {
     const response = await fetch(`${this.baseUrl}${path}`, { headers: { "content-type": "application/json" }, ...init });

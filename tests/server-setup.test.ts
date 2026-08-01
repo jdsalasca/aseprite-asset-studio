@@ -31,6 +31,7 @@ class FakeStore implements ConfigStorePort<StudioConfig> {
 
 class FakeAssetStorage implements AssetStoragePort {
   public async store(filename: string, data: Uint8Array) { return { filename, path: `/tmp/${filename}`, sizeBytes: data.byteLength }; }
+  public async read(path: string) { return { filename: path, contentType: "image/png", data: new Uint8Array() }; }
 }
 
 describe("ServerSetupService", () => {
