@@ -20,7 +20,7 @@ describe("MCP launcher", () => {
     await expect(validateLaunchConfig({ mcpRepoPath: "C:\\does-not-exist", asepritePath: "", gatewayPort: 3765 })).resolves.toBe("La carpeta seleccionada no contiene package.json");
   });
 
-  it("accepts the real aseprite-mcp repository contract", async () => {
-    await expect(validateLaunchConfig({ mcpRepoPath: "C:\\Users\\jdsal\\Documents\\Programming-personal\\aseprite-mcp", asepritePath: "", gatewayPort: 3765 })).resolves.toBeUndefined();
+  it("does not mistake the Asset Studio workspace for the MCP workspace", async () => {
+    await expect(validateLaunchConfig({ mcpRepoPath: process.cwd(), asepritePath: "", gatewayPort: 3765 })).resolves.toBe("El package.json no contiene el script npm 'mcp'");
   });
 });
