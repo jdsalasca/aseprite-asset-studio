@@ -1,12 +1,12 @@
 export type ConnectionState = "offline" | "starting" | "online" | "error";
 
-export interface StudioConfig {
-  mcpRepoPath: string;
-  asepritePath: string;
+export interface RuntimeConfig {
+  workspacePath: string;
+  executablePath: string;
   gatewayPort: number;
 }
 
-export interface McpStatus {
+export interface ToolRuntimeStatus {
   state: ConnectionState;
   pid: number | null;
   serverName: string | null;
@@ -15,7 +15,7 @@ export interface McpStatus {
   message: string;
 }
 
-export interface McpToolSummary {
+export interface ToolDescriptor {
   name: string;
   description?: string;
 }
@@ -24,7 +24,7 @@ export interface HealthResponse {
   ok: boolean;
   service: string;
   version: string;
-  mcp: McpStatus;
+  runtime: ToolRuntimeStatus;
 }
 
 export interface StoredAsset {
@@ -62,10 +62,10 @@ export interface EnhancementApplyView {
 
 export interface AssetGateway {
   health(): Promise<HealthResponse>;
-  config(): Promise<StudioConfig>;
-  startMcp(config: StudioConfig): Promise<McpStatus>;
-  stopMcp(): Promise<McpStatus>;
-  tools(): Promise<McpToolSummary[]>;
+  config(): Promise<RuntimeConfig>;
+  startRuntime(config: RuntimeConfig): Promise<ToolRuntimeStatus>;
+  stopRuntime(): Promise<ToolRuntimeStatus>;
+  tools(): Promise<ToolDescriptor[]>;
   callTool(name: string, args: Record<string, unknown>): Promise<unknown>;
   upload(file: File): Promise<StoredAsset>;
   assetPreviewUrl(path: string): string;

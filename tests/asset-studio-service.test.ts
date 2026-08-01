@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { AssetStudioService } from "../src/application/AssetStudioService.js";
-import type { AssetGateway, HealthResponse, McpStatus, McpToolSummary, StoredAsset, StudioConfig } from "../src/domain/contracts.js";
+import type { AssetGateway, HealthResponse, RuntimeConfig, StoredAsset, ToolDescriptor, ToolRuntimeStatus } from "../src/domain/contracts.js";
 import type { OperationEvent, OperationLogPort } from "../src/ports/OperationLogPort.js";
 
-const status: McpStatus = { state: "online", pid: 7, serverName: "fake", serverVersion: "1", toolCount: 1, message: "online" };
+const status: ToolRuntimeStatus = { state: "online", pid: 7, serverName: "fake", serverVersion: "1", toolCount: 1, message: "online" };
 
 class FakeLogger implements OperationLogPort {
   public events: OperationEvent[] = [];
@@ -12,11 +12,11 @@ class FakeLogger implements OperationLogPort {
 
 class FakeGateway implements AssetGateway {
   public calls: Array<{ name: string; args: Record<string, unknown> }> = [];
-  public async health(): Promise<HealthResponse> { return { ok: true, service: "fake", version: "1", mcp: status }; }
-  public async config(): Promise<StudioConfig> { return { mcpRepoPath: "", asepritePath: "", gatewayPort: 3765 }; }
-  public async startMcp(): Promise<McpStatus> { return status; }
-  public async stopMcp(): Promise<McpStatus> { return status; }
-  public async tools(): Promise<McpToolSummary[]> { return [{ name: "apply_enhancement_plan" }]; }
+  public async health(): Promise<HealthResponse> { return { ok: true, service: "fake", version: "1", runtime: status }; }
+  public async config(): Promise<RuntimeConfig> { return { workspacePath: "", executablePath: "", gatewayPort: 3765 }; }
+  public async startRuntime(): Promise<ToolRuntimeStatus> { return status; }
+  public async stopRuntime(): Promise<ToolRuntimeStatus> { return status; }
+  public async tools(): Promise<ToolDescriptor[]> { return [{ name: "apply_enhancement_plan" }]; }
   public async callTool(name: string, args: Record<string, unknown>): Promise<unknown> {
     this.calls.push({ name, args });
     if (name === "suggest_enhancement_plan") return { content: [{ text: JSON.stringify({ planId: "plan-1", algorithmVersion: "v1", filename: args.filename, seed: 1, detectedSignals: [], warnings: [], passes: [], destructive: false }) }] };
@@ -43,5 +43,28 @@ describe("AssetStudioService enhancement use cases", () => {
     const result = await new AssetStudioService(gateway).applyEnhancementPlan("source.png", "source-enhanced.png");
     expect(result).toMatchObject({ outputFilename: "source-enhanced.png", sourcePreserved: true, quality: { valid: true } });
     expect(gateway.calls[0]).toMatchObject({ name: "apply_enhancement_plan", args: { output_filename: "source-enhanced.png" } });
+  });
+
+  it("surfaces the MCP error instead of replacing it with a missing-plan message", async () => {
+    const gateway = new FakeGateway();
+    gateway.callTool = async (name: string, args: Record<string, unknown>): Promise<unknown> => {
+      gateway.calls.push({ name, args });
+      if (name === "suggest_enhancement_plan") return { isError: true, content: [{ type: "text", text: "La imagen no tiene una capa válida" }] };
+      return { content: [{ text: "{}" }] };
+    };
+
+    await expect(new AssetStudioService(gateway).suggestEnhancementPlan("source.png"))
+      .rejects.toThrow("La imagen no tiene una capa válida");
+  });
+
+  it("rejects malformed tool JSON with a diagnostic that identifies the protocol problem", async () => {
+    const gateway = new FakeGateway();
+    gateway.callTool = async (name: string, args: Record<string, unknown>): Promise<unknown> => {
+      gateway.calls.push({ name, args });
+      return { content: [{ type: "text", text: "{not-json" }] };
+    };
+
+    await expect(new AssetStudioService(gateway).suggestEnhancementPlan("source.png"))
+      .rejects.toThrow("JSON inválido");
   });
 });

@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { ServerSetupService } from "../src/application/ServerSetupService.js";
-import type { StudioConfig } from "../src/domain/contracts.js";
+import type { RuntimeConfig } from "../src/domain/contracts.js";
 import type { ConfigStorePort } from "../src/ports/ConfigStorePort.js";
 import type { AssetStoragePort } from "../src/ports/AssetStoragePort.js";
 import type { ToolSessionLaunchOptions, ToolSessionPort, ToolSessionStatus } from "../src/ports/ToolSessionPort.js";
 import type { WorkspaceValidatorPort } from "../src/ports/WorkspaceValidatorPort.js";
 
-const config: StudioConfig = { mcpRepoPath: "C:\\work\\mcp", asepritePath: "C:\\apps\\Aseprite.exe", gatewayPort: 3765 };
+const config: RuntimeConfig = { workspacePath: "C:\\work\\mcp", executablePath: "C:\\apps\\Aseprite.exe", gatewayPort: 3765 };
 
 class FakeSession implements ToolSessionPort {
   public options: ToolSessionLaunchOptions | undefined;
@@ -18,15 +18,15 @@ class FakeSession implements ToolSessionPort {
   public async call() { return { ok: true }; }
 }
 
-class FakeValidator implements WorkspaceValidatorPort<StudioConfig> {
+class FakeValidator implements WorkspaceValidatorPort<RuntimeConfig> {
   public error: string | undefined;
   public async validate() { return this.error; }
 }
 
-class FakeStore implements ConfigStorePort<StudioConfig> {
-  public saved: StudioConfig | undefined;
-  public async load(fallback: StudioConfig) { return fallback; }
-  public async save(configToSave: StudioConfig) { this.saved = configToSave; }
+class FakeStore implements ConfigStorePort<RuntimeConfig> {
+  public saved: RuntimeConfig | undefined;
+  public async load(fallback: RuntimeConfig) { return fallback; }
+  public async save(configToSave: RuntimeConfig) { this.saved = configToSave; }
 }
 
 class FakeAssetStorage implements AssetStoragePort {
@@ -42,7 +42,7 @@ describe("ServerSetupService", () => {
 
     const status = await service.start(config);
 
-    expect(session.options).toEqual({ workingDirectory: config.mcpRepoPath, environmentOverrides: { ASEPRITE_PATH: config.asepritePath } });
+    expect(session.options).toEqual({ workingDirectory: config.workspacePath, environmentOverrides: { ASEPRITE_PATH: config.executablePath } });
     expect(store.saved).toEqual(config);
     expect(status).toMatchObject({ state: "online", pid: 42, toolCount: 2 });
   });

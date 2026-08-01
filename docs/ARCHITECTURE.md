@@ -8,11 +8,35 @@ React UX → casos de uso → puertos → adaptadores Node/MCP/filesystem
 
 El navegador no conoce `child_process`, MCP SDK ni rutas de Aseprite. El proceso gateway compone adaptadores concretos y expone controladores HTTP locales.
 
-## Mejoras previstas y entregadas
+## Mejoras entregadas
 
 1. `ServerSetupService` inicia y detiene sesiones mediante un puerto genérico;
 2. `JsonStudioConfigStore` y `LocalAssetStore` son persistencias reemplazables;
 3. `StudioHttpController` es delgado y solo traduce HTTP;
 4. el upload de assets pasa por un puerto y valida tamaño/formato;
-5. jobs de assets, preview, recetas y comparación visual quedan como siguientes slices;
-6. pruebas de contrato, E2E y accesibilidad acompañan cada extracción.
+5. `ToolResponseParser` centraliza la lectura de respuestas de herramientas, preserva `isError` y diagnostica JSON inválido;
+6. las pruebas TDD cubren los casos de uso de mejora y los límites de almacenamiento.
+
+## Plan de implementación
+
+### Fase 3 · Jobs y artifacts
+
+- definir puertos genéricos para `JobRepository`, `ArtifactRepository` y reloj;
+- implementar persistencia local como adaptador reemplazable, con estados `queued`, `running`, `completed`, `failed` y `cancelled`;
+- exponer controladores HTTP delgados para iniciar, consultar y cancelar jobs;
+- conservar el input y el output separados, con checksum y metadatos de receta;
+- probar primero las transiciones de estado y después el flujo contra el gateway real.
+
+### Fase 4 · UX de producción
+
+- añadir comparación antes/después, selector de receta y navegación de frames;
+- mostrar señales detectadas, warnings y quality gate sin mezclar reglas de dominio en React;
+- usar componentes de `pixel-art-ui` para estados accesibles, teclado y reduced motion;
+- añadir pruebas de interacción y un E2E del flujo upload → inspect → plan → apply.
+
+### Fase 5 · Contratos y releases
+
+- versionar un contrato JSON de planes y resultados;
+- generar fixtures compactos para agentes y evitar repetir contexto grande;
+- validar compatibilidad MCP/Studio en CI;
+- publicar la librería UI desde un workflow protegido por `NPM_TOKEN`.

@@ -17,10 +17,10 @@ describe("MCP launcher", () => {
   });
 
   it("rejects a repository that cannot launch the MCP script", async () => {
-    await expect(validateLaunchConfig({ mcpRepoPath: "C:\\does-not-exist", asepritePath: "", gatewayPort: 3765 })).resolves.toBe("La carpeta seleccionada no contiene package.json");
+    await expect(validateLaunchConfig({ workspacePath: "C:\\does-not-exist", executablePath: "", gatewayPort: 3765 })).resolves.toBe("La carpeta seleccionada no contiene package.json");
   });
 
   it("does not mistake the Asset Studio workspace for the MCP workspace", async () => {
-    await expect(validateLaunchConfig({ mcpRepoPath: process.cwd(), asepritePath: "", gatewayPort: 3765 })).resolves.toBe("El package.json no contiene el script npm 'mcp'");
+    await expect(validateLaunchConfig({ workspacePath: process.cwd(), executablePath: "", gatewayPort: 3765 })).resolves.toBe("El package.json no contiene el script npm 'mcp'");
   });
 });

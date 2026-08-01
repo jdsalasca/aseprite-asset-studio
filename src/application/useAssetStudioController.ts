@@ -2,15 +2,15 @@ import { useEffect, useMemo, useState } from "react";
 import { AssetStudioService } from "./AssetStudioService.js";
 import { HttpAssetGateway } from "../adapters/mcp/HttpAssetGateway.js";
 import { ConsoleOperationLogger } from "../adapters/observability/ConsoleOperationLogger.js";
-import type { EnhancementPlanView, McpStatus, McpToolSummary, StudioConfig } from "../domain/contracts.js";
+import type { EnhancementPlanView, RuntimeConfig, ToolDescriptor, ToolRuntimeStatus } from "../domain/contracts.js";
 
-const defaultConfig: StudioConfig = { mcpRepoPath: "", asepritePath: "", gatewayPort: 3765 };
-const offlineStatus: McpStatus = { state: "offline", pid: null, serverName: null, serverVersion: null, toolCount: 0, message: "Gateway local no iniciado" };
+const defaultConfig: RuntimeConfig = { workspacePath: "", executablePath: "", gatewayPort: 3765 };
+const offlineStatus: ToolRuntimeStatus = { state: "offline", pid: null, serverName: null, serverVersion: null, toolCount: 0, message: "Gateway local no iniciado" };
 
 export interface AssetStudioController {
-  config: StudioConfig;
-  status: McpStatus;
-  tools: McpToolSummary[];
+  config: RuntimeConfig;
+  status: ToolRuntimeStatus;
+  tools: ToolDescriptor[];
   busy: boolean;
   assetName: string;
   assetPath: string | null;
@@ -18,7 +18,7 @@ export interface AssetStudioController {
   previewUrl: string | null;
   enhancedPreviewUrl: string | null;
   notice: string;
-  updateConfig(config: StudioConfig): void;
+  updateConfig(config: RuntimeConfig): void;
   start(): Promise<void>;
   stop(): Promise<void>;
   inspect(): Promise<void>;
@@ -33,7 +33,7 @@ export function useAssetStudioController(): AssetStudioController {
   const service = useMemo(() => new AssetStudioService(new HttpAssetGateway(), new ConsoleOperationLogger()), []);
   const [config, setConfig] = useState(defaultConfig);
   const [status, setStatus] = useState(offlineStatus);
-  const [tools, setTools] = useState<McpToolSummary[]>([]);
+  const [tools, setTools] = useState<ToolDescriptor[]>([]);
   const [busy, setBusy] = useState(false);
   const [assetName, setAssetName] = useState("Ningún asset cargado");
   const [assetPath, setAssetPath] = useState<string | null>(null);
@@ -44,19 +44,19 @@ export function useAssetStudioController(): AssetStudioController {
 
   useEffect(() => {
     void service.config().then(setConfig).catch(() => undefined);
-    void service.health().then((health) => { setStatus(health.mcp); }).catch(() => undefined);
+    void service.health().then((health) => { setStatus(health.runtime); }).catch(() => undefined);
   }, [service]);
 
   async function start(): Promise<void> {
     setBusy(true); setNotice("Lanzando aseprite-mcp y comprobando herramientas...");
-    try { const next = await service.startMcp(config); setStatus(next); setTools(await service.tools()); setNotice(next.message); }
+    try { const next = await service.startRuntime(config); setStatus(next); setTools(await service.tools()); setNotice(next.message); }
     catch (error) { setStatus({ ...offlineStatus, state: "error", message: errorMessage(error) }); setNotice("No se pudo iniciar el servidor. Revisa la guía y las rutas."); }
     finally { setBusy(false); }
   }
 
   async function stop(): Promise<void> {
     setBusy(true);
-    try { const next = await service.stopMcp(); setStatus(next); setTools([]); setNotice(next.message); }
+    try { const next = await service.stopRuntime(); setStatus(next); setTools([]); setNotice(next.message); }
     catch (error) { setNotice(errorMessage(error)); }
     finally { setBusy(false); }
   }
