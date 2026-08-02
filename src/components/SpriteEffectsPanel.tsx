@@ -78,7 +78,7 @@ export function SpriteEffectsPanel({ busy, online, assetName, onApply }: SpriteE
       const parsedFrames = Number(frames);
       const parsedIntensity = Number(dayNightIntensity);
       const parsedSeed = Number(dayNightSeed);
-      if (!Number.isInteger(parsedFrames) || parsedFrames < 4 || parsedFrames > 24 || !Number.isFinite(parsedIntensity) || parsedIntensity < 0 || parsedIntensity > 1 || !Number.isInteger(parsedSeed)) return;
+      if (!Number.isInteger(parsedFrames) || parsedFrames < 4 || parsedFrames > 24 || !Number.isFinite(parsedIntensity) || parsedIntensity < 0.05 || parsedIntensity > 1 || !Number.isInteger(parsedSeed)) return;
       onApply(kind, { frames: parsedFrames, intensity: parsedIntensity, seed: parsedSeed });
       return;
     }
@@ -128,7 +128,7 @@ export function SpriteEffectsPanel({ busy, online, assetName, onApply }: SpriteE
         </> : kind === "day_night" ? <>
           <PixelTimeline aria-label="DAY NIGHT STAGES" activeId="day" items={[{ id: "day", label: "DAY", state: "complete" }, { id: "sunset", label: "SUNSET", state: "current" }, { id: "night", label: "NIGHT", state: "pending" }, { id: "sunrise", label: "SUNRISE", state: "pending" }]} />
           <PixelField label="FRAMES" type="number" min="4" max="24" value={frames} onChange={(event) => setFrames(event.target.value)} disabled={disabled} />
-          <PixelSlider label={`INTENSITY · ${dayNightIntensity}`} min={0} max={1} step={0.05} value={Number(dayNightIntensity)} onChange={(event) => setDayNightIntensity(event.target.value)} disabled={disabled} />
+          <PixelSlider label={`INTENSITY · ${dayNightIntensity}`} min={0.05} max={1} step={0.05} value={Number(dayNightIntensity)} onChange={(event) => setDayNightIntensity(event.target.value)} disabled={disabled} />
           <PixelField label="SEED" type="number" value={dayNightSeed} onChange={(event) => setDayNightSeed(event.target.value)} disabled={disabled} />
         </> : <PixelSlider label={kind === "upscale" ? `SCALE · ${strength}` : kind === "seamless" ? `SEAM WIDTH · ${strength}` : kind === "normal_map" ? `STRENGTH · ${strength}` : kind === "rain" ? `RAIN INTENSITY · ${strength}` : `THICKNESS · ${strength}`} min={kind === "upscale" ? 2 : kind === "normal_map" ? 0 : 1} max={kind === "upscale" ? 16 : kind === "seamless" ? 32 : 8} step={1} value={Number(strength)} onChange={(event) => setStrength(event.target.value)} disabled={disabled} />}
       </div>
