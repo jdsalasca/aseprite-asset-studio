@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { AssetJobView, AssetRecipe } from "../domain/contracts.js";
 import { AssetJobService } from "./AssetJobService.js";
+import { JobPollingGuard } from "./JobPollingGuard.js";
 
 export interface AssetJobController {
   recipe: AssetRecipe;
@@ -18,20 +19,30 @@ export function useAssetJobController(service: AssetJobService, assetPath: strin
   const [recipe, setRecipe] = useState<AssetRecipe>("pixel_art");
   const [job, setJob] = useState<AssetJobView | null>(null);
   const [busy, setBusy] = useState(false);
+  const pollingGuard = useMemo(() => new JobPollingGuard(), []);
 
-  useEffect(() => { setJob(null); }, [assetPath]);
+  useEffect(() => {
+    pollingGuard.invalidate();
+    setJob(null);
+  }, [assetPath, pollingGuard]);
 
   useEffect(() => {
     if (!job || !["queued", "running"].includes(job.status)) return undefined;
     const jobId = job.id;
     let active = true;
-    const refresh = () => { void service.status(jobId).then((next) => { if (active) setJob(next); }).catch((error) => { if (active) onNotice(errorMessage(error)); }); };
+    const refresh = () => {
+      const snapshot = pollingGuard.snapshot();
+      void service.status(jobId).then((next) => {
+        if (active && pollingGuard.accepts(snapshot) && next.id === jobId) setJob(next);
+      }).catch((error) => { if (active && pollingGuard.accepts(snapshot)) onNotice(errorMessage(error)); });
+    };
     const timer = window.setInterval(refresh, 700);
     return () => { active = false; window.clearInterval(timer); };
-  }, [job?.id, job?.status, onNotice, service]);
+  }, [job?.id, job?.status, onNotice, pollingGuard, service]);
 
   async function start(): Promise<void> {
     if (!assetPath || !online) return;
+    pollingGuard.invalidate();
     setBusy(true); onNotice(`Encolando receta ${recipe}...`);
     try {
       const started = await service.start({ jobs: [{ recipe, inputFilenames: [assetPath], outputFilename: jobFilename(assetPath, recipe), maxColors: 32 }] });
@@ -42,6 +53,7 @@ export function useAssetJobController(service: AssetJobService, assetPath: strin
 
   async function cancel(): Promise<void> {
     if (!job || ["completed", "failed", "cancelled"].includes(job.status)) return;
+    pollingGuard.invalidate();
     setBusy(true); onNotice(`Cancelando ${job.id}...`);
     try { const cancelled = await service.cancel(job.id); setJob(cancelled); onNotice(`Job ${cancelled.id}: ${cancelled.status}.`); }
     catch (error) { onNotice(errorMessage(error)); }

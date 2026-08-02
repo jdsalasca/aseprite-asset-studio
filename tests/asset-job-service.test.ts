@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { AssetJobService } from "../src/application/AssetJobService.js";
+import { JobPollingGuard } from "../src/application/JobPollingGuard.js";
 import type { AssetGateway, HealthResponse, RuntimeConfig, StoredAsset, ToolDescriptor, ToolRuntimeStatus } from "../src/domain/contracts.js";
 
 const status: ToolRuntimeStatus = { state: "online", pid: 1, serverName: "fake", serverVersion: "1", toolCount: 1, message: "online" };
@@ -30,5 +31,15 @@ describe("AssetJobService", () => {
     const gateway = new FakeGateway();
     await expect(new AssetJobService(gateway).start({ jobs: [] })).rejects.toThrow("al menos una receta");
     expect(gateway.calls).toHaveLength(0);
+  });
+
+  it("rejects an in-flight poll after its lifecycle is invalidated", () => {
+    const guard = new JobPollingGuard();
+    const snapshot = guard.snapshot();
+
+    guard.invalidate();
+
+    expect(guard.accepts(snapshot)).toBe(false);
+    expect(guard.accepts(guard.snapshot())).toBe(true);
   });
 });
