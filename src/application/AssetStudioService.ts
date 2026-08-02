@@ -1,4 +1,4 @@
-import type { AnimationQualityView, AnimationSheetView, AssetGateway, AssetLibraryAuditView, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetLibrarySummaryView, AssetLibraryVariantPackView, AssetManifestAuditView, AssetPresetGenerationView, AssetQualityBatchView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetSceneAnimationCompositionView, AssetSceneCompositionView, AssetScenePlanView, AssetVariantKind, AssetVariantPackView, BiomeTransitionView, ContactSheetView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, PaletteHarmonizeView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SceneExtensionView, SpriteEffectKind, SpriteGeometryView, SpriteHitboxView, SpriteNormalizationView, SpritePivotMode, SpriteRuntimeBundleView, SpriteAnchorsView, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { AnimationQualityView, AnimationSheetView, AssetGateway, AssetLibraryAuditView, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetLibrarySummaryView, AssetLibraryVariantPackView, AssetManifestAuditView, AssetPresetGenerationView, AssetQualityBatchView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetSceneAnimationCompositionView, AssetSceneCompositionView, AssetScenePlanView, AssetSceneRecommendationView, AssetVariantKind, AssetVariantPackView, BiomeTransitionView, ContactSheetView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, PaletteHarmonizeView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SceneExtensionView, SpriteEffectKind, SpriteGeometryView, SpriteHitboxView, SpriteNormalizationView, SpritePivotMode, SpriteRuntimeBundleView, SpriteAnchorsView, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { RuntimeDiagnostics } from "../domain/aseprite.js";
 import type { OperationEvent, OperationLogPort } from "../ports/OperationLogPort.js";
 import { ToolResponseParser } from "./ToolResponseParser.js";
@@ -198,6 +198,13 @@ export class AssetStudioService {
       const response = await this.gateway.callTool("audit_asset_manifest", { manifest_filename: manifestFilename });
       return this.responseParser.parseJson<AssetManifestAuditView>(response, "El MCP no devolvió la auditoría del manifest");
     }, { manifestFilename });
+  }
+
+  public async recommendAssetScene(input: { prompt?: string; category?: string; requiredKinds?: string[]; requiredTags?: string[]; requiredVariants?: string[]; limit: number; seed: number }): Promise<AssetSceneRecommendationView> {
+    return this.trace("recommend_asset_scene", async () => {
+      const response = await this.gateway.callTool("recommend_asset_scene", { ...(input.prompt === undefined ? {} : { prompt: input.prompt }), ...(input.category === undefined ? {} : { category: input.category }), ...(input.requiredKinds === undefined ? {} : { required_kinds: input.requiredKinds }), ...(input.requiredTags === undefined ? {} : { required_tags: input.requiredTags }), ...(input.requiredVariants === undefined ? {} : { required_variants: input.requiredVariants }), limit: input.limit, seed: input.seed });
+      return this.responseParser.parseJson<AssetSceneRecommendationView>(response, "El MCP no devolvió recomendaciones de escena");
+    }, { ...(input.prompt === undefined ? {} : { prompt: input.prompt }), ...(input.category === undefined ? {} : { category: input.category }), limit: input.limit, seed: input.seed });
   }
 
   public async summarizeAssetLibrary(): Promise<AssetLibrarySummaryView> {
