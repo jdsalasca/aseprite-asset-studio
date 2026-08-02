@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { AssetJobService } from "./AssetJobService.js";
 import { AssetStudioService } from "./AssetStudioService.js";
+import { useAssetJobController } from "./useAssetJobController.js";
 import { HttpAssetGateway } from "../adapters/mcp/HttpAssetGateway.js";
 import { ConsoleOperationLogger } from "../adapters/observability/ConsoleOperationLogger.js";
 import type { AssetJobView, AssetRecipe, EnhancementApplyView, EnhancementPlanView, RuntimeConfig, ToolDescriptor, ToolRuntimeStatus } from "../domain/contracts.js";
@@ -35,8 +36,6 @@ export interface AssetStudioController {
 
 function errorMessage(error: unknown): string { return error instanceof Error ? error.message : String(error); }
 function enhancedFilename(filename: string): string { return /\.[^./\\]+$/.test(filename) ? filename.replace(/\.[^./\\]+$/, "-enhanced.png") : `${filename}-enhanced.png`; }
-function jobFilename(filename: string, recipe: AssetRecipe): string { const extension = recipe === "gif" ? "gif" : "png"; return /\.[^./\\]+$/.test(filename) ? filename.replace(/\.[^./\\]+$/, `-job.${extension}`) : `${filename}-job.${extension}`; }
-
 export function useAssetStudioController(): AssetStudioController {
   const services = useMemo(() => { const gateway = new HttpAssetGateway(); return { studio: new AssetStudioService(gateway, new ConsoleOperationLogger()), jobs: new AssetJobService(gateway) }; }, []);
   const service = services.studio;
@@ -51,8 +50,6 @@ export function useAssetStudioController(): AssetStudioController {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [enhancedPreviewUrl, setEnhancedPreviewUrl] = useState<string | null>(null);
   const [quality, setQuality] = useState<EnhancementApplyView["quality"] | null>(null);
-  const [recipe, setRecipe] = useState<AssetRecipe>("pixel_art");
-  const [job, setJob] = useState<AssetJobView | null>(null);
   const [notice, setNotice] = useState("Inicia el gateway para conectar Aseprite MCP.");
 
   useEffect(() => {
@@ -60,14 +57,7 @@ export function useAssetStudioController(): AssetStudioController {
     void service.health().then((health) => { setStatus(health.runtime); }).catch(() => undefined);
   }, [service]);
 
-  useEffect(() => {
-    if (!job || !["queued", "running"].includes(job.status)) return undefined;
-    const jobId = job.id;
-    let active = true;
-    const refresh = () => { void jobs.status(jobId).then((next) => { if (active) setJob(next); }).catch((error) => { if (active) setNotice(errorMessage(error)); }); };
-    const timer = window.setInterval(refresh, 700);
-    return () => { active = false; window.clearInterval(timer); };
-  }, [job?.id, job?.status, jobs]);
+  const jobController = useAssetJobController(jobs, assetPath, status.state === "online", setNotice);
 
   async function start(): Promise<void> {
     setBusy(true); setNotice("Lanzando aseprite-mcp y comprobando herramientas...");
@@ -105,32 +95,14 @@ export function useAssetStudioController(): AssetStudioController {
     finally { setBusy(false); }
   }
 
-  async function startJob(): Promise<void> {
-    if (!assetPath || status.state !== "online") return;
-    setBusy(true); setNotice(`Encolando receta ${recipe}...`);
-    try {
-      const started = await jobs.start({ jobs: [{ recipe, inputFilenames: [assetPath], outputFilename: jobFilename(assetPath, recipe), maxColors: 32 }] });
-      setJob(started); setNotice(`Job ${started.id} encolado. El Studio actualizará su estado automáticamente.`);
-    } catch (error) { setNotice(errorMessage(error)); }
-    finally { setBusy(false); }
-  }
-
-  async function cancelJob(): Promise<void> {
-    if (!job || ["completed", "failed", "cancelled"].includes(job.status)) return;
-    setBusy(true); setNotice(`Cancelando ${job.id}...`);
-    try { const cancelled = await jobs.cancel(job.id); setJob(cancelled); setNotice(`Job ${cancelled.id}: ${cancelled.status}.`); }
-    catch (error) { setNotice(errorMessage(error)); }
-    finally { setBusy(false); }
-  }
-
   function upload(files: File[]): void {
     const file = files[0];
     if (!file) return;
-    setAssetName(file.name); setPlan(null); setEnhancedPreviewUrl(null); setQuality(null); setJob(null); setNotice(`Subiendo ${file.name}...`);
+    setAssetName(file.name); setPlan(null); setEnhancedPreviewUrl(null); setQuality(null); setNotice(`Subiendo ${file.name}...`);
     void service.upload(file).then((stored) => {
       setAssetPath(stored.path); setPreviewUrl(service.assetPreviewUrl(stored.path)); setNotice(`${stored.filename} cargado (${stored.sizeBytes} bytes).`);
     }).catch((error) => setNotice(errorMessage(error)));
   }
 
-  return { config, status, tools, busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, recipe, updateRecipe: setRecipe, job, notice, updateConfig: setConfig, start, stop, inspect, applyPlan, startJob, cancelJob, upload };
+  return { config, status, tools, busy: busy || jobController.busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, recipe: jobController.recipe, updateRecipe: jobController.updateRecipe, job: jobController.job, notice, updateConfig: setConfig, start, stop, inspect, applyPlan, startJob: jobController.start, cancelJob: jobController.cancel, upload };
 }

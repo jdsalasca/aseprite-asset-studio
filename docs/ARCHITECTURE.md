@@ -17,7 +17,8 @@ El navegador no conoce `child_process`, MCP SDK ni rutas de Aseprite. El proceso
 5. `ToolResponseParser` centraliza la lectura de respuestas de herramientas, preserva `isError` y diagnostica JSON inválido;
 6. `QualityGatePanel` muestra resultado y violaciones con una primitive reusable, sin reglas de dominio en React;
 7. `AssetJobService` traduce recetas genéricas al contrato externo, mientras la UX solo consume estados tipados;
-8. las pruebas TDD cubren los casos de uso de mejora, jobs y límites de almacenamiento.
+8. `useAssetJobController` aísla polling, cancelación y selección de receta del controlador principal;
+9. las pruebas TDD cubren los casos de uso de mejora, jobs y límites de almacenamiento.
 
 ## Plan de implementación
 
