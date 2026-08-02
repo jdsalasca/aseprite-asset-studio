@@ -1,6 +1,6 @@
 # Aseprite Asset Studio
 
-Interfaz Vite + React + TypeScript para operar `aseprite-asset-mcp` con una guía de configuración humana. Los componentes visuales provienen del repositorio independiente [`@jdsalas/pixel-ui`](https://github.com/jdsalasca/pixel-art-ui). Mientras se completa la primera publicación npm, la dependencia usa el branch Git de integración.
+Interfaz Vite + React + TypeScript para operar `aseprite-asset-mcp` con una guía de configuración humana. Los componentes visuales provienen del paquete independiente [`@jdsalasc/pixel-ui`](https://github.com/jdsalasca/pixel-art-ui). Mientras se completa la primera publicación npm, la dependencia usa un commit Git fijado para reproducibilidad.
 
 ## Arranque local
 

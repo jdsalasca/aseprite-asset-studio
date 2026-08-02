@@ -1,4 +1,4 @@
-import { PixelBadge, PixelPanel } from "@jdsalas/pixel-ui";
+import { PixelBadge, PixelPanel } from "@jdsalasc/pixel-ui";
 import type { EnhancementPlanView } from "../domain/contracts.js";
 
 export function DecisionPlanPanel({ plan }: { plan: EnhancementPlanView }) {

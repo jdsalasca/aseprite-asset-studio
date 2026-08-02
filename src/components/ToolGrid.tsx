@@ -1,4 +1,4 @@
-import { PixelBadge, PixelPanel, PixelToolCard } from "@jdsalas/pixel-ui";
+import { PixelBadge, PixelPanel, PixelToolCard } from "@jdsalasc/pixel-ui";
 import type { ToolDescriptor } from "../domain/contracts.js";
 
 export function ToolGrid({ tools }: { tools: ToolDescriptor[] }) {

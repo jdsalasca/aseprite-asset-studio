@@ -1,4 +1,4 @@
-import { PixelPanel, PixelQualityGate } from "@jdsalas/pixel-ui";
+import { PixelPanel, PixelQualityGate } from "@jdsalasc/pixel-ui";
 import type { EnhancementApplyView } from "../domain/contracts.js";
 
 export function QualityGatePanel({ quality }: { quality: EnhancementApplyView["quality"] }) {

@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import "@jdsalas/pixel-ui/styles.css";
+import "@jdsalasc/pixel-ui/styles.css";
 import "./styles/app.css";
 import App from "./App.js";
 

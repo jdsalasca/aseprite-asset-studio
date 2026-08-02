@@ -1,4 +1,4 @@
-import { PixelBadge, PixelButton, PixelDropzone, PixelNotice, PixelPanel, PixelProgress } from "@jdsalas/pixel-ui";
+import { PixelBadge, PixelButton, PixelDropzone, PixelNotice, PixelPanel, PixelProgress } from "@jdsalasc/pixel-ui";
 import { useAssetStudioController } from "./application/useAssetStudioController.js";
 import { AssetPreviewPanel } from "./components/AssetPreviewPanel.js";
 import { AssetJobPanel } from "./components/AssetJobPanel.js";

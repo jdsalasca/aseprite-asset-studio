@@ -1,4 +1,4 @@
-import { PixelBadge, PixelButton, PixelField, PixelPanel } from "@jdsalas/pixel-ui";
+import { PixelBadge, PixelButton, PixelField, PixelPanel } from "@jdsalasc/pixel-ui";
 import type { RuntimeConfig, ToolRuntimeStatus } from "../domain/contracts.js";
 
 interface ServerSetupProps {

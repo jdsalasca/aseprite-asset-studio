@@ -1,4 +1,4 @@
-import { PixelBadge, PixelButton, PixelPanel, PixelSelect } from "@jdsalas/pixel-ui";
+import { PixelBadge, PixelButton, PixelPanel, PixelSelect } from "@jdsalasc/pixel-ui";
 import type { AssetJobView, AssetRecipe } from "../domain/contracts.js";
 
 interface AssetJobPanelProps {
