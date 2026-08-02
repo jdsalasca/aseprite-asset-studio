@@ -45,6 +45,9 @@ describe("studio feature contracts", () => {
     expect(markup).toContain("RECIPE CREATOR");
     expect(markup).toContain("Quality gate");
     expect(markup).toContain("EXECUTE RECIPE");
-    expect(renderToStaticMarkup(<AssetLibraryPanel busy={false} online restPort={3766} query="rain" items={[{ id: "oak", title: "Oak", category: "flora", folder: "flora/oak", kind: "sprite", description: "Tree", tags: ["tree"], variants: ["rain"], formats: ["png", "svg", "json"], readmePath: "flora/oak/README.md", previewPath: "flora/oak/preview.png", spritePath: "flora/oak/sprite-sheet.png", deterministic: true }]} presets={[]} total={1} onQueryChange={() => undefined} onSearch={() => undefined} />)).toContain("http://127.0.0.1:3766/api/v1/library/items/oak/preview");
+    const libraryMarkup = renderToStaticMarkup(<AssetLibraryPanel busy={false} online restPort={3766} query="rain" items={[{ id: "oak", title: "Oak", category: "flora", folder: "flora/oak", kind: "sprite", description: "Tree", tags: ["tree"], variants: ["rain"], formats: ["png", "svg", "json"], readmePath: "flora/oak/README.md", previewPath: "flora/oak/preview.png", spritePath: "flora/oak/sprite-sheet.png", deterministic: true }]} presets={[{ id: "rainy-grove", title: "Rainy grove", description: "Oak under rain", category: "flora", itemIds: ["oak"], recommendedTools: ["generate_rain_overlay"], deterministic: true }]} total={1} composition={null} onQueryChange={() => undefined} onSearch={() => undefined} onComposePreset={() => undefined} />);
+    expect(libraryMarkup).toContain("http://127.0.0.1:3766/api/v1/library/items/oak/preview");
+    expect(libraryMarkup).toContain("Scene presets");
+    expect(libraryMarkup).toContain('role="listbox"');
   });
 });
