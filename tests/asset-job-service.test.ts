@@ -42,4 +42,13 @@ describe("AssetJobService", () => {
     expect(guard.accepts(snapshot)).toBe(false);
     expect(guard.accepts(guard.snapshot())).toBe(true);
   });
+
+  it("preserves generic artifact metadata from the provider response", async () => {
+    const gateway = new FakeGateway();
+    gateway.callTool = async () => ({ content: [{ text: JSON.stringify({ id: "job-2", status: "completed", jobs: [], createdAt: "now", updatedAt: "now", artifacts: [{ id: "artifact-1", jobId: "job-2", filename: "output.gif", format: "gif", sizeBytes: 42, sha256: "a".repeat(64), createdAt: "now" }] }) }] });
+
+    const job = await new AssetJobService(gateway).status("job-2");
+
+    expect(job.artifacts?.[0]).toMatchObject({ filename: "output.gif", format: "gif", sizeBytes: 42 });
+  });
 });

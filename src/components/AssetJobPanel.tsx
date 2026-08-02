@@ -23,5 +23,6 @@ export function AssetJobPanel({ recipe, job, busy, canStart, onRecipeChange, onS
     {job ? <div className="asset-row"><span>JOB {job.id}</span><PixelBadge tone={job.status === "completed" ? "cyan" : job.status === "failed" ? "danger" : "amber"}>{job.status.toUpperCase()}</PixelBadge></div> : null}
     <div className="asset-row"><span className="muted">El procesamiento ocurre fuera de la interacción del navegador.</span>{terminal ? <PixelButton tone="amber" disabled={busy || !canStart} onClick={onStart}>START JOB</PixelButton> : <PixelButton tone="danger" disabled={busy} onClick={onCancel}>CANCEL JOB</PixelButton>}</div>
     {job?.outcome ? <p className="muted">{job.outcome.message}</p> : null}
+    {job?.artifacts?.length ? <div className="artifact-list" aria-label="Generated artifacts"><p className="eyebrow">OUTPUT ARTIFACTS</p>{job.artifacts.map((artifact) => <article key={artifact.id}><span title={artifact.filename}>{artifact.filename}</span><small>{artifact.format.toUpperCase()} · {artifact.sizeBytes} B · {artifact.sha256.slice(0, 12)}…</small></article>)}</div> : null}
   </PixelPanel>;
 }

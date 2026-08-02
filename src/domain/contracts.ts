@@ -63,6 +63,16 @@ export interface EnhancementApplyView {
 export type AssetRecipe = "pixel_art" | "animation_pixel_art" | "gif" | "atlas";
 export type AssetJobStatus = "queued" | "running" | "completed" | "failed" | "cancelled";
 
+export interface AssetArtifactView {
+  id: string;
+  jobId: string;
+  filename: string;
+  format: string;
+  sizeBytes: number;
+  sha256: string;
+  createdAt: string;
+}
+
 export interface AssetJobItem {
   recipe: AssetRecipe;
   inputFilenames: string[];
@@ -80,6 +90,7 @@ export interface AssetJobView {
   createdAt: string;
   updatedAt: string;
   outcome?: { ok: boolean; message: string };
+  artifacts?: AssetArtifactView[];
 }
 
 export interface AssetGateway {
