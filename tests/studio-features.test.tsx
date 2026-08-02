@@ -20,6 +20,7 @@ import { QualityRecommendationsPanel } from "../src/components/QualityRecommenda
 import { PaletteHarmonizerPanel } from "../src/components/PaletteHarmonizerPanel.js";
 import { ContactSheetPanel } from "../src/components/ContactSheetPanel.js";
 import { QualityBatchPanel } from "../src/components/QualityBatchPanel.js";
+import { AnimationAuditPanel } from "../src/components/AnimationAuditPanel.js";
 
 describe("studio feature contracts", () => {
   it("validates supported asset formats and size limits", () => {
@@ -76,5 +77,6 @@ describe("studio feature contracts", () => {
     expect(renderToStaticMarkup(<ContactSheetPanel busy={false} online assetCount={3} sourceNames={["rain.gif", "night.gif", "fire.gif"]} previewUrl="sheet.png" result={{ operation: "build_contact_sheet", output: "sheet.png", manifest: "sheet.json", assets: 3, columns: 2, rows: 2, width: 66, height: 66, cellWidth: 32, cellHeight: 32, padding: 2, deterministic: true, sourcePreserved: true }} onBuild={() => undefined} />)).toContain("BUILD CONTACT SHEET");
     expect(renderToStaticMarkup(<ContactSheetPanel busy={false} online assetCount={3} sourceNames={["rain.gif", "night.gif", "fire.gif"]} previewUrl="sheet.png" result={{ operation: "build_contact_sheet", output: "sheet.png", manifest: "sheet.json", assets: 3, columns: 2, rows: 2, width: 66, height: 66, cellWidth: 32, cellHeight: 32, padding: 2, deterministic: true, sourcePreserved: true }} onBuild={() => undefined} />)).toContain("CONTACT SHEET");
     expect(renderToStaticMarkup(<QualityBatchPanel busy={false} online result={{ operation: "inspect_asset_batch", assets: [{ filename: "hero.png", valid: true, violations: [], recommendations: [] }], summary: { total: 1, valid: 1, invalid: 0, failed: 0 }, maxColors: 64, maxIsolatedPixels: 4, deterministic: true, sourcePreserved: true }} onInspect={() => undefined} />)).toContain("AUDIT COLLECTION");
+    expect(renderToStaticMarkup(<AnimationAuditPanel busy={false} online assetName="hero.gif" result={{ operation: "inspect_animation_quality", filename: "hero.gif", frameCount: 8, width: 16, height: 16, delaysMs: [90], transitions: [], duplicateFrames: [3], loop: { changedPixels: 0, closed: true }, palette: { colorsPerFrame: [4], driftFrames: [], stable: true }, timing: { consistent: true, positive: true }, quality: { valid: false, violations: ["duplicate frames: 3"] }, recommendations: [], deterministic: true, sourcePreserved: true }} onInspect={() => undefined} />)).toContain("AUDIT ANIMATION");
   });
 });

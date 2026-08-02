@@ -47,6 +47,7 @@ Los assets cargados se validan por extensión, limitan a 32 MB y se guardan medi
 - Usa `INSPECT REFERENCE` para generar un plan determinista y revisa el antes/después antes de aplicar.
 - `QUALITY BUNDLE` ejecuta la inspección y quality gate compactos del MCP, muestra violaciones y recomendaciones sin generar archivos.
 - `AUDIT COLLECTION` inspecciona el asset cargado y todas sus variantes con `inspect_asset_batch`, mostrando una matriz pass/review/failed sin repetir llamadas por archivo.
+- `AUDIT ANIMATION` inspecciona frames, timing, deriva de paleta y costura de loop con `inspect_animation_quality` antes de exportar un GIF.
 - Los paneles `MATERIAL ENHANCER` y `DEPTH LIGHTING` crean salidas separadas con seed, granularidad y luz direccional reproducibles.
 - `PALETTE HARMONIZER` unifica la familia cromática de un PNG/GIF hacia un color de acento, limita la paleta y muestra swatches del resultado sin tocar el origen.
 - `SPRITE EFFECTS` añade outline, color grade, sombra, partículas, normal map, lluvia, ciclos de movimiento, nearest upscale, seamless texture, reflejo animado, caústicas de agua y ciclo día/atardecer/noche/amanecer con outputs separados.
