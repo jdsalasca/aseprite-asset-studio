@@ -20,7 +20,8 @@ El navegador no conoce `child_process`, MCP SDK ni rutas de Aseprite. El proceso
 8. `useAssetJobController` aísla polling, cancelación y selección de receta del controlador principal;
 9. `AssetArtifactView` conserva metadata genérica de outputs y `AssetJobPanel` muestra formato, tamaño y hash abreviado;
 10. `AssetPreviewPanel` usa `PixelCompare` para revisar el antes/después con teclado y ARIA;
-11. las pruebas TDD cubren los casos de uso de mejora, jobs, artifacts, HTTP, preview y límites de almacenamiento.
+11. `ToolRunnerPanel` ejecuta cualquier herramienta MCP con argumentos JSON editables y `InMemoryOperationLogger` publica eventos en vivo hacia `PixelLogViewer`;
+12. las pruebas TDD cubren los casos de uso de mejora, jobs, artifacts, HTTP, preview, runner, observabilidad y límites de almacenamiento.
 
 ## Plan de implementación
 
@@ -37,6 +38,8 @@ El navegador no conoce `child_process`, MCP SDK ni rutas de Aseprite. El proceso
 
 - añadir comparación antes/después, selector de receta y navegación de frames;
 - `PixelCompare` ya está integrado; la navegación de frames queda como siguiente incremento;
+- el catálogo deja de ser informativo: las tarjetas seleccionan herramientas y el runner las ejecuta mediante el gateway local;
+- los eventos `started`, `success` y `failure` se muestran con duración y correlación, sin exponer detalles del proveedor en el dominio;
 - mostrar señales detectadas, warnings y quality gate sin mezclar reglas de dominio en React;
 - usar componentes de `pixel-art-ui` para estados accesibles, teclado y reduced motion; los estilos se importan explícitamente para no romper SSR;
 - añadir pruebas de interacción y un E2E del flujo upload → inspect → plan → apply.

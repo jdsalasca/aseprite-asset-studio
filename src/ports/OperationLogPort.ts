@@ -1,4 +1,4 @@
-export type OperationOutcome = "success" | "failure";
+export type OperationOutcome = "started" | "success" | "failure";
 
 export interface OperationEvent {
   operation: string;
@@ -11,4 +11,13 @@ export interface OperationEvent {
 
 export interface OperationLogPort {
   record(event: OperationEvent): void;
+}
+
+export interface OperationLogEntry extends OperationEvent {
+  timestamp: string;
+}
+
+export interface OperationLogReaderPort {
+  list(limit?: number): OperationLogEntry[];
+  subscribe(listener: (entry: OperationLogEntry) => void): () => void;
 }

@@ -18,6 +18,7 @@ export interface ToolRuntimeStatus {
 export interface ToolDescriptor {
   name: string;
   description?: string;
+  inputSchema?: Record<string, unknown>;
 }
 
 export interface HealthResponse {

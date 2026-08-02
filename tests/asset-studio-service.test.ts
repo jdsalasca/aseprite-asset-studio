@@ -33,9 +33,10 @@ describe("AssetStudioService enhancement use cases", () => {
     const plan = await new AssetStudioService(gateway, logger).suggestEnhancementPlan("source.png");
     expect(plan.planId).toBe("plan-1");
     expect(gateway.calls.map((call) => call.name)).toEqual(["inspect_reference", "suggest_enhancement_plan"]);
-    expect(logger.events).toHaveLength(1);
-    expect(logger.events[0]).toMatchObject({ operation: "suggest_enhancement_plan", outcome: "success" });
-    expect(logger.events[0]?.correlationId).toContain("suggest_enhancement_plan-");
+    expect(logger.events).toHaveLength(2);
+    expect(logger.events.map((event) => event.outcome)).toEqual(["started", "success"]);
+    expect(logger.events[1]).toMatchObject({ operation: "suggest_enhancement_plan", outcome: "success" });
+    expect(logger.events[1]?.correlationId).toContain("suggest_enhancement_plan-");
   });
 
   it("applies to a separate output and returns a typed outcome", async () => {

@@ -4,8 +4,9 @@ import { AssetStudioService } from "./AssetStudioService.js";
 import { RequestGenerationGuard } from "./RequestGenerationGuard.js";
 import { useAssetJobController } from "./useAssetJobController.js";
 import { HttpAssetGateway } from "../adapters/mcp/HttpAssetGateway.js";
-import { ConsoleOperationLogger } from "../adapters/observability/ConsoleOperationLogger.js";
+import { InMemoryOperationLogger } from "../adapters/observability/InMemoryOperationLogger.js";
 import type { AssetJobView, AssetRecipe, EnhancementApplyView, EnhancementPlanView, RuntimeConfig, ToolDescriptor, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { OperationLogEntry } from "../ports/OperationLogPort.js";
 
 const defaultConfig: RuntimeConfig = { workspacePath: "", executablePath: "", gatewayPort: 3765 };
 const offlineStatus: ToolRuntimeStatus = { state: "offline", pid: null, serverName: null, serverVersion: null, toolCount: 0, message: "Gateway local no iniciado" };
@@ -14,6 +15,8 @@ export interface AssetStudioController {
   config: RuntimeConfig;
   status: ToolRuntimeStatus;
   tools: ToolDescriptor[];
+  logs: OperationLogEntry[];
+  toolOutput: string | null;
   busy: boolean;
   assetName: string;
   assetPath: string | null;
@@ -32,19 +35,23 @@ export interface AssetStudioController {
   applyPlan(): Promise<void>;
   startJob(): Promise<void>;
   cancelJob(): Promise<void>;
+  executeTool(name: string, args: Record<string, unknown>): Promise<void>;
   upload(files: File[]): void;
 }
 
 function errorMessage(error: unknown): string { return error instanceof Error ? error.message : String(error); }
 function enhancedFilename(filename: string): string { return /\.[^./\\]+$/.test(filename) ? filename.replace(/\.[^./\\]+$/, "-enhanced.png") : `${filename}-enhanced.png`; }
 export function useAssetStudioController(): AssetStudioController {
-  const services = useMemo(() => { const gateway = new HttpAssetGateway(); return { studio: new AssetStudioService(gateway, new ConsoleOperationLogger()), jobs: new AssetJobService(gateway) }; }, []);
+  const logger = useMemo(() => new InMemoryOperationLogger(), []);
+  const services = useMemo(() => { const gateway = new HttpAssetGateway(); return { studio: new AssetStudioService(gateway, logger), jobs: new AssetJobService(gateway) }; }, [logger]);
   const service = services.studio;
   const jobs = services.jobs;
   const uploadGuard = useMemo(() => new RequestGenerationGuard(), []);
   const [config, setConfig] = useState(defaultConfig);
   const [status, setStatus] = useState(offlineStatus);
   const [tools, setTools] = useState<ToolDescriptor[]>([]);
+  const [logs, setLogs] = useState<OperationLogEntry[]>(() => logger.list());
+  const [toolOutput, setToolOutput] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [assetName, setAssetName] = useState("Ningún asset cargado");
   const [assetPath, setAssetPath] = useState<string | null>(null);
@@ -53,6 +60,8 @@ export function useAssetStudioController(): AssetStudioController {
   const [enhancedPreviewUrl, setEnhancedPreviewUrl] = useState<string | null>(null);
   const [quality, setQuality] = useState<EnhancementApplyView["quality"] | null>(null);
   const [notice, setNotice] = useState("Inicia el gateway para conectar Aseprite MCP.");
+
+  useEffect(() => logger.subscribe((entry) => setLogs(logger.list())), [logger]);
 
   useEffect(() => {
     void service.config().then(setConfig).catch(() => undefined);
@@ -97,6 +106,18 @@ export function useAssetStudioController(): AssetStudioController {
     finally { setBusy(false); }
   }
 
+  async function executeTool(name: string, args: Record<string, unknown>): Promise<void> {
+    if (!name || status.state !== "online") return;
+    setBusy(true); setToolOutput(null); setNotice(`Ejecutando ${name}...`);
+    try {
+      const output = await service.callTool(name, args);
+      const serialized = typeof output === "string" ? output : JSON.stringify(output, null, 2);
+      setToolOutput(serialized.length > 24000 ? `${serialized.slice(0, 24000)}\n… output truncado por seguridad visual` : serialized);
+      setNotice(`${name} terminó correctamente.`);
+    } catch (error) { setNotice(errorMessage(error)); }
+    finally { setBusy(false); }
+  }
+
   function upload(files: File[]): void {
     const file = files[0];
     if (!file) return;
@@ -108,5 +129,5 @@ export function useAssetStudioController(): AssetStudioController {
     }).catch((error) => { if (uploadGuard.accepts(request)) { setNotice(errorMessage(error)); setBusy(false); } });
   }
 
-  return { config, status, tools, busy: busy || jobController.busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, recipe: jobController.recipe, updateRecipe: jobController.updateRecipe, job: jobController.job, notice, updateConfig: setConfig, start, stop, inspect, applyPlan, startJob: jobController.start, cancelJob: jobController.cancel, upload };
+  return { config, status, tools, logs, toolOutput, busy: busy || jobController.busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, recipe: jobController.recipe, updateRecipe: jobController.updateRecipe, job: jobController.job, notice, updateConfig: setConfig, start, stop, inspect, applyPlan, startJob: jobController.start, cancelJob: jobController.cancel, executeTool, upload };
 }

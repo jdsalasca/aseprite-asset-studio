@@ -3,6 +3,7 @@ export type ToolSessionState = "offline" | "starting" | "online" | "error";
 export interface ToolDefinition {
   name: string;
   description?: string;
+  inputSchema?: Record<string, unknown>;
 }
 
 export interface ToolSessionStatus {
