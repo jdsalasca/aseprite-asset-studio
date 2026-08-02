@@ -1,0 +1,18 @@
+@use "tokens" as t;
+
+.studio-shell { margin: 0 auto; max-width: 1440px; padding: 2rem; }
+.studio-header { align-items: flex-start; display: flex; justify-content: space-between; margin-bottom: 2rem; }
+.studio-grid { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1.7fr) minmax(300px, .8fr); }
+.studio-main, .studio-side { align-content: start; display: grid; gap: 1rem; }
+.asset-row, .setup-actions, .setup-status { align-items: center; display: flex; gap: .75rem; justify-content: space-between; margin-top: 1rem; }
+.asset-row span { color: var(--studio-muted); font-size: .8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.setup-status { justify-content: flex-start; margin-top: 0; }
+.setup-fields { display: grid; gap: .8rem; margin-top: 1rem; }
+.tool-grid { display: grid; gap: .7rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.pipeline { align-items: center; color: var(--studio-pink); display: flex; flex-wrap: wrap; font-size: .75rem; font-weight: bold; gap: .7rem; justify-content: center; margin-bottom: 1.2rem; }
+.pipeline i { color: var(--studio-muted); font-style: normal; }
+
+@media (max-width: t.$studio-breakpoint) {
+  .studio-shell { padding: 1rem; }
+  .studio-grid { grid-template-columns: 1fr; }
+}
