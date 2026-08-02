@@ -89,6 +89,9 @@ export interface DepthLightingView {
 }
 
 export type SpriteEffectKind = "outline" | "color_grade" | "shadow" | "particles" | "normal_map" | "rain" | "motion" | "upscale" | "seamless" | "reflection" | "caustics" | "day_night";
+export type AssetVariantKind = "rain" | "fire" | "earthquake" | "birds" | "night" | "day_night" | "walk" | "water_reflection" | "water_caustics";
+export interface AssetVariantArtifactView { variant: AssetVariantKind; outputFilename: string; operation: string; frames: number; format: "png" | "gif"; deterministic: true; sourcePreserved: true; }
+export interface AssetVariantPackView { operation: "generate_variant_pack"; input: string; outputPrefix: string; seed: number; artifacts: AssetVariantArtifactView[]; deterministic: true; sourcePreserved: true; }
 export type AssetRecipeStep = "outline" | "color_grade" | "material_texture" | "depth_lighting" | "shadow" | "particles" | "normal_map" | "quality_gate";
 export interface SpriteEffectView { operation: string; output: string; frames: number; format: "png" | "gif"; deterministic: true; sourcePreserved: true; }
 export interface AssetRecipeStepView { id: AssetRecipeStep; operation: string; inputFilename: string; outputFilename?: string; arguments: Record<string, number | string | boolean>; }

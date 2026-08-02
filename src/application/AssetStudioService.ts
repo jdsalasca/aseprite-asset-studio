@@ -1,4 +1,4 @@
-import type { AssetGateway, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, RuntimeConfig, SceneExtensionView, SpriteEffectKind, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { AssetGateway, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetVariantKind, AssetVariantPackView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, RuntimeConfig, SceneExtensionView, SpriteEffectKind, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { RuntimeDiagnostics } from "../domain/aseprite.js";
 import type { OperationEvent, OperationLogPort } from "../ports/OperationLogPort.js";
 import { ToolResponseParser } from "./ToolResponseParser.js";
@@ -69,6 +69,13 @@ export class AssetStudioService {
       const response = await this.gateway.callTool(operation, args);
       return this.responseParser.parseJson<SpriteEffectView>(response, "El MCP no devolvió el resultado del efecto");
     }, { filename, outputFilename, kind });
+  }
+
+  public async generateVariantPack(input: { filename: string; outputPrefix: string; variants: AssetVariantKind[]; frames: number; seed: number }): Promise<AssetVariantPackView> {
+    return this.trace("generate_variant_pack", async () => {
+      const response = await this.gateway.callTool("generate_variant_pack", { input_filename: input.filename, output_prefix: input.outputPrefix, variants: input.variants, frames: input.frames, seed: input.seed, delay_ms: 90 });
+      return this.responseParser.parseJson<AssetVariantPackView>(response, "El MCP no devolvió el pack de variantes");
+    }, { filename: input.filename, variants: input.variants.length, seed: input.seed });
   }
 
   public async createAssetRecipe(input: { assetId: string; filename: string; outputPrefix: string; steps: AssetRecipeStep[]; seed: number; material: MaterialTextureKind; direction: LightDirection }): Promise<AssetRecipePlanView> {

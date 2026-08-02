@@ -46,6 +46,7 @@ Los assets cargados se validan por extensión, limitan a 32 MB y se guardan medi
 - Usa `INSPECT REFERENCE` para generar un plan determinista y revisa el antes/después antes de aplicar.
 - Los paneles `MATERIAL ENHANCER` y `DEPTH LIGHTING` crean salidas separadas con seed, granularidad y luz direccional reproducibles.
 - `SPRITE EFFECTS` añade outline, color grade, sombra, partículas, normal map, lluvia, ciclos de movimiento, nearest upscale, seamless texture, reflejo animado, caústicas de agua y ciclo día/atardecer/noche/amanecer con outputs separados.
+- `ENVIRONMENT VARIANT PACK` genera lluvia, fuego, terremoto, pájaros, noche, ciclos día/noche, walk, reflejos y caústicas desde un único asset, usando una sola llamada MCP y mostrando el manifiesto de artifacts.
 - `RECIPE CREATOR` genera un plan MCP determinista con pasos seleccionables, material, luz y seed para revisión humana.
 - `EXECUTE RECIPE` ejecuta el pipeline seleccionado en el servicio compartido del MCP, muestra cada paso, conserva el original y carga el artifact final en la comparación.
 - `BACKGROUND ASSET JOB` permite presets PNG, animación, GIF y atlas; muestra progreso y artifacts con hash.

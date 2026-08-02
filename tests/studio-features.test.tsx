@@ -13,6 +13,7 @@ import { SpriteEffectsPanel } from "../src/components/SpriteEffectsPanel.js";
 import { ToolGrid } from "../src/components/ToolGrid.js";
 import { AssetLibraryPanel } from "../src/components/AssetLibraryPanel.js";
 import { SceneExtensionPanel } from "../src/components/SceneExtensionPanel.js";
+import { VariantPackPanel } from "../src/components/VariantPackPanel.js";
 
 describe("studio feature contracts", () => {
   it("validates supported asset formats and size limits", () => {
@@ -49,6 +50,7 @@ describe("studio feature contracts", () => {
     expect(effectsMarkup).toContain("WATER CAUSTICS");
     expect(effectsMarkup).toContain("DAY / NIGHT CYCLE");
     expect(renderToStaticMarkup(<SceneExtensionPanel busy={false} online onExtend={() => undefined} />)).toContain("SCENE EXTENSION");
+    expect(renderToStaticMarkup(<VariantPackPanel busy={false} online assetName="oak.png" onGenerate={() => undefined} />)).toContain("ENVIRONMENT VARIANT PACK");
     const markup = renderToStaticMarkup(<RecipeCreatorPanel busy={false} online assetName="hero.png" onCreate={() => undefined} onExecute={() => undefined} />);
     expect(markup).toContain("RECIPE CREATOR");
     expect(markup).toContain("Quality gate");
