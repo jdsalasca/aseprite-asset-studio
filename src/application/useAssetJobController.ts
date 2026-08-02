@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { AssetJobView, AssetRecipe } from "../domain/contracts.js";
 import { AssetJobService } from "./AssetJobService.js";
-import { JobPollingGuard } from "./JobPollingGuard.js";
+import { RequestGenerationGuard } from "./RequestGenerationGuard.js";
 
 export interface AssetJobController {
   recipe: AssetRecipe;
@@ -19,7 +19,7 @@ export function useAssetJobController(service: AssetJobService, assetPath: strin
   const [recipe, setRecipe] = useState<AssetRecipe>("pixel_art");
   const [job, setJob] = useState<AssetJobView | null>(null);
   const [busy, setBusy] = useState(false);
-  const pollingGuard = useMemo(() => new JobPollingGuard(), []);
+  const pollingGuard = useMemo(() => new RequestGenerationGuard(), []);
 
   useEffect(() => {
     pollingGuard.invalidate();

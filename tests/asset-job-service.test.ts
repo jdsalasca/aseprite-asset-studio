@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { AssetJobService } from "../src/application/AssetJobService.js";
-import { JobPollingGuard } from "../src/application/JobPollingGuard.js";
+import { RequestGenerationGuard } from "../src/application/RequestGenerationGuard.js";
 import type { AssetGateway, HealthResponse, RuntimeConfig, StoredAsset, ToolDescriptor, ToolRuntimeStatus } from "../src/domain/contracts.js";
 
 const status: ToolRuntimeStatus = { state: "online", pid: 1, serverName: "fake", serverVersion: "1", toolCount: 1, message: "online" };
@@ -34,8 +34,8 @@ describe("AssetJobService", () => {
   });
 
   it("rejects an in-flight poll after its lifecycle is invalidated", () => {
-    const guard = new JobPollingGuard();
-    const snapshot = guard.snapshot();
+    const guard = new RequestGenerationGuard();
+    const snapshot = guard.next();
 
     guard.invalidate();
 

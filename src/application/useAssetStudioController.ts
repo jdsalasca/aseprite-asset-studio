@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { AssetJobService } from "./AssetJobService.js";
 import { AssetStudioService } from "./AssetStudioService.js";
+import { RequestGenerationGuard } from "./RequestGenerationGuard.js";
 import { useAssetJobController } from "./useAssetJobController.js";
 import { HttpAssetGateway } from "../adapters/mcp/HttpAssetGateway.js";
 import { ConsoleOperationLogger } from "../adapters/observability/ConsoleOperationLogger.js";
@@ -40,6 +41,7 @@ export function useAssetStudioController(): AssetStudioController {
   const services = useMemo(() => { const gateway = new HttpAssetGateway(); return { studio: new AssetStudioService(gateway, new ConsoleOperationLogger()), jobs: new AssetJobService(gateway) }; }, []);
   const service = services.studio;
   const jobs = services.jobs;
+  const uploadGuard = useMemo(() => new RequestGenerationGuard(), []);
   const [config, setConfig] = useState(defaultConfig);
   const [status, setStatus] = useState(offlineStatus);
   const [tools, setTools] = useState<ToolDescriptor[]>([]);
@@ -98,10 +100,12 @@ export function useAssetStudioController(): AssetStudioController {
   function upload(files: File[]): void {
     const file = files[0];
     if (!file) return;
-    setAssetName(file.name); setPlan(null); setEnhancedPreviewUrl(null); setQuality(null); setNotice(`Subiendo ${file.name}...`);
+    const request = uploadGuard.next();
+    setBusy(true); setAssetName(file.name); setAssetPath(null); setPreviewUrl(null); setPlan(null); setEnhancedPreviewUrl(null); setQuality(null); setNotice(`Subiendo ${file.name}...`);
     void service.upload(file).then((stored) => {
-      setAssetPath(stored.path); setPreviewUrl(service.assetPreviewUrl(stored.path)); setNotice(`${stored.filename} cargado (${stored.sizeBytes} bytes).`);
-    }).catch((error) => setNotice(errorMessage(error)));
+      if (!uploadGuard.accepts(request)) return;
+      setAssetPath(stored.path); setPreviewUrl(service.assetPreviewUrl(stored.path)); setNotice(`${stored.filename} cargado (${stored.sizeBytes} bytes).`); setBusy(false);
+    }).catch((error) => { if (uploadGuard.accepts(request)) { setNotice(errorMessage(error)); setBusy(false); } });
   }
 
   return { config, status, tools, busy: busy || jobController.busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, recipe: jobController.recipe, updateRecipe: jobController.updateRecipe, job: jobController.job, notice, updateConfig: setConfig, start, stop, inspect, applyPlan, startJob: jobController.start, cancelJob: jobController.cancel, upload };
