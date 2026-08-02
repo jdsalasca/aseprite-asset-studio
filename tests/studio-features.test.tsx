@@ -25,6 +25,7 @@ import { SpriteNormalizationPanel } from "../src/components/SpriteNormalizationP
 import { AnimationSheetPanel } from "../src/components/AnimationSheetPanel.js";
 import { SpriteGeometryPanel } from "../src/components/SpriteGeometryPanel.js";
 import { SpriteHitboxPanel } from "../src/components/SpriteHitboxPanel.js";
+import { SpriteRuntimeBundlePanel } from "../src/components/SpriteRuntimeBundlePanel.js";
 
 describe("studio feature contracts", () => {
   it("validates supported asset formats and size limits", () => {
@@ -86,5 +87,6 @@ describe("studio feature contracts", () => {
     expect(renderToStaticMarkup(<AnimationSheetPanel busy={false} online assetName="hero.gif" result={{ operation: "build_animation_sheet", output: "hero-sheet.png", manifest: "hero-sheet.json", frames: 8, columns: 3, rows: 3, width: 100, height: 100, cellWidth: 32, cellHeight: 32, padding: 1, deterministic: true, sourcePreserved: true }} onBuild={() => undefined} />)).toContain("BUILD ANIMATION SHEET");
     expect(renderToStaticMarkup(<SpriteGeometryPanel busy={false} online assetName="hero.gif" result={{ operation: "inspect_sprite_geometry", filename: "hero.gif", frameCount: 8, width: 32, height: 32, minComponentPixels: 1, frames: [{ index: 0, opaquePixels: 42, bounds: { x: 4, y: 8, width: 20, height: 22 }, baselineY: 29, pivot: { x: 16, y: 29, mode: "bottom_center" }, components: [{ x: 4, y: 8, width: 20, height: 22, pixels: 42 }] }], animation: { stableBounds: false, baselineDrift: 2 }, quality: { valid: true, violations: [] }, recommendations: ["Use the reported pivots."], deterministic: true, sourcePreserved: true }} onInspect={() => undefined} />)).toContain("INSPECT SPRITE GEOMETRY");
     expect(renderToStaticMarkup(<SpriteHitboxPanel busy={false} online assetName="hero.gif" result={{ operation: "generate_sprite_hitboxes", manifest: "hero-hitboxes.json", filename: "hero.gif", frames: 8, mode: "components", padding: 1, hitboxes: 24, deterministic: true, sourcePreserved: true }} onGenerate={() => undefined} />)).toContain("GENERATE SPRITE HITBOXES");
+    expect(renderToStaticMarkup(<SpriteRuntimeBundlePanel busy={false} online assetName="hero.gif" result={{ operation: "build_sprite_runtime_bundle", manifest: "hero-runtime.json", filename: "hero.gif", frames: 8, artifacts: 2, deterministic: true, sourcePreserved: true }} onBuild={() => undefined} />)).toContain("BUILD SPRITE RUNTIME BUNDLE");
   });
 });
