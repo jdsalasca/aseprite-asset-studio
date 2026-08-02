@@ -1,4 +1,4 @@
-import type { AssetGateway, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetPresetGenerationView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetVariantKind, AssetVariantPackView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, RuntimeConfig, SceneExtensionView, SpriteEffectKind, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { AssetGateway, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetPresetGenerationView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetVariantKind, AssetVariantPackView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SceneExtensionView, SpriteEffectKind, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { RuntimeDiagnostics } from "../domain/aseprite.js";
 import type { OperationEvent, OperationLogPort } from "../ports/OperationLogPort.js";
 import { ToolResponseParser } from "./ToolResponseParser.js";
@@ -76,6 +76,13 @@ export class AssetStudioService {
       const response = await this.gateway.callTool("generate_variant_pack", { input_filename: input.filename, output_prefix: input.outputPrefix, variants: input.variants, frames: input.frames, seed: input.seed, delay_ms: 90 });
       return this.responseParser.parseJson<AssetVariantPackView>(response, "El MCP no devolvió el pack de variantes");
     }, { filename: input.filename, variants: input.variants.length, seed: input.seed });
+  }
+
+  public async generateSceneEffectStack(input: { filename: string; outputPrefix: string; effects: SceneEffectKind[]; frames: number; seed: number; material: MaterialTextureKind; direction: LightDirection; particleCount?: number }): Promise<SceneEffectStackView> {
+    return this.trace("generate_scene_effect_stack", async () => {
+      const response = await this.gateway.callTool("generate_scene_effect_stack", { input_filename: input.filename, output_prefix: input.outputPrefix, effects: input.effects, frames: input.frames, seed: input.seed, delay_ms: 90, material: input.material, direction: input.direction, ...(input.particleCount === undefined ? {} : { particle_count: input.particleCount }), format: "gif" });
+      return this.responseParser.parseJson<SceneEffectStackView>(response, "El MCP no devolvió el stack de efectos");
+    }, { filename: input.filename, effects: input.effects.length, seed: input.seed });
   }
 
   public async inspectAssetQualityBundle(filename: string): Promise<AssetQualityBundleView> {

@@ -14,6 +14,7 @@ import { ToolGrid } from "../src/components/ToolGrid.js";
 import { AssetLibraryPanel } from "../src/components/AssetLibraryPanel.js";
 import { SceneExtensionPanel } from "../src/components/SceneExtensionPanel.js";
 import { VariantPackPanel } from "../src/components/VariantPackPanel.js";
+import { SceneEffectStackPanel } from "../src/components/SceneEffectStackPanel.js";
 import { VariantPreviewPanel } from "../src/components/VariantPreviewPanel.js";
 import { QualityRecommendationsPanel } from "../src/components/QualityRecommendationsPanel.js";
 
@@ -53,6 +54,7 @@ describe("studio feature contracts", () => {
     expect(effectsMarkup).toContain("DAY / NIGHT CYCLE");
     expect(renderToStaticMarkup(<SceneExtensionPanel busy={false} online onExtend={() => undefined} />)).toContain("SCENE EXTENSION");
     expect(renderToStaticMarkup(<VariantPackPanel busy={false} online assetName="oak.png" onGenerate={() => undefined} />)).toContain("ENVIRONMENT VARIANT PACK");
+    expect(renderToStaticMarkup(<SceneEffectStackPanel busy={false} online assetName="oak.png" onGenerate={() => undefined} />)).toContain("SCENE EFFECT STACK");
     expect(renderToStaticMarkup(<VariantPreviewPanel previewUrl={(path) => `/preview?path=${encodeURIComponent(path)}`} artifacts={[{ variant: "rain", outputFilename: "oak-rain.gif", operation: "generate_rain_overlay", frames: 8, format: "gif", deterministic: true, sourcePreserved: true }]} />)).toContain("VARIANT PREVIEWS");
     expect(renderToStaticMarkup(<QualityRecommendationsPanel recommendations={["Reduce the palette before export."]} />)).toContain("QUALITY RECOMMENDATIONS");
     const markup = renderToStaticMarkup(<RecipeCreatorPanel busy={false} online assetName="hero.png" onCreate={() => undefined} onExecute={() => undefined} />);
