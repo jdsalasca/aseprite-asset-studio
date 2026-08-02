@@ -116,7 +116,7 @@ export interface DepthLightingView {
   sourcePreserved: true;
 }
 
-export type SpriteEffectKind = "outline" | "color_grade" | "shadow" | "particles" | "normal_map" | "rain" | "motion" | "upscale" | "seamless" | "reflection" | "caustics" | "day_night" | "background" | "cleanup" | "glow" | "rim_light" | "ambient_occlusion" | "specular_highlight";
+export type SpriteEffectKind = "outline" | "color_grade" | "shadow" | "particles" | "normal_map" | "rain" | "motion" | "upscale" | "seamless" | "reflection" | "caustics" | "day_night" | "background" | "cleanup" | "glow" | "rim_light" | "ambient_occlusion" | "specular_highlight" | "color_ramp";
 export type AssetVariantKind = "rain" | "fire" | "earthquake" | "birds" | "night" | "day_night" | "walk" | "water_reflection" | "water_caustics";
 export interface AssetVariantArtifactView { variant: AssetVariantKind; outputFilename: string; operation: string; frames: number; format: "png" | "gif"; deterministic: true; sourcePreserved: true; }
 export interface AssetVariantPackView { operation: "generate_variant_pack"; input: string; outputPrefix: string; seed: number; artifacts: AssetVariantArtifactView[]; deterministic: true; sourcePreserved: true; }
