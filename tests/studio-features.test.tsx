@@ -19,6 +19,7 @@ import { VariantPreviewPanel } from "../src/components/VariantPreviewPanel.js";
 import { QualityRecommendationsPanel } from "../src/components/QualityRecommendationsPanel.js";
 import { PaletteHarmonizerPanel } from "../src/components/PaletteHarmonizerPanel.js";
 import { ContactSheetPanel } from "../src/components/ContactSheetPanel.js";
+import { QualityBatchPanel } from "../src/components/QualityBatchPanel.js";
 
 describe("studio feature contracts", () => {
   it("validates supported asset formats and size limits", () => {
@@ -74,5 +75,6 @@ describe("studio feature contracts", () => {
     expect(renderToStaticMarkup(<PaletteHarmonizerPanel busy={false} online assetName="hero.png" palette={["#3155D8", "#8AA0F0"]} onApply={() => undefined} />)).toContain("#3155D8");
     expect(renderToStaticMarkup(<ContactSheetPanel busy={false} online assetCount={3} sourceNames={["rain.gif", "night.gif", "fire.gif"]} previewUrl="sheet.png" result={{ operation: "build_contact_sheet", output: "sheet.png", manifest: "sheet.json", assets: 3, columns: 2, rows: 2, width: 66, height: 66, cellWidth: 32, cellHeight: 32, padding: 2, deterministic: true, sourcePreserved: true }} onBuild={() => undefined} />)).toContain("BUILD CONTACT SHEET");
     expect(renderToStaticMarkup(<ContactSheetPanel busy={false} online assetCount={3} sourceNames={["rain.gif", "night.gif", "fire.gif"]} previewUrl="sheet.png" result={{ operation: "build_contact_sheet", output: "sheet.png", manifest: "sheet.json", assets: 3, columns: 2, rows: 2, width: 66, height: 66, cellWidth: 32, cellHeight: 32, padding: 2, deterministic: true, sourcePreserved: true }} onBuild={() => undefined} />)).toContain("CONTACT SHEET");
+    expect(renderToStaticMarkup(<QualityBatchPanel busy={false} online result={{ operation: "inspect_asset_batch", assets: [{ filename: "hero.png", valid: true, violations: [], recommendations: [] }], summary: { total: 1, valid: 1, invalid: 0, failed: 0 }, maxColors: 64, maxIsolatedPixels: 4, deterministic: true, sourcePreserved: true }} onInspect={() => undefined} />)).toContain("AUDIT COLLECTION");
   });
 });

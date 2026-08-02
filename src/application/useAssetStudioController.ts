@@ -6,7 +6,7 @@ import { useAssetJobController } from "./useAssetJobController.js";
 import { HttpAssetGateway } from "../adapters/mcp/HttpAssetGateway.js";
 import { InMemoryOperationLogger } from "../adapters/observability/InMemoryOperationLogger.js";
 import { validateAssetFile } from "./assetValidation.js";
-import type { AssetJobView, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetQualityBundleView, AssetRecipe, AssetRecipeStep, AssetVariantArtifactView, AssetVariantKind, BiomeTransitionView, ContactSheetView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, PaletteHarmonizeView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SpriteEffectKind, ToolDescriptor, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { AssetJobView, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetQualityBatchView, AssetQualityBundleView, AssetRecipe, AssetRecipeStep, AssetVariantArtifactView, AssetVariantKind, BiomeTransitionView, ContactSheetView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, PaletteHarmonizeView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SpriteEffectKind, ToolDescriptor, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { OperationLogEntry } from "../ports/OperationLogPort.js";
 import type { RuntimeDiagnostics } from "../domain/aseprite.js";
 
@@ -30,6 +30,7 @@ export interface AssetStudioController {
   variantPreviewUrl(path: string): string;
   quality: EnhancementApplyView["quality"] | null;
   qualityRecommendations: string[];
+  batchQuality: AssetQualityBatchView | null;
   harmonizedPalette: string[];
   contactSheet: ContactSheetView | null;
   contactSheetPreviewUrl: string | null;
@@ -57,6 +58,7 @@ export interface AssetStudioController {
   generateSceneEffectStack(effects: SceneEffectKind[], frames: number, seed: number, material: MaterialTextureKind, direction: LightDirection): Promise<void>;
   generateAssetPreset(id: string): Promise<void>;
   inspectAssetQualityBundle(): Promise<void>;
+  inspectAssetBatch(): Promise<void>;
   createAssetRecipe(input: RecipeInput): Promise<void>;
   executeAssetRecipe(input: RecipeInput): Promise<void>;
   extendScene(input: { inputMapFilename: string; outputMapFilename: string; previewFilename?: string; top: number; right: number; bottom: number; left: number; seed: number }): Promise<void>;
@@ -91,6 +93,7 @@ export function useAssetStudioController(): AssetStudioController {
   const [enhancedPreviewUrl, setEnhancedPreviewUrl] = useState<string | null>(null);
   const [quality, setQuality] = useState<EnhancementApplyView["quality"] | null>(null);
   const [qualityRecommendations, setQualityRecommendations] = useState<string[]>([]);
+  const [batchQuality, setBatchQuality] = useState<AssetQualityBatchView | null>(null);
   const [harmonizedPalette, setHarmonizedPalette] = useState<string[]>([]);
   const [contactSheet, setContactSheet] = useState<ContactSheetView | null>(null);
   const [contactSheetPreviewUrl, setContactSheetPreviewUrl] = useState<string | null>(null);
@@ -341,18 +344,27 @@ export function useAssetStudioController(): AssetStudioController {
     finally { setBusy(false); }
   }
 
+  async function inspectAssetBatch(): Promise<void> {
+    if (!assetPath || status.state !== "online") return;
+    const filenames = [...new Set([assetPath, ...variantArtifacts.map((artifact) => artifact.outputFilename)])];
+    setBusy(true); setToolOutput(null); setNotice(`Auditando ${filenames.length} assets en una sola pasada...`);
+    try { const result = await service.inspectAssetBatch({ filenames, maxColors: 64, maxIsolatedPixels: 4 }); setBatchQuality(result); setToolOutput(JSON.stringify(result, null, 2)); setNotice(`Auditoría lista: ${result.summary.valid} pass, ${result.summary.invalid} para revisar y ${result.summary.failed} fallidos.`); }
+    catch (error) { setNotice(errorMessage(error)); }
+    finally { setBusy(false); }
+  }
+
   function upload(files: File[]): void {
     const file = files[0];
     if (!file) return;
     const validationError = validateAssetFile(file);
     if (validationError) { setNotice(validationError); return; }
     const request = uploadGuard.next();
-    setBusy(true); setAssetName(file.name); setAssetPath(null); setPreviewUrl(null); setPlan(null); setEnhancedPreviewUrl(null); setQuality(null); setQualityRecommendations([]); setHarmonizedPalette([]); setVariantArtifacts([]); setContactSheet(null); setContactSheetPreviewUrl(null); setNotice(`Subiendo ${file.name}...`);
+    setBusy(true); setAssetName(file.name); setAssetPath(null); setPreviewUrl(null); setPlan(null); setEnhancedPreviewUrl(null); setQuality(null); setQualityRecommendations([]); setBatchQuality(null); setHarmonizedPalette([]); setVariantArtifacts([]); setContactSheet(null); setContactSheetPreviewUrl(null); setNotice(`Subiendo ${file.name}...`);
     void service.upload(file).then((stored) => {
       if (!uploadGuard.accepts(request)) return;
       setAssetPath(stored.path); setPreviewUrl(service.assetPreviewUrl(stored.path)); setNotice(`${stored.filename} cargado (${stored.sizeBytes} bytes).`); setBusy(false);
     }).catch((error) => { if (uploadGuard.accepts(request)) { setNotice(errorMessage(error)); setBusy(false); } });
   }
 
-  return { config, status, diagnostics, tools, logs, toolOutput, busy: busy || jobController.busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, variantPreviewUrl: service.assetPreviewUrl.bind(service), quality, qualityRecommendations, harmonizedPalette, contactSheet, contactSheetPreviewUrl, variantArtifacts, assetLibrary, assetPresetComposition, libraryQuery, recipe: jobController.recipe, updateRecipe: jobController.updateRecipe, job: jobController.job, notice, updateConfig: setConfig, start, stop, detectAseprite, inspect, applyPlan, startJob: jobController.start, cancelJob: jobController.cancel, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, generateVariantPack, generateSceneEffectStack, generateAssetPreset, inspectAssetQualityBundle, createAssetRecipe, executeAssetRecipe, extendScene, generateBiomeTransition, harmonizePalette, buildContactSheet, searchAssetLibrary, composeAssetPreset, updateLibraryQuery: setLibraryQuery, upload };
+  return { config, status, diagnostics, tools, logs, toolOutput, busy: busy || jobController.busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, variantPreviewUrl: service.assetPreviewUrl.bind(service), quality, qualityRecommendations, batchQuality, harmonizedPalette, contactSheet, contactSheetPreviewUrl, variantArtifacts, assetLibrary, assetPresetComposition, libraryQuery, recipe: jobController.recipe, updateRecipe: jobController.updateRecipe, job: jobController.job, notice, updateConfig: setConfig, start, stop, detectAseprite, inspect, applyPlan, startJob: jobController.start, cancelJob: jobController.cancel, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, generateVariantPack, generateSceneEffectStack, generateAssetPreset, inspectAssetQualityBundle, inspectAssetBatch, createAssetRecipe, executeAssetRecipe, extendScene, generateBiomeTransition, harmonizePalette, buildContactSheet, searchAssetLibrary, composeAssetPreset, updateLibraryQuery: setLibraryQuery, upload };
 }
