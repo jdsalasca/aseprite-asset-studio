@@ -64,6 +64,15 @@ export interface EnhancementApplyView {
   quality: { valid: boolean; violations?: string[] };
 }
 
+export interface EnhancementBundleView {
+  operation: "apply_enhancement_bundle";
+  plan: EnhancementPlanView;
+  applied: Omit<EnhancementApplyView, "quality">;
+  quality: EnhancementApplyView["quality"];
+  deterministic: true;
+  sourcePreserved: true;
+}
+
 export type MaterialTextureKind = "water" | "earth" | "grass" | "stone" | "snow";
 
 export interface MaterialTextureView {

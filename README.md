@@ -45,6 +45,7 @@ Los assets cargados se validan por extensión, limitan a 32 MB y se guardan medi
 
 - Carga un PNG, GIF, WebP o archivo Aseprite; el cliente rechaza formatos no soportados y archivos mayores de 25 MB antes de subirlos.
 - Usa `INSPECT REFERENCE` para generar un plan determinista y revisa el antes/después antes de aplicar.
+- `APPLY ENHANCEMENT` usa `apply_enhancement_bundle`: el MCP inspecciona, planifica, aplica y valida en una sola llamada. La UX ya no repite `inspect_reference` antes de pedir el plan.
 - `QUALITY BUNDLE` ejecuta la inspección y quality gate compactos del MCP, muestra violaciones y recomendaciones sin generar archivos.
 - `AUDIT COLLECTION` inspecciona el asset cargado y todas sus variantes con `inspect_asset_batch`, mostrando una matriz pass/review/failed sin repetir llamadas por archivo.
 - `AUDIT ANIMATION` inspecciona frames, timing, deriva de paleta y costura de loop con `inspect_animation_quality` antes de exportar un GIF.

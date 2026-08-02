@@ -59,6 +59,7 @@ class FakeGateway implements AssetGateway {
     if (name === "compose_asset_scene") return { content: [{ text: JSON.stringify({ operation: name, output: String(args.output_filename), manifest: String(args.manifest_filename), libraryVersion: "catalog-scene-v1", itemIds: args.item_ids as string[], width: Number(args.width), height: Number(args.height), padding: Number(args.padding), layers: [{ id: "scene-oak", assetId: "oak", title: "Oak", category: "flora", kind: "scene", role: "background", order: 0, previewPath: "flora/oak/preview.png", spritePath: "flora/oak/sprite-sheet.png", x: 2, y: 2, width: 60, height: 60 }], deterministic: true, sourcePreserved: true } satisfies AssetSceneCompositionView) }] };
     if (name === "compose_asset_scene_animation") return { content: [{ text: JSON.stringify({ operation: name, output: String(args.output_filename), manifest: String(args.manifest_filename), libraryVersion: "catalog-scene-v1", itemIds: args.item_ids as string[], width: Number(args.width), height: Number(args.height), padding: Number(args.padding), frames: Number(args.frames), delayMs: Number(args.delay_ms), frameLayers: [{ index: 0, layers: [{ id: "scene-rain", assetId: "rain", title: "Rain", category: "effects", kind: "effect", role: "effect", order: 0, previewPath: "effects/rain/preview.gif", spritePath: "effects/rain/sprite-sheet.gif", x: 2, y: 2, width: 60, height: 60 }] }], deterministic: true, sourcePreserved: true } satisfies AssetSceneAnimationCompositionView) }] };
     if (name === "generate_library_variant_pack") return { content: [{ text: JSON.stringify({ operation: name, manifest: "out/library.json", libraryVersion: "catalog-v1", itemIds: args.item_ids as string[], outputPrefix: String(args.output_prefix), variants: args.variants as AssetLibraryVariantPackView["variants"], frames: Number(args.frames), seed: Number(args.seed), assets: [{ assetId: "oak", title: "Oak", outputPrefix: "out/library/oak", artifacts: [{ variant: "rain", outputFilename: "out/library/oak-rain.gif", operation: "generate_rain_overlay", frames: Number(args.frames), format: "gif", deterministic: true, sourcePreserved: true }] }], deterministic: true, sourcePreserved: true } satisfies AssetLibraryVariantPackView) }] };
+    if (name === "apply_enhancement_bundle") return { content: [{ text: JSON.stringify({ operation: name, plan: { planId: "plan-1", algorithmVersion: "enhancement-plan-v1", filename: "source.png", seed: 1, detectedSignals: [], warnings: [], passes: [{ id: "cleanup", reason: "cleanup", parameters: {} }], destructive: false }, applied: { planId: "plan-1", outputFilename: args.output_filename, format: "png", frames: 1, passesApplied: ["cleanup"], sourcePreserved: true }, quality: { valid: true, violations: [] }, deterministic: true, sourcePreserved: true }) }] };
     return { content: [{ text: JSON.stringify({ applied: { planId: "plan-1", outputFilename: args.output_filename, format: "png", frames: 1, passesApplied: ["cleanup"], sourcePreserved: true }, quality: { valid: true, violations: [] } }) }] };
   }
   public async upload(file: File): Promise<StoredAsset> { return { filename: file.name, path: `/tmp/${file.name}`, sizeBytes: file.size }; }
@@ -66,12 +67,12 @@ class FakeGateway implements AssetGateway {
 }
 
 describe("AssetStudioService enhancement use cases", () => {
-  it("inspects before suggesting a typed plan", async () => {
+  it("suggests a typed plan with one gateway call because the MCP planner inspects internally", async () => {
     const gateway = new FakeGateway();
     const logger = new FakeLogger();
     const plan = await new AssetStudioService(gateway, logger).suggestEnhancementPlan("source.png");
     expect(plan.planId).toBe("plan-1");
-    expect(gateway.calls.map((call) => call.name)).toEqual(["inspect_reference", "suggest_enhancement_plan"]);
+    expect(gateway.calls.map((call) => call.name)).toEqual(["suggest_enhancement_plan"]);
     expect(logger.events).toHaveLength(2);
     expect(logger.events.map((event) => event.outcome)).toEqual(["started", "success"]);
     expect(logger.events[1]).toMatchObject({ operation: "suggest_enhancement_plan", outcome: "success" });
@@ -82,7 +83,7 @@ describe("AssetStudioService enhancement use cases", () => {
     const gateway = new FakeGateway();
     const result = await new AssetStudioService(gateway).applyEnhancementPlan("source.png", "source-enhanced.png");
     expect(result).toMatchObject({ outputFilename: "source-enhanced.png", sourcePreserved: true, quality: { valid: true } });
-    expect(gateway.calls[0]).toMatchObject({ name: "apply_enhancement_plan", args: { output_filename: "source-enhanced.png" } });
+    expect(gateway.calls[0]).toMatchObject({ name: "apply_enhancement_bundle", args: { output_filename: "source-enhanced.png" } });
   });
 
   it("executes the material pass through the generic gateway contract", async () => {
