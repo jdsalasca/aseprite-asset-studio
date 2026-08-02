@@ -56,13 +56,15 @@ export class AssetStudioService {
 
   public async applySpriteEffect(kind: SpriteEffectKind, filename: string, outputFilename: string, options: Record<string, number | string | boolean> = {}): Promise<SpriteEffectView> {
     return this.trace(`apply_${kind}`, async () => {
-      const operation = kind === "outline" ? "apply_pixel_outline" : kind === "background" ? "remove_background" : kind === "cleanup" ? "cleanup_isolated_pixels" : kind === "color_grade" ? "apply_color_grade" : kind === "shadow" ? "generate_sprite_shadow" : kind === "particles" ? "generate_particle_burst" : kind === "normal_map" ? "generate_normal_map" : kind === "rain" ? "generate_rain_overlay" : kind === "motion" ? "generate_motion_pack" : kind === "upscale" ? "upscale_pixel_art" : kind === "reflection" ? "generate_water_reflection" : kind === "caustics" ? "generate_water_caustics" : kind === "day_night" ? "generate_day_night_cycle" : "generate_seamless_texture";
+      const operation = kind === "outline" ? "apply_pixel_outline" : kind === "background" ? "remove_background" : kind === "cleanup" ? "cleanup_isolated_pixels" : kind === "glow" ? "generate_sprite_glow" : kind === "color_grade" ? "apply_color_grade" : kind === "shadow" ? "generate_sprite_shadow" : kind === "particles" ? "generate_particle_burst" : kind === "normal_map" ? "generate_normal_map" : kind === "rain" ? "generate_rain_overlay" : kind === "motion" ? "generate_motion_pack" : kind === "upscale" ? "upscale_pixel_art" : kind === "reflection" ? "generate_water_reflection" : kind === "caustics" ? "generate_water_caustics" : kind === "day_night" ? "generate_day_night_cycle" : "generate_seamless_texture";
       const args: Record<string, unknown> = kind === "particles"
         ? { output_filename: outputFilename, width: options.width ?? 64, height: options.height ?? 64, frames: options.frames ?? 8, particle_count: options.particle_count ?? 24, seed: options.seed ?? 1, color: options.color ?? "#FFD166", delay_ms: options.delay_ms ?? 80 }
         : kind === "background"
           ? { input_filename: filename, output_filename: outputFilename, format: /\.gif$/i.test(filename) ? "gif" : "png", background_color: options.background_color ?? "#000000", tolerance: options.tolerance ?? 0, connected_only: options.connected_only ?? true }
           : kind === "cleanup"
             ? { input_filename: filename, output_filename: outputFilename, format: /\.gif$/i.test(filename) ? "gif" : "png", min_neighbors: options.min_neighbors ?? 1, iterations: options.iterations ?? 1 }
+          : kind === "glow"
+            ? { input_filename: filename, output_filename: outputFilename, format: /\.gif$/i.test(filename) ? "gif" : "png", color: options.color ?? "#FFD166", radius: options.radius ?? 2, opacity: options.opacity ?? 0.8 }
           : kind === "rain"
           ? { input_filename: filename, output_filename: outputFilename, format: "gif", seed: options.seed ?? 1, intensity: options.intensity ?? 0.55, wind: options.wind ?? 0, color: options.color ?? "#B7D7FF", delay_ms: options.delay_ms ?? 90 }
           : kind === "motion"

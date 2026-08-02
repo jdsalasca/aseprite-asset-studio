@@ -73,6 +73,7 @@ describe("studio feature contracts", () => {
     expect(effectsMarkup).toContain("DAY / NIGHT CYCLE");
     expect(effectsMarkup).toContain("REMOVE BACKGROUND");
     expect(effectsMarkup).toContain("CLEAN ISOLATED PIXELS");
+    expect(effectsMarkup).toContain("SPRITE GLOW");
     expect(renderToStaticMarkup(<SceneExtensionPanel busy={false} online onExtend={() => undefined} onTransition={() => undefined} />)).toContain("SCENE EXTENSION");
     expect(renderToStaticMarkup(<SceneExtensionPanel busy={false} online onExtend={() => undefined} onTransition={() => undefined} />)).toContain("BLEND BIOMES");
     expect(renderToStaticMarkup(<VariantPackPanel busy={false} online assetName="oak.png" onGenerate={() => undefined} />)).toContain("ENVIRONMENT VARIANT PACK");
