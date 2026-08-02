@@ -61,6 +61,7 @@ Los assets cargados se validan por extensión, limitan a 32 MB y se guardan medi
 - `REMOVE BACKGROUND` elimina de forma determinista el color conectado al borde, permite tolerancia RGB y conserva colores encerrados; el origen siempre queda intacto.
 - `CLEAN ISOLATED PIXELS` corrige ruido de píxeles opacos aislados con vecinos mínimos e iteraciones acotadas, manteniendo los grupos conectados y el origen.
 - `SPRITE GLOW` agrega aura radial para magia, fuego, lámparas y campanas mediante color, radio y opacidad reproducibles, sin modificar la silueta fuente.
+- `SPRITE SHADOW` genera sombras recortadas con color, desplazamiento X/Y y opacidad; el gateway envía el contrato MCP correcto y conserva GIFs animados.
 - `RIM LIGHT` añade iluminación de borde cardinal o diagonal mediante el mismo servicio MCP, con color y fuerza deterministas, sin duplicar lógica en la UX.
 - `AMBIENT OCCLUSION` añade sombreado de cavidades basado en vecindad alfa mediante el mismo servicio MCP, con radio, color y fuerza reproducibles.
 - `SPECULAR HIGHLIGHT` añade una banda de brillo hacia el interior de la silueta para metal, agua, cristal y magia mediante el mismo servicio MCP, con dirección, radio y fuerza reproducibles.

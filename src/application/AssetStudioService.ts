@@ -77,6 +77,8 @@ export class AssetStudioService {
             ? { input_filename: filename, output_filename: outputFilename, format: /\.gif$/i.test(filename) ? "gif" : "png", seed: options.seed ?? 1, intensity: options.intensity ?? 0.45, scale: options.scale ?? 1 }
           : kind === "dither"
             ? { input_filename: filename, output_filename: outputFilename, format: /\.gif$/i.test(filename) ? "gif" : "png", dark_color: options.dark_color ?? "#202030", light_color: options.light_color ?? "#F0E8C8", strength: options.strength ?? 1, scale: options.scale ?? 1 }
+          : kind === "shadow"
+            ? { input_filename: filename, output_filename: outputFilename, format: /\.gif$/i.test(filename) ? "gif" : "png", offset_x: options.offset_x ?? 2, offset_y: options.offset_y ?? 2, color: options.color ?? "#000000", opacity: options.opacity ?? 0.45 }
           : kind === "rain"
           ? { input_filename: filename, output_filename: outputFilename, format: "gif", seed: options.seed ?? 1, intensity: options.intensity ?? 0.55, wind: options.wind ?? 0, color: options.color ?? "#B7D7FF", delay_ms: options.delay_ms ?? 90 }
           : kind === "motion"
