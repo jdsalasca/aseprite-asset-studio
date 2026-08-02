@@ -19,12 +19,13 @@ import { AssetLibraryPanel } from "./components/AssetLibraryPanel.js";
 import { SceneExtensionPanel } from "./components/SceneExtensionPanel.js";
 import { VariantPackPanel } from "./components/VariantPackPanel.js";
 import { VariantPreviewPanel } from "./components/VariantPreviewPanel.js";
+import { QualityRecommendationsPanel } from "./components/QualityRecommendationsPanel.js";
 import { buildPipelineStages } from "./application/pipelineStages.js";
 import { summarizeRuntimeMetrics } from "./application/runtimeMetrics.js";
 import { shortcutAction } from "./application/keyboardShortcuts.js";
 
 export default function App() {
-  const { config, status, diagnostics, tools, logs, toolOutput, busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, variantArtifacts, variantPreviewUrl, assetLibrary, assetPresetComposition, libraryQuery, recipe, job, notice, updateConfig, updateRecipe, start, stop, detectAseprite, inspect, applyPlan, startJob, cancelJob, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, generateVariantPack, inspectAssetQualityBundle, createAssetRecipe, executeAssetRecipe, extendScene, searchAssetLibrary, composeAssetPreset, updateLibraryQuery, upload } = useAssetStudioController();
+  const { config, status, diagnostics, tools, logs, toolOutput, busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, qualityRecommendations, variantArtifacts, variantPreviewUrl, assetLibrary, assetPresetComposition, libraryQuery, recipe, job, notice, updateConfig, updateRecipe, start, stop, detectAseprite, inspect, applyPlan, startJob, cancelJob, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, generateVariantPack, inspectAssetQualityBundle, createAssetRecipe, executeAssetRecipe, extendScene, searchAssetLibrary, composeAssetPreset, updateLibraryQuery, upload } = useAssetStudioController();
   const [selectedToolName, setSelectedToolName] = useState("");
   const stages = useMemo(() => buildPipelineStages({ online: status.state === "online", hasAsset: Boolean(assetPath), hasPlan: Boolean(plan), hasQuality: Boolean(quality) }), [assetPath, plan, quality, status.state]);
   const metrics = useMemo(() => summarizeRuntimeMetrics(logs), [logs]);
@@ -63,6 +64,7 @@ export default function App() {
         {previewUrl ? <AssetPreviewPanel before={previewUrl} after={enhancedPreviewUrl ?? undefined} /> : null}
         {plan ? <><DecisionPlanPanel plan={plan} /><div className="asset-row"><span className="muted">Salida: archivo separado -enhanced.png</span><PixelButton disabled={busy || status.state !== "online" || !assetPath} onClick={() => void applyPlan()}>APPLY ENHANCEMENT</PixelButton></div></> : null}
         {quality ? <QualityGatePanel quality={quality} /> : null}
+        <QualityRecommendationsPanel recommendations={qualityRecommendations} />
         {assetPath ? <MaterialTexturePanel busy={busy} online={status.state === "online"} assetName={assetName} onApply={(material, seed, intensity) => void applyMaterialTexture(material, seed, intensity)} /> : null}
         {assetPath ? <LightingPanel busy={busy} online={status.state === "online"} assetName={assetName} onApply={(direction, strength, ambient) => void applyDepthLighting(direction, strength, ambient)} /> : null}
         {assetPath ? <SpriteEffectsPanel busy={busy} online={status.state === "online"} assetName={assetName} onApply={(kind, options) => void applySpriteEffect(kind, options)} /> : null}
