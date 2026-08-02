@@ -33,5 +33,8 @@
 .asset-library-grid .pixel-asset-card small { color: var(--studio-cyan); font-size: .62rem; letter-spacing: .1em; }
 .log-line { align-items: flex-start; display: flex; gap: .6rem; line-height: 1.5; }
 .log-line .pixel-badge { flex: none; }
+.normalization-controls { @include m.studio-grid(repeat(2, minmax(0, 1fr))); margin-top: .8rem; }
+.normalization-controls label { color: var(--studio-muted); display: grid; font-size: .7rem; gap: .35rem; letter-spacing: .08em; }
+.normalization-controls input, .normalization-controls select { background: var(--studio-ink); border: 1px solid var(--studio-cyan); color: #d4def0; font: inherit; min-height: 2.2rem; padding: .45rem; }
 .activity-log { display: grid; gap: .7rem; }
 button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { @include m.studio-focus; }

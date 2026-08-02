@@ -6,7 +6,7 @@ import { useAssetJobController } from "./useAssetJobController.js";
 import { HttpAssetGateway } from "../adapters/mcp/HttpAssetGateway.js";
 import { InMemoryOperationLogger } from "../adapters/observability/InMemoryOperationLogger.js";
 import { validateAssetFile } from "./assetValidation.js";
-import type { AnimationQualityView, AssetJobView, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetQualityBatchView, AssetQualityBundleView, AssetRecipe, AssetRecipeStep, AssetVariantArtifactView, AssetVariantKind, BiomeTransitionView, ContactSheetView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, PaletteHarmonizeView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SpriteEffectKind, ToolDescriptor, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { AnimationQualityView, AssetJobView, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetQualityBatchView, AssetQualityBundleView, AssetRecipe, AssetRecipeStep, AssetVariantArtifactView, AssetVariantKind, BiomeTransitionView, ContactSheetView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, PaletteHarmonizeView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SpriteEffectKind, SpriteNormalizationView, SpritePivotMode, ToolDescriptor, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { OperationLogEntry } from "../ports/OperationLogPort.js";
 import type { RuntimeDiagnostics } from "../domain/aseprite.js";
 
@@ -32,6 +32,7 @@ export interface AssetStudioController {
   qualityRecommendations: string[];
   batchQuality: AssetQualityBatchView | null;
   animationQuality: AnimationQualityView | null;
+  normalizedSprite: SpriteNormalizationView | null;
   harmonizedPalette: string[];
   contactSheet: ContactSheetView | null;
   contactSheetPreviewUrl: string | null;
@@ -61,6 +62,7 @@ export interface AssetStudioController {
   inspectAssetQualityBundle(): Promise<void>;
   inspectAssetBatch(): Promise<void>;
   inspectAnimationQuality(): Promise<void>;
+  normalizeSprite(padding: number, pivot: SpritePivotMode): Promise<void>;
   createAssetRecipe(input: RecipeInput): Promise<void>;
   executeAssetRecipe(input: RecipeInput): Promise<void>;
   extendScene(input: { inputMapFilename: string; outputMapFilename: string; previewFilename?: string; top: number; right: number; bottom: number; left: number; seed: number }): Promise<void>;
@@ -97,6 +99,7 @@ export function useAssetStudioController(): AssetStudioController {
   const [qualityRecommendations, setQualityRecommendations] = useState<string[]>([]);
   const [batchQuality, setBatchQuality] = useState<AssetQualityBatchView | null>(null);
   const [animationQuality, setAnimationQuality] = useState<AnimationQualityView | null>(null);
+  const [normalizedSprite, setNormalizedSprite] = useState<SpriteNormalizationView | null>(null);
   const [harmonizedPalette, setHarmonizedPalette] = useState<string[]>([]);
   const [contactSheet, setContactSheet] = useState<ContactSheetView | null>(null);
   const [contactSheetPreviewUrl, setContactSheetPreviewUrl] = useState<string | null>(null);
@@ -364,18 +367,30 @@ export function useAssetStudioController(): AssetStudioController {
     finally { setBusy(false); }
   }
 
+  async function normalizeSprite(padding: number, pivot: SpritePivotMode): Promise<void> {
+    if (!assetPath || status.state !== "online") return;
+    const base = assetPath.replace(/\.[^./\\]+$/, "");
+    const format = /\.gif$/i.test(assetPath) ? "gif" : "png";
+    const outputFilename = `${base}-normalized.${format}`;
+    const manifestFilename = `${base}-normalized.json`;
+    setBusy(true); setToolOutput(null); setNotice("Normalizando bounds, padding y pivote del sprite...");
+    try { const result = await service.normalizeSprite({ inputFilename: assetPath, outputFilename, manifestFilename, padding, pivot, format }); setNormalizedSprite(result); setEnhancedPreviewUrl(service.assetPreviewUrl(result.output)); setToolOutput(JSON.stringify(result, null, 2)); setNotice(`Sprite normalizado: ${result.width}×${result.height}, pivote ${result.pivot.mode}.`); }
+    catch (error) { setNotice(errorMessage(error)); }
+    finally { setBusy(false); }
+  }
+
   function upload(files: File[]): void {
     const file = files[0];
     if (!file) return;
     const validationError = validateAssetFile(file);
     if (validationError) { setNotice(validationError); return; }
     const request = uploadGuard.next();
-    setBusy(true); setAssetName(file.name); setAssetPath(null); setPreviewUrl(null); setPlan(null); setEnhancedPreviewUrl(null); setQuality(null); setQualityRecommendations([]); setBatchQuality(null); setAnimationQuality(null); setHarmonizedPalette([]); setVariantArtifacts([]); setContactSheet(null); setContactSheetPreviewUrl(null); setNotice(`Subiendo ${file.name}...`);
+    setBusy(true); setAssetName(file.name); setAssetPath(null); setPreviewUrl(null); setPlan(null); setEnhancedPreviewUrl(null); setQuality(null); setQualityRecommendations([]); setBatchQuality(null); setAnimationQuality(null); setNormalizedSprite(null); setHarmonizedPalette([]); setVariantArtifacts([]); setContactSheet(null); setContactSheetPreviewUrl(null); setNotice(`Subiendo ${file.name}...`);
     void service.upload(file).then((stored) => {
       if (!uploadGuard.accepts(request)) return;
       setAssetPath(stored.path); setPreviewUrl(service.assetPreviewUrl(stored.path)); setNotice(`${stored.filename} cargado (${stored.sizeBytes} bytes).`); setBusy(false);
     }).catch((error) => { if (uploadGuard.accepts(request)) { setNotice(errorMessage(error)); setBusy(false); } });
   }
 
-  return { config, status, diagnostics, tools, logs, toolOutput, busy: busy || jobController.busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, variantPreviewUrl: service.assetPreviewUrl.bind(service), quality, qualityRecommendations, batchQuality, animationQuality, harmonizedPalette, contactSheet, contactSheetPreviewUrl, variantArtifacts, assetLibrary, assetPresetComposition, libraryQuery, recipe: jobController.recipe, updateRecipe: jobController.updateRecipe, job: jobController.job, notice, updateConfig: setConfig, start, stop, detectAseprite, inspect, applyPlan, startJob: jobController.start, cancelJob: jobController.cancel, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, generateVariantPack, generateSceneEffectStack, generateAssetPreset, inspectAssetQualityBundle, inspectAssetBatch, inspectAnimationQuality, createAssetRecipe, executeAssetRecipe, extendScene, generateBiomeTransition, harmonizePalette, buildContactSheet, searchAssetLibrary, composeAssetPreset, updateLibraryQuery: setLibraryQuery, upload };
+  return { config, status, diagnostics, tools, logs, toolOutput, busy: busy || jobController.busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, variantPreviewUrl: service.assetPreviewUrl.bind(service), quality, qualityRecommendations, batchQuality, animationQuality, normalizedSprite, harmonizedPalette, contactSheet, contactSheetPreviewUrl, variantArtifacts, assetLibrary, assetPresetComposition, libraryQuery, recipe: jobController.recipe, updateRecipe: jobController.updateRecipe, job: jobController.job, notice, updateConfig: setConfig, start, stop, detectAseprite, inspect, applyPlan, startJob: jobController.start, cancelJob: jobController.cancel, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, generateVariantPack, generateSceneEffectStack, generateAssetPreset, inspectAssetQualityBundle, inspectAssetBatch, inspectAnimationQuality, normalizeSprite, createAssetRecipe, executeAssetRecipe, extendScene, generateBiomeTransition, harmonizePalette, buildContactSheet, searchAssetLibrary, composeAssetPreset, updateLibraryQuery: setLibraryQuery, upload };
 }

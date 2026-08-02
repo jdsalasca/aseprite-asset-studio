@@ -1,4 +1,4 @@
-import type { AnimationQualityView, AssetGateway, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetPresetGenerationView, AssetQualityBatchView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetVariantKind, AssetVariantPackView, BiomeTransitionView, ContactSheetView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, PaletteHarmonizeView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SceneExtensionView, SpriteEffectKind, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { AnimationQualityView, AssetGateway, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetPresetGenerationView, AssetQualityBatchView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetVariantKind, AssetVariantPackView, BiomeTransitionView, ContactSheetView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, PaletteHarmonizeView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SceneExtensionView, SpriteEffectKind, SpriteNormalizationView, SpritePivotMode, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { RuntimeDiagnostics } from "../domain/aseprite.js";
 import type { OperationEvent, OperationLogPort } from "../ports/OperationLogPort.js";
 import { ToolResponseParser } from "./ToolResponseParser.js";
@@ -104,6 +104,14 @@ export class AssetStudioService {
       const response = await this.gateway.callTool("inspect_animation_quality", { filename });
       return this.responseParser.parseJson<AnimationQualityView>(response, "El MCP no devolvió la auditoría de animación");
     }, { filename });
+  }
+
+  public async normalizeSprite(input: { inputFilename: string; outputFilename: string; manifestFilename: string; padding: number; pivot: SpritePivotMode; format?: "png" | "gif" }): Promise<SpriteNormalizationView> {
+    return this.trace("normalize_sprite", async () => {
+      const format = input.format ?? (/\.gif$/i.test(input.inputFilename) ? "gif" : "png");
+      const response = await this.gateway.callTool("normalize_sprite", { input_filename: input.inputFilename, output_filename: input.outputFilename, manifest_filename: input.manifestFilename, padding: input.padding, pivot: input.pivot, format });
+      return this.responseParser.parseJson<SpriteNormalizationView>(response, "El MCP no devolvió la normalización del sprite");
+    }, { filename: input.inputFilename, padding: input.padding, pivot: input.pivot });
   }
 
   public async generateAssetPreset(input: { presetId: string; outputPrefix: string; width: number; height: number; seed: number }): Promise<AssetPresetGenerationView> {
