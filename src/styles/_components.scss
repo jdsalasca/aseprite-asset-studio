@@ -39,4 +39,7 @@
 .asset-library-grid { display: grid; gap: .7rem; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-top: .8rem; }
 .asset-library-grid .pixel-asset-card { min-width: 0; }
 .asset-library-grid .pixel-asset-card small { color: var(--studio-cyan); font-size: .62rem; letter-spacing: .1em; }
+.log-line { align-items: flex-start; display: flex; gap: .6rem; line-height: 1.5; }
+.log-line .pixel-badge { flex: none; }
+.activity-log { display: grid; gap: .7rem; }
 button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { @include m.studio-focus; }

@@ -1,4 +1,5 @@
 // SCSS presentation composition. Domain/application layers do not import this entrypoint.
 @use "./tokens";
+@use "./foundation";
 @use "./layout";
 @use "./components";

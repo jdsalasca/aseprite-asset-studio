@@ -18,10 +18,14 @@ describe("hexagonal boundaries", () => {
   it("keeps studio presentation styles modular and avoids Sass inheritance", async () => {
     const entry = await readFile(new URL("../src/styles/app.scss", import.meta.url), "utf8");
     const main = await readFile(new URL("../src/main.tsx", import.meta.url), "utf8");
+    const foundation = await readFile(new URL("../src/styles/_foundation.scss", import.meta.url), "utf8");
     expect(entry).toContain('@use "./tokens"');
+    expect(entry).toContain('@use "./foundation"');
     expect(entry).toContain('@use "./layout"');
     expect(entry).toContain('@use "./components"');
     expect(entry).not.toContain("@extend");
     expect(main).toContain('import "./styles/app.scss"');
+    expect(main).not.toContain('import "./styles/app.css"');
+    expect(foundation).toContain("body {");
   });
 });

@@ -23,10 +23,11 @@ El gateway local utiliza el cliente MCP oficial sobre stdio. El navegador solo l
 La arquitectura está separada por dominio, casos de uso, puertos y adaptadores: `src/domain`, `src/application`, `src/ports` y `src/adapters`.
 
 La presentación mantiene la misma disciplina: `src/styles/app.scss` compone los módulos
-`_tokens.scss`, `_layout.scss`, `_components.scss` y `_mixins.scss`. No hay superclases
-Sass ni estilos acoplados al dominio; los componentes React implementan props HTML
-tipados y la hoja SCSS solo conoce clases de presentación. `app.css` permanece como
-capa de compatibilidad mientras se termina la migración visual.
+`_tokens.scss`, `_foundation.scss`, `_layout.scss`, `_components.scss` y `_mixins.scss`.
+No hay superclases Sass ni estilos acoplados al dominio; los componentes React
+implementan props HTML tipados y la hoja SCSS solo conoce clases de presentación. El
+CSS legado ya no se importa en la aplicación, por lo que SCSS es la única fuente de
+estilos del Studio.
 
 Variables opcionales:
 
