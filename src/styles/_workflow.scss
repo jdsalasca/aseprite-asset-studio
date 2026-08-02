@@ -37,6 +37,8 @@
 .scene-compose-controls { @include m.studio-grid(repeat(7, minmax(0, 1fr))); align-items: end; margin-top: .8rem; }
 .scene-compose-controls .pixel-field:first-child { grid-column: span 2; }
 .scene-compose-actions { display: flex; flex-wrap: wrap; gap: .5rem; grid-column: span 2; }
+.library-variant-pack-controls { @include m.studio-grid(repeat(7, minmax(0, 1fr))); align-items: end; margin-top: .8rem; }
+.library-variant-pack-controls .pixel-field:nth-child(1), .library-variant-pack-controls .pixel-field:nth-child(2), .library-variant-pack-controls .pixel-field:nth-child(3) { grid-column: span 2; }
 .log-line { align-items: flex-start; display: flex; gap: .6rem; line-height: 1.5; }
 .log-line .pixel-badge { flex: none; }
 .normalization-controls { @include m.studio-grid(repeat(2, minmax(0, 1fr))); margin-top: .8rem; }

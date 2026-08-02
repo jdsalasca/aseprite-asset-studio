@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { AssetStudioService } from "../src/application/AssetStudioService.js";
-import type { AssetGateway, AssetLibraryAuditView, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetLibrarySummaryView, AssetRecipeExecutionView, AssetSceneAnimationCompositionView, AssetSceneCompositionView, AssetScenePlanView, HealthResponse, RuntimeConfig, StoredAsset, ToolDescriptor, ToolRuntimeStatus } from "../src/domain/contracts.js";
+import type { AssetGateway, AssetLibraryAuditView, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetLibrarySummaryView, AssetLibraryVariantPackView, AssetRecipeExecutionView, AssetSceneAnimationCompositionView, AssetSceneCompositionView, AssetScenePlanView, HealthResponse, RuntimeConfig, StoredAsset, ToolDescriptor, ToolRuntimeStatus } from "../src/domain/contracts.js";
 import type { OperationEvent, OperationLogPort } from "../src/ports/OperationLogPort.js";
 
 const status: ToolRuntimeStatus = { state: "online", pid: 7, serverName: "fake", serverVersion: "1", toolCount: 1, message: "online" };
@@ -55,6 +55,7 @@ class FakeGateway implements AssetGateway {
     if (name === "plan_asset_scene") return { content: [{ text: JSON.stringify({ operation: name, libraryVersion: "catalog-scene-v1", itemIds: ["oak"], layers: [{ id: "scene-oak", assetId: "oak", title: "Oak", category: "flora", kind: "scene", role: "background", order: 0, previewPath: "flora/oak/preview.png", spritePath: "flora/oak/sprite-sheet.png" }], deterministic: true, sourcePreserved: true } satisfies AssetScenePlanView) }] };
     if (name === "compose_asset_scene") return { content: [{ text: JSON.stringify({ operation: name, output: String(args.output_filename), manifest: String(args.manifest_filename), libraryVersion: "catalog-scene-v1", itemIds: args.item_ids as string[], width: Number(args.width), height: Number(args.height), padding: Number(args.padding), layers: [{ id: "scene-oak", assetId: "oak", title: "Oak", category: "flora", kind: "scene", role: "background", order: 0, previewPath: "flora/oak/preview.png", spritePath: "flora/oak/sprite-sheet.png", x: 2, y: 2, width: 60, height: 60 }], deterministic: true, sourcePreserved: true } satisfies AssetSceneCompositionView) }] };
     if (name === "compose_asset_scene_animation") return { content: [{ text: JSON.stringify({ operation: name, output: String(args.output_filename), manifest: String(args.manifest_filename), libraryVersion: "catalog-scene-v1", itemIds: args.item_ids as string[], width: Number(args.width), height: Number(args.height), padding: Number(args.padding), frames: Number(args.frames), delayMs: Number(args.delay_ms), frameLayers: [{ index: 0, layers: [{ id: "scene-rain", assetId: "rain", title: "Rain", category: "effects", kind: "effect", role: "effect", order: 0, previewPath: "effects/rain/preview.gif", spritePath: "effects/rain/sprite-sheet.gif", x: 2, y: 2, width: 60, height: 60 }] }], deterministic: true, sourcePreserved: true } satisfies AssetSceneAnimationCompositionView) }] };
+    if (name === "generate_library_variant_pack") return { content: [{ text: JSON.stringify({ operation: name, manifest: "out/library.json", libraryVersion: "catalog-v1", itemIds: args.item_ids as string[], outputPrefix: String(args.output_prefix), variants: args.variants as AssetLibraryVariantPackView["variants"], frames: Number(args.frames), seed: Number(args.seed), assets: [{ assetId: "oak", title: "Oak", outputPrefix: "out/library/oak", artifacts: [{ variant: "rain", outputFilename: "out/library/oak-rain.gif", operation: "generate_rain_overlay", frames: Number(args.frames), format: "gif", deterministic: true, sourcePreserved: true }] }], deterministic: true, sourcePreserved: true } satisfies AssetLibraryVariantPackView) }] };
     return { content: [{ text: JSON.stringify({ applied: { planId: "plan-1", outputFilename: args.output_filename, format: "png", frames: 1, passesApplied: ["cleanup"], sourcePreserved: true }, quality: { valid: true, violations: [] } }) }] };
   }
   public async upload(file: File): Promise<StoredAsset> { return { filename: file.name, path: `/tmp/${file.name}`, sizeBytes: file.size }; }
@@ -324,6 +325,13 @@ describe("AssetStudioService enhancement use cases", () => {
     const result = await new AssetStudioService(gateway).composeAssetSceneAnimation({ itemIds: ["rain"], outputFilename: "scene.gif", manifestFilename: "scene.json", width: 64, height: 64, padding: 2, frames: 8, delayMs: 90 });
     expect(result).toMatchObject({ operation: "compose_asset_scene_animation", output: "scene.gif", frames: 8, delayMs: 90 });
     expect(gateway.calls[0]).toMatchObject({ name: "compose_asset_scene_animation", args: { item_ids: ["rain"], frames: 8, delay_ms: 90 } });
+  });
+
+  it("generates a library variant pack through one compact MCP request", async () => {
+    const gateway = new FakeGateway();
+    const result = await new AssetStudioService(gateway).generateLibraryVariantPack({ itemIds: ["oak"], outputPrefix: "out/library", variants: ["rain", "walk"], frames: 6, seed: 3, delayMs: 100 });
+    expect(result).toMatchObject({ operation: "generate_library_variant_pack", itemIds: ["oak"], manifest: "out/library.json" });
+    expect(gateway.calls[0]).toMatchObject({ name: "generate_library_variant_pack", args: { item_ids: ["oak"], output_prefix: "out/library", frames: 6 } });
   });
 
   it("surfaces the MCP error instead of replacing it with a missing-plan message", async () => {
