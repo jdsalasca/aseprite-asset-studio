@@ -50,6 +50,7 @@ Los assets cargados se validan por extensión, limitan a 32 MB y se guardan medi
 - `AUDIT ANIMATION` inspecciona frames, timing, deriva de paleta y costura de loop con `inspect_animation_quality` antes de exportar un GIF.
 - `SPRITE NORMALIZATION` recorta bounds alfa compartidos, aplica padding y registra pivote por frame sin sobrescribir el origen.
 - `BUILD ANIMATION SHEET` usa el ensamblador determinista del MCP para crear un PNG de frames y conservar delays/pivotes en un manifest JSON.
+- `INSPECT SPRITE GEOMETRY` muestra bounds, componentes alfa, baseline drift y pivotes para detectar jitter antes de usar un sprite en una escena.
 - Los paneles `MATERIAL ENHANCER` y `DEPTH LIGHTING` crean salidas separadas con seed, granularidad y luz direccional reproducibles.
 - `PALETTE HARMONIZER` unifica la familia cromática de un PNG/GIF hacia un color de acento, limita la paleta y muestra swatches del resultado sin tocar el origen.
 - `SPRITE EFFECTS` añade outline, color grade, sombra, partículas, normal map, lluvia, ciclos de movimiento, nearest upscale, seamless texture, reflejo animado, caústicas de agua y ciclo día/atardecer/noche/amanecer con outputs separados.

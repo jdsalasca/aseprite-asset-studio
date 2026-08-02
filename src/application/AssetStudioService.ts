@@ -1,4 +1,4 @@
-import type { AnimationQualityView, AnimationSheetView, AssetGateway, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetPresetGenerationView, AssetQualityBatchView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetVariantKind, AssetVariantPackView, BiomeTransitionView, ContactSheetView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, PaletteHarmonizeView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SceneExtensionView, SpriteEffectKind, SpriteNormalizationView, SpritePivotMode, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { AnimationQualityView, AnimationSheetView, AssetGateway, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetPresetGenerationView, AssetQualityBatchView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetVariantKind, AssetVariantPackView, BiomeTransitionView, ContactSheetView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, PaletteHarmonizeView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SceneExtensionView, SpriteEffectKind, SpriteGeometryView, SpriteNormalizationView, SpritePivotMode, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { RuntimeDiagnostics } from "../domain/aseprite.js";
 import type { OperationEvent, OperationLogPort } from "../ports/OperationLogPort.js";
 import { ToolResponseParser } from "./ToolResponseParser.js";
@@ -119,6 +119,13 @@ export class AssetStudioService {
       const response = await this.gateway.callTool("build_animation_sheet", { input_filename: input.inputFilename, output_filename: input.outputFilename, manifest_filename: input.manifestFilename, columns: input.columns, padding: input.padding });
       return this.responseParser.parseJson<AnimationSheetView>(response, "El MCP no devolvió el spritesheet de animación");
     }, { filename: input.inputFilename, columns: input.columns, padding: input.padding });
+  }
+
+  public async inspectSpriteGeometry(filename: string, minComponentPixels = 1): Promise<SpriteGeometryView> {
+    return this.trace("inspect_sprite_geometry", async () => {
+      const response = await this.gateway.callTool("inspect_sprite_geometry", { filename, min_component_pixels: minComponentPixels });
+      return this.responseParser.parseJson<SpriteGeometryView>(response, "El MCP no devolvió la geometría del sprite");
+    }, { filename, minComponentPixels });
   }
 
   public async generateAssetPreset(input: { presetId: string; outputPrefix: string; width: number; height: number; seed: number }): Promise<AssetPresetGenerationView> {

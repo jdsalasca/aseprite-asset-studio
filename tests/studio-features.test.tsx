@@ -23,6 +23,7 @@ import { QualityBatchPanel } from "../src/components/QualityBatchPanel.js";
 import { AnimationAuditPanel } from "../src/components/AnimationAuditPanel.js";
 import { SpriteNormalizationPanel } from "../src/components/SpriteNormalizationPanel.js";
 import { AnimationSheetPanel } from "../src/components/AnimationSheetPanel.js";
+import { SpriteGeometryPanel } from "../src/components/SpriteGeometryPanel.js";
 
 describe("studio feature contracts", () => {
   it("validates supported asset formats and size limits", () => {
@@ -82,5 +83,6 @@ describe("studio feature contracts", () => {
     expect(renderToStaticMarkup(<AnimationAuditPanel busy={false} online assetName="hero.gif" result={{ operation: "inspect_animation_quality", filename: "hero.gif", frameCount: 8, width: 16, height: 16, delaysMs: [90], transitions: [], duplicateFrames: [3], loop: { changedPixels: 0, closed: true }, palette: { colorsPerFrame: [4], driftFrames: [], stable: true }, timing: { consistent: true, positive: true }, quality: { valid: false, violations: ["duplicate frames: 3"] }, recommendations: [], deterministic: true, sourcePreserved: true }} onInspect={() => undefined} />)).toContain("AUDIT ANIMATION");
     expect(renderToStaticMarkup(<SpriteNormalizationPanel busy={false} online assetName="hero.gif" result={{ operation: "normalize_sprite", input: "hero.gif", output: "hero-normalized.gif", manifest: "hero-normalized.json", format: "gif", width: 24, height: 28, frames: 8, padding: 2, bounds: { x: 2, y: 3, width: 20, height: 24 }, pivot: { mode: "bottom_center", x: 12, y: 26 }, deterministic: true, sourcePreserved: true }} onNormalize={() => undefined} />)).toContain("NORMALIZE SPRITE");
     expect(renderToStaticMarkup(<AnimationSheetPanel busy={false} online assetName="hero.gif" result={{ operation: "build_animation_sheet", output: "hero-sheet.png", manifest: "hero-sheet.json", frames: 8, columns: 3, rows: 3, width: 100, height: 100, cellWidth: 32, cellHeight: 32, padding: 1, deterministic: true, sourcePreserved: true }} onBuild={() => undefined} />)).toContain("BUILD ANIMATION SHEET");
+    expect(renderToStaticMarkup(<SpriteGeometryPanel busy={false} online assetName="hero.gif" result={{ operation: "inspect_sprite_geometry", filename: "hero.gif", frameCount: 8, width: 32, height: 32, minComponentPixels: 1, frames: [{ index: 0, opaquePixels: 42, bounds: { x: 4, y: 8, width: 20, height: 22 }, baselineY: 29, pivot: { x: 16, y: 29, mode: "bottom_center" }, components: [{ x: 4, y: 8, width: 20, height: 22, pixels: 42 }] }], animation: { stableBounds: false, baselineDrift: 2 }, quality: { valid: true, violations: [] }, recommendations: ["Use the reported pivots."], deterministic: true, sourcePreserved: true }} onInspect={() => undefined} />)).toContain("INSPECT SPRITE GEOMETRY");
   });
 });
