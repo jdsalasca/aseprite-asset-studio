@@ -1,4 +1,4 @@
-import type { AnimationQualityView, AssetGateway, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetPresetGenerationView, AssetQualityBatchView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetVariantKind, AssetVariantPackView, BiomeTransitionView, ContactSheetView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, PaletteHarmonizeView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SceneExtensionView, SpriteEffectKind, SpriteNormalizationView, SpritePivotMode, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { AnimationQualityView, AnimationSheetView, AssetGateway, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetPresetGenerationView, AssetQualityBatchView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetVariantKind, AssetVariantPackView, BiomeTransitionView, ContactSheetView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, PaletteHarmonizeView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SceneExtensionView, SpriteEffectKind, SpriteNormalizationView, SpritePivotMode, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { RuntimeDiagnostics } from "../domain/aseprite.js";
 import type { OperationEvent, OperationLogPort } from "../ports/OperationLogPort.js";
 import { ToolResponseParser } from "./ToolResponseParser.js";
@@ -112,6 +112,13 @@ export class AssetStudioService {
       const response = await this.gateway.callTool("normalize_sprite", { input_filename: input.inputFilename, output_filename: input.outputFilename, manifest_filename: input.manifestFilename, padding: input.padding, pivot: input.pivot, format });
       return this.responseParser.parseJson<SpriteNormalizationView>(response, "El MCP no devolvió la normalización del sprite");
     }, { filename: input.inputFilename, padding: input.padding, pivot: input.pivot });
+  }
+
+  public async buildAnimationSheet(input: { inputFilename: string; outputFilename: string; manifestFilename: string; columns: number; padding: number }): Promise<AnimationSheetView> {
+    return this.trace("build_animation_sheet", async () => {
+      const response = await this.gateway.callTool("build_animation_sheet", { input_filename: input.inputFilename, output_filename: input.outputFilename, manifest_filename: input.manifestFilename, columns: input.columns, padding: input.padding });
+      return this.responseParser.parseJson<AnimationSheetView>(response, "El MCP no devolvió el spritesheet de animación");
+    }, { filename: input.inputFilename, columns: input.columns, padding: input.padding });
   }
 
   public async generateAssetPreset(input: { presetId: string; outputPrefix: string; width: number; height: number; seed: number }): Promise<AssetPresetGenerationView> {

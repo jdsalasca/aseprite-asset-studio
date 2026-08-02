@@ -22,6 +22,7 @@ import { ContactSheetPanel } from "../src/components/ContactSheetPanel.js";
 import { QualityBatchPanel } from "../src/components/QualityBatchPanel.js";
 import { AnimationAuditPanel } from "../src/components/AnimationAuditPanel.js";
 import { SpriteNormalizationPanel } from "../src/components/SpriteNormalizationPanel.js";
+import { AnimationSheetPanel } from "../src/components/AnimationSheetPanel.js";
 
 describe("studio feature contracts", () => {
   it("validates supported asset formats and size limits", () => {
@@ -80,5 +81,6 @@ describe("studio feature contracts", () => {
     expect(renderToStaticMarkup(<QualityBatchPanel busy={false} online result={{ operation: "inspect_asset_batch", assets: [{ filename: "hero.png", valid: true, violations: [], recommendations: [] }], summary: { total: 1, valid: 1, invalid: 0, failed: 0 }, maxColors: 64, maxIsolatedPixels: 4, deterministic: true, sourcePreserved: true }} onInspect={() => undefined} />)).toContain("AUDIT COLLECTION");
     expect(renderToStaticMarkup(<AnimationAuditPanel busy={false} online assetName="hero.gif" result={{ operation: "inspect_animation_quality", filename: "hero.gif", frameCount: 8, width: 16, height: 16, delaysMs: [90], transitions: [], duplicateFrames: [3], loop: { changedPixels: 0, closed: true }, palette: { colorsPerFrame: [4], driftFrames: [], stable: true }, timing: { consistent: true, positive: true }, quality: { valid: false, violations: ["duplicate frames: 3"] }, recommendations: [], deterministic: true, sourcePreserved: true }} onInspect={() => undefined} />)).toContain("AUDIT ANIMATION");
     expect(renderToStaticMarkup(<SpriteNormalizationPanel busy={false} online assetName="hero.gif" result={{ operation: "normalize_sprite", input: "hero.gif", output: "hero-normalized.gif", manifest: "hero-normalized.json", format: "gif", width: 24, height: 28, frames: 8, padding: 2, bounds: { x: 2, y: 3, width: 20, height: 24 }, pivot: { mode: "bottom_center", x: 12, y: 26 }, deterministic: true, sourcePreserved: true }} onNormalize={() => undefined} />)).toContain("NORMALIZE SPRITE");
+    expect(renderToStaticMarkup(<AnimationSheetPanel busy={false} online assetName="hero.gif" result={{ operation: "build_animation_sheet", output: "hero-sheet.png", manifest: "hero-sheet.json", frames: 8, columns: 3, rows: 3, width: 100, height: 100, cellWidth: 32, cellHeight: 32, padding: 1, deterministic: true, sourcePreserved: true }} onBuild={() => undefined} />)).toContain("BUILD ANIMATION SHEET");
   });
 });
