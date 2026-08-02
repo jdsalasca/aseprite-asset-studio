@@ -11,6 +11,7 @@ import { RuntimeMetricsPanel } from "../src/components/RuntimeMetricsPanel.js";
 import { RecipeCreatorPanel } from "../src/components/RecipeCreatorPanel.js";
 import { SpriteEffectsPanel } from "../src/components/SpriteEffectsPanel.js";
 import { ToolGrid } from "../src/components/ToolGrid.js";
+import { AssetLibraryPanel } from "../src/components/AssetLibraryPanel.js";
 
 describe("studio feature contracts", () => {
   it("validates supported asset formats and size limits", () => {
@@ -44,5 +45,6 @@ describe("studio feature contracts", () => {
     expect(markup).toContain("RECIPE CREATOR");
     expect(markup).toContain("Quality gate");
     expect(markup).toContain("EXECUTE RECIPE");
+    expect(renderToStaticMarkup(<AssetLibraryPanel busy={false} online query="rain" items={[{ id: "oak", title: "Oak", category: "flora", folder: "flora/oak", kind: "sprite", description: "Tree", tags: ["tree"], variants: ["rain"], formats: ["png", "svg", "json"], readmePath: "flora/oak/README.md", previewPath: "flora/oak/preview.png", spritePath: "flora/oak/sprite-sheet.png", deterministic: true }]} presets={[]} total={1} onQueryChange={() => undefined} onSearch={() => undefined} />)).toContain("ASSET LIBRARY");
   });
 });

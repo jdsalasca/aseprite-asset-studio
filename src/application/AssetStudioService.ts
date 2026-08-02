@@ -1,4 +1,4 @@
-import type { AssetGateway, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, RuntimeConfig, SpriteEffectKind, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { AssetGateway, AssetLibrarySearchView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, RuntimeConfig, SpriteEffectKind, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { RuntimeDiagnostics } from "../domain/aseprite.js";
 import type { OperationEvent, OperationLogPort } from "../ports/OperationLogPort.js";
 import { ToolResponseParser } from "./ToolResponseParser.js";
@@ -69,6 +69,13 @@ export class AssetStudioService {
       const response = await this.gateway.callTool("execute_asset_recipe", { asset_id: input.assetId, input_filename: input.filename, output_prefix: input.outputPrefix, format: "png", steps: input.steps, seed: input.seed, material: input.material, direction: input.direction });
       return this.responseParser.parseJson<AssetRecipeExecutionView>(response, "El MCP no devolvió la ejecución de receta");
     }, { assetId: input.assetId, filename: input.filename, steps: input.steps.length, seed: input.seed });
+  }
+
+  public async searchAssetLibrary(query = ""): Promise<AssetLibrarySearchView> {
+    return this.trace("search_asset_library", async () => {
+      const response = await this.gateway.callTool("get_asset_library", { query, limit: 24 });
+      return this.responseParser.parseJson<AssetLibrarySearchView>(response, "El MCP no devolvió el catálogo de assets");
+    }, { query });
   }
 
   public assetPreviewUrl(path: string): string { return this.gateway.assetPreviewUrl(path); }
