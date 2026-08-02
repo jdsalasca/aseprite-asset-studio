@@ -13,6 +13,7 @@ import { SpriteEffectsPanel } from "../src/components/SpriteEffectsPanel.js";
 import { ToolGrid } from "../src/components/ToolGrid.js";
 import { AssetLibraryPanel } from "../src/components/AssetLibraryPanel.js";
 import { AssetLibraryAuditPanel } from "../src/components/AssetLibraryAuditPanel.js";
+import { AssetLibrarySummaryPanel } from "../src/components/AssetLibrarySummaryPanel.js";
 import { SceneExtensionPanel } from "../src/components/SceneExtensionPanel.js";
 import { VariantPackPanel } from "../src/components/VariantPackPanel.js";
 import { SceneEffectStackPanel } from "../src/components/SceneEffectStackPanel.js";
@@ -82,6 +83,9 @@ describe("studio feature contracts", () => {
     const auditMarkup = renderToStaticMarkup(<AssetLibraryAuditPanel busy={false} online result={{ operation: "audit_asset_library", libraryVersion: "catalog-v1", totalItems: 339, totalCategories: 24, totalPresets: 12, totalFolders: 339, readmePaths: 339, previewPaths: 338, spritePaths: 339, valid: false, violations: ["missing preset item"], deterministic: true, sourcePreserved: true }} onAudit={() => undefined} />);
     expect(auditMarkup).toContain("AUDIT ASSET LIBRARY");
     expect(auditMarkup).toContain("REVIEW REQUIRED");
+    const summaryMarkup = renderToStaticMarkup(<AssetLibrarySummaryPanel busy={false} online result={{ operation: "summarize_asset_library", libraryVersion: "catalog-v2", totalItems: 339, totalCategories: 24, totalPresets: 12, categories: [{ id: "flora", title: "Flora", itemCount: 42, examples: ["oak", "pine"] }], presets: [{ id: "grove", title: "Living grove", category: "flora", itemCount: 8 }], deterministic: true, sourcePreserved: true }} onSummarize={() => undefined} />);
+    expect(summaryMarkup).toContain("LOAD LIBRARY MAP");
+    expect(summaryMarkup).toContain("Living grove (8)");
     expect(renderToStaticMarkup(<PaletteHarmonizerPanel busy={false} online assetName="hero.png" palette={["#3155D8", "#8AA0F0"]} onApply={() => undefined} />)).toContain("HARMONIZE PALETTE");
     expect(renderToStaticMarkup(<PaletteHarmonizerPanel busy={false} online assetName="hero.png" palette={["#3155D8", "#8AA0F0"]} onApply={() => undefined} />)).toContain("#3155D8");
     expect(renderToStaticMarkup(<ContactSheetPanel busy={false} online assetCount={3} sourceNames={["rain.gif", "night.gif", "fire.gif"]} previewUrl="sheet.png" result={{ operation: "build_contact_sheet", output: "sheet.png", manifest: "sheet.json", assets: 3, columns: 2, rows: 2, width: 66, height: 66, cellWidth: 32, cellHeight: 32, padding: 2, deterministic: true, sourcePreserved: true }} onBuild={() => undefined} />)).toContain("BUILD CONTACT SHEET");
