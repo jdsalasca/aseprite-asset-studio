@@ -1,4 +1,4 @@
-import type { AnimationQualityView, AnimationSheetView, AssetGateway, AssetLibraryAuditView, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetLibrarySummaryView, AssetPresetGenerationView, AssetQualityBatchView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetSceneCompositionView, AssetScenePlanView, AssetVariantKind, AssetVariantPackView, BiomeTransitionView, ContactSheetView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, PaletteHarmonizeView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SceneExtensionView, SpriteEffectKind, SpriteGeometryView, SpriteHitboxView, SpriteNormalizationView, SpritePivotMode, SpriteRuntimeBundleView, SpriteAnchorsView, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { AnimationQualityView, AnimationSheetView, AssetGateway, AssetLibraryAuditView, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetLibrarySummaryView, AssetPresetGenerationView, AssetQualityBatchView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetSceneAnimationCompositionView, AssetSceneCompositionView, AssetScenePlanView, AssetVariantKind, AssetVariantPackView, BiomeTransitionView, ContactSheetView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, PaletteHarmonizeView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SceneExtensionView, SpriteEffectKind, SpriteGeometryView, SpriteHitboxView, SpriteNormalizationView, SpritePivotMode, SpriteRuntimeBundleView, SpriteAnchorsView, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { RuntimeDiagnostics } from "../domain/aseprite.js";
 import type { OperationEvent, OperationLogPort } from "../ports/OperationLogPort.js";
 import { ToolResponseParser } from "./ToolResponseParser.js";
@@ -212,6 +212,13 @@ export class AssetStudioService {
       const response = await this.gateway.callTool("compose_asset_scene", { item_ids: input.itemIds, output_filename: input.outputFilename, manifest_filename: input.manifestFilename, width: input.width, height: input.height, padding: input.padding });
       return this.responseParser.parseJson<AssetSceneCompositionView>(response, "El MCP no devolvió la composición visual de escena");
     }, { itemCount: input.itemIds.length, outputFilename: input.outputFilename });
+  }
+
+  public async composeAssetSceneAnimation(input: { itemIds: string[]; outputFilename: string; manifestFilename: string; width: number; height: number; padding: number; frames: number; delayMs: number }): Promise<AssetSceneAnimationCompositionView> {
+    return this.trace("compose_asset_scene_animation", async () => {
+      const response = await this.gateway.callTool("compose_asset_scene_animation", { item_ids: input.itemIds, output_filename: input.outputFilename, manifest_filename: input.manifestFilename, width: input.width, height: input.height, padding: input.padding, frames: input.frames, delay_ms: input.delayMs });
+      return this.responseParser.parseJson<AssetSceneAnimationCompositionView>(response, "El MCP no devolvió la animación de escena");
+    }, { itemCount: input.itemIds.length, outputFilename: input.outputFilename, frames: input.frames });
   }
 
   public async extendScene(input: { inputMapFilename: string; outputMapFilename: string; previewFilename?: string; top: number; right: number; bottom: number; left: number; seed: number }): Promise<SceneExtensionView> {
