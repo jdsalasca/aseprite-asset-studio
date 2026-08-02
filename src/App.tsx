@@ -10,6 +10,8 @@ import { ToolGrid } from "./components/ToolGrid.js";
 import { ToolRunnerPanel } from "./components/ToolRunnerPanel.js";
 import { MaterialTexturePanel } from "./components/MaterialTexturePanel.js";
 import { LightingPanel } from "./components/LightingPanel.js";
+import { SpriteEffectsPanel } from "./components/SpriteEffectsPanel.js";
+import { RecipeCreatorPanel } from "./components/RecipeCreatorPanel.js";
 import { ActivityLogPanel } from "./components/ActivityLogPanel.js";
 import { PipelineStatus } from "./components/PipelineStatus.js";
 import { RuntimeMetricsPanel } from "./components/RuntimeMetricsPanel.js";
@@ -18,7 +20,7 @@ import { summarizeRuntimeMetrics } from "./application/runtimeMetrics.js";
 import { shortcutAction } from "./application/keyboardShortcuts.js";
 
 export default function App() {
-  const { config, status, tools, logs, toolOutput, busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, recipe, job, notice, updateConfig, updateRecipe, start, stop, inspect, applyPlan, startJob, cancelJob, executeTool, applyMaterialTexture, applyDepthLighting, upload } = useAssetStudioController();
+  const { config, status, tools, logs, toolOutput, busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, recipe, job, notice, updateConfig, updateRecipe, start, stop, inspect, applyPlan, startJob, cancelJob, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, createAssetRecipe, upload } = useAssetStudioController();
   const [selectedToolName, setSelectedToolName] = useState("");
   const stages = useMemo(() => buildPipelineStages({ online: status.state === "online", hasAsset: Boolean(assetPath), hasPlan: Boolean(plan), hasQuality: Boolean(quality) }), [assetPath, plan, quality, status.state]);
   const metrics = useMemo(() => summarizeRuntimeMetrics(logs), [logs]);
@@ -59,6 +61,8 @@ export default function App() {
         {quality ? <QualityGatePanel quality={quality} /> : null}
         {assetPath ? <MaterialTexturePanel busy={busy} online={status.state === "online"} assetName={assetName} onApply={(material, seed, intensity) => void applyMaterialTexture(material, seed, intensity)} /> : null}
         {assetPath ? <LightingPanel busy={busy} online={status.state === "online"} assetName={assetName} onApply={(direction, strength, ambient) => void applyDepthLighting(direction, strength, ambient)} /> : null}
+        {assetPath ? <SpriteEffectsPanel busy={busy} online={status.state === "online"} assetName={assetName} onApply={(kind, options) => void applySpriteEffect(kind, options)} /> : null}
+        {assetPath ? <RecipeCreatorPanel busy={busy} online={status.state === "online"} assetName={assetName} onCreate={(input) => void createAssetRecipe(input)} /> : null}
         {assetPath ? <AssetJobPanel recipe={recipe} job={job} busy={busy} canStart={status.state === "online" && Boolean(assetPath)} onRecipeChange={updateRecipe} onStart={() => void startJob()} onCancel={() => void cancelJob()} /> : null}
         <PipelineStatus stages={stages} />
         <PixelPanel title="ENHANCEMENT PIPELINE" accent="pink"><div className="pipeline"><span>INSPECT</span><i>→</i><span>MATERIALS</span><i>→</i><span>LIGHTING</span><i>→</i><span>QUALITY</span></div><PixelProgress value={progressValue} label={progressLabel} /></PixelPanel>

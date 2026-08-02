@@ -8,6 +8,8 @@ import { ActivityLogPanel } from "../src/components/ActivityLogPanel.js";
 import { AssetJobPanel } from "../src/components/AssetJobPanel.js";
 import { PipelineStatus } from "../src/components/PipelineStatus.js";
 import { RuntimeMetricsPanel } from "../src/components/RuntimeMetricsPanel.js";
+import { RecipeCreatorPanel } from "../src/components/RecipeCreatorPanel.js";
+import { SpriteEffectsPanel } from "../src/components/SpriteEffectsPanel.js";
 import { ToolGrid } from "../src/components/ToolGrid.js";
 
 describe("studio feature contracts", () => {
@@ -37,5 +39,8 @@ describe("studio feature contracts", () => {
     expect(renderToStaticMarkup(<ToolGrid tools={[{ name: "apply_depth_lighting", description: "Light" }]} selectedName="" onSelect={() => undefined} />)).toContain("FILTER TOOLS");
     expect(renderToStaticMarkup(<PipelineStatus stages={buildPipelineStages({ online: false, hasAsset: false, hasPlan: false, hasQuality: false })} />)).toContain("PIPELINE STATUS");
     expect(renderToStaticMarkup(<RuntimeMetricsPanel metrics={{ total: 2, successes: 1, failures: 1, averageMs: 20 }} />)).toContain("AVG");
+    expect(renderToStaticMarkup(<SpriteEffectsPanel busy={false} online assetName="hero.png" onApply={() => undefined} />)).toContain("SPRITE EFFECTS");
+    expect(renderToStaticMarkup(<RecipeCreatorPanel busy={false} online assetName="hero.png" onCreate={() => undefined} />)).toContain("RECIPE CREATOR");
+    expect(renderToStaticMarkup(<RecipeCreatorPanel busy={false} online assetName="hero.png" onCreate={() => undefined} />)).toContain("Quality gate");
   });
 });

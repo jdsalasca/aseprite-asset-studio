@@ -34,6 +34,10 @@ El navegador no conoce `child_process`, MCP SDK ni rutas de Aseprite. El proceso
 22. `PipelineStatus` expone estados conect, inspect, enhance y quality;
 23. `RuntimeMetricsPanel` resume operaciones, éxitos, fallos y latencia promedio;
 24. las pruebas TDD de `studio-features.test.tsx` blindan estas rutas y detectaron el ajuste de JSX en el archivo de pruebas.
+25. `SpriteEffectsPanel` integra outline, color grade, shadow, partículas y normal map mediante el gateway tipado;
+26. `RecipeCreatorPanel` compone pasos, seed, material y dirección de luz sin ejecutar implícitamente;
+27. `AssetStudioService` traduce ambos flujos a puertos MCP y conserva el parseo de respuestas en aplicación;
+28. `PixelCheckboxGroup` permite seleccionar pasos reutilizables sin introducir lógica MCP en la librería visual.
 
 ## Plan de implementación
 

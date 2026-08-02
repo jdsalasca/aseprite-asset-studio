@@ -85,6 +85,12 @@ export interface DepthLightingView {
   sourcePreserved: true;
 }
 
+export type SpriteEffectKind = "outline" | "color_grade" | "shadow" | "particles" | "normal_map";
+export type AssetRecipeStep = "outline" | "color_grade" | "material_texture" | "depth_lighting" | "shadow" | "particles" | "normal_map" | "quality_gate";
+export interface SpriteEffectView { operation: string; output: string; frames: number; format: "png" | "gif"; deterministic: true; sourcePreserved: true; }
+export interface AssetRecipeStepView { id: AssetRecipeStep; operation: string; inputFilename: string; outputFilename?: string; arguments: Record<string, number | string | boolean>; }
+export interface AssetRecipePlanView { recipeId: string; schemaVersion: 1; algorithmVersion: string; assetId: string; inputFilename: string; outputPrefix: string; format: "png" | "gif"; seed: number; steps: AssetRecipeStepView[]; sourcePreserved: true; deterministic: true; }
+
 export type AssetRecipe = "pixel_art" | "animation_pixel_art" | "gif" | "atlas";
 export type AssetJobStatus = "queued" | "running" | "completed" | "failed" | "cancelled";
 

@@ -34,6 +34,8 @@ Los assets cargados se validan por extensión, limitan a 32 MB y se guardan medi
 - Carga un PNG, GIF, WebP o archivo Aseprite; el cliente rechaza formatos no soportados y archivos mayores de 25 MB antes de subirlos.
 - Usa `INSPECT REFERENCE` para generar un plan determinista y revisa el antes/después antes de aplicar.
 - Los paneles `MATERIAL ENHANCER` y `DEPTH LIGHTING` crean salidas separadas con seed, granularidad y luz direccional reproducibles.
+- `SPRITE EFFECTS` añade outline, color grade, sombra, partículas y normal map con outputs separados.
+- `RECIPE CREATOR` genera un plan MCP determinista con pasos seleccionables, material, luz y seed para revisión humana.
 - `BACKGROUND ASSET JOB` permite presets PNG, animación, GIF y atlas; muestra progreso y artifacts con hash.
 - Filtra herramientas y logs desde la UX. Atajos: `Ctrl+I` inspeccionar, `Ctrl+Enter` aplicar, `Ctrl+J` iniciar job.
 - El panel de métricas ayuda a detectar latencia y fallos del gateway sin abrir logs del proveedor.
