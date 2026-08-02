@@ -22,12 +22,13 @@ import { VariantPreviewPanel } from "./components/VariantPreviewPanel.js";
 import { SceneEffectStackPanel } from "./components/SceneEffectStackPanel.js";
 import { QualityRecommendationsPanel } from "./components/QualityRecommendationsPanel.js";
 import { PaletteHarmonizerPanel } from "./components/PaletteHarmonizerPanel.js";
+import { ContactSheetPanel } from "./components/ContactSheetPanel.js";
 import { buildPipelineStages } from "./application/pipelineStages.js";
 import { summarizeRuntimeMetrics } from "./application/runtimeMetrics.js";
 import { shortcutAction } from "./application/keyboardShortcuts.js";
 
 export default function App() {
-  const { config, status, diagnostics, tools, logs, toolOutput, busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, qualityRecommendations, harmonizedPalette, variantArtifacts, variantPreviewUrl, assetLibrary, assetPresetComposition, libraryQuery, recipe, job, notice, updateConfig, updateRecipe, start, stop, detectAseprite, inspect, applyPlan, startJob, cancelJob, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, generateVariantPack, generateSceneEffectStack, generateAssetPreset, inspectAssetQualityBundle, createAssetRecipe, executeAssetRecipe, extendScene, generateBiomeTransition, harmonizePalette, searchAssetLibrary, composeAssetPreset, updateLibraryQuery, upload } = useAssetStudioController();
+  const { config, status, diagnostics, tools, logs, toolOutput, busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, qualityRecommendations, harmonizedPalette, contactSheet, contactSheetPreviewUrl, variantArtifacts, variantPreviewUrl, assetLibrary, assetPresetComposition, libraryQuery, recipe, job, notice, updateConfig, updateRecipe, start, stop, detectAseprite, inspect, applyPlan, startJob, cancelJob, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, generateVariantPack, generateSceneEffectStack, generateAssetPreset, inspectAssetQualityBundle, createAssetRecipe, executeAssetRecipe, extendScene, generateBiomeTransition, harmonizePalette, buildContactSheet, searchAssetLibrary, composeAssetPreset, updateLibraryQuery, upload } = useAssetStudioController();
   const [selectedToolName, setSelectedToolName] = useState("");
   const stages = useMemo(() => buildPipelineStages({ online: status.state === "online", hasAsset: Boolean(assetPath), hasPlan: Boolean(plan), hasQuality: Boolean(quality) }), [assetPath, plan, quality, status.state]);
   const metrics = useMemo(() => summarizeRuntimeMetrics(logs), [logs]);
@@ -74,6 +75,7 @@ export default function App() {
         {assetPath ? <VariantPackPanel busy={busy} online={status.state === "online"} assetName={assetName} onGenerate={(variants, frames, seed) => void generateVariantPack(variants, frames, seed)} /> : null}
         {assetPath ? <SceneEffectStackPanel busy={busy} online={status.state === "online"} assetName={assetName} onGenerate={(effects, frames, seed, material, direction) => void generateSceneEffectStack(effects, frames, seed, material, direction)} /> : null}
         <VariantPreviewPanel previewUrl={variantPreviewUrl} artifacts={variantArtifacts} />
+        {variantArtifacts.length ? <ContactSheetPanel busy={busy} online={status.state === "online"} assetCount={variantArtifacts.length} sourceNames={variantArtifacts.map((artifact) => artifact.outputFilename)} previewUrl={contactSheetPreviewUrl} result={contactSheet} onBuild={(cellWidth, cellHeight, columns, padding) => void buildContactSheet(cellWidth, cellHeight, columns, padding)} /> : null}
         {assetPath ? <RecipeCreatorPanel busy={busy} online={status.state === "online"} assetName={assetName} onCreate={(input) => void createAssetRecipe(input)} onExecute={(input) => void executeAssetRecipe(input)} /> : null}
         <AssetLibraryPanel busy={busy} online={status.state === "online"} restPort={config.mcpRestPort} query={libraryQuery} items={assetLibrary?.items ?? []} presets={assetLibrary?.presets ?? []} total={assetLibrary?.total ?? 0} composition={assetPresetComposition} onQueryChange={updateLibraryQuery} onSearch={() => void searchAssetLibrary()} onComposePreset={(id) => void composeAssetPreset(id)} onGeneratePreset={(id) => void generateAssetPreset(id)} />
         <SceneExtensionPanel busy={busy} online={status.state === "online"} onExtend={(input) => void extendScene(input)} onTransition={(input) => void generateBiomeTransition(input)} />

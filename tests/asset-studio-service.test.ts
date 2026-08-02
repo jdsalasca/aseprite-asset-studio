@@ -29,6 +29,7 @@ class FakeGateway implements AssetGateway {
     if (name === "extend_scene") return { content: [{ text: JSON.stringify({ operation: name, input: args.input_map_filename, output: args.output_map_filename, preview: null, width: 32, height: 24, padding: { top: args.top, right: args.right, bottom: args.bottom, left: args.left }, seed: args.seed, layers: 3, deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_biome_transition") return { content: [{ text: JSON.stringify({ operation: name, input: args.input_map_filename, output: args.output_map_filename, preview: args.preview_filename ?? null, width: 32, height: 24, transitionWidth: args.transition_width, transitions: 42, seed: args.seed, deterministic: true, sourcePreserved: true }) }] };
     if (name === "harmonize_asset_palette") return { content: [{ text: JSON.stringify({ operation: name, input: args.input_filename, output: args.output_filename, frames: 1, format: "png", accentColor: args.accent_color, strength: args.strength, maxColors: args.max_colors, palette: ["#3155D8", "#8AA0F0"], deterministic: true, sourcePreserved: true }) }] };
+    if (name === "build_contact_sheet") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, manifest: args.manifest_filename, assets: (args.input_filenames as string[]).length, columns: args.columns ?? 2, rows: 1, width: 66, height: 32, cellWidth: args.cell_width, cellHeight: args.cell_height, padding: args.padding, deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_seamless_texture") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: "png", deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_water_reflection") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_water_caustics") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
@@ -131,6 +132,13 @@ describe("AssetStudioService enhancement use cases", () => {
     const result = await new AssetStudioService(gateway).harmonizePalette("source.png", "source-harmonized.png", "#3155d8", 0.8, 8);
     expect(result).toMatchObject({ operation: "harmonize_asset_palette", output: "source-harmonized.png", format: "png", maxColors: 8, sourcePreserved: true });
     expect(gateway.calls.at(-1)).toMatchObject({ name: "harmonize_asset_palette", args: { input_filename: "source.png", output_filename: "source-harmonized.png", accent_color: "#3155d8", strength: 0.8, max_colors: 8, format: "png" } });
+  });
+
+  it("maps variant previews to one shared contact-sheet request", async () => {
+    const gateway = new FakeGateway();
+    const result = await new AssetStudioService(gateway).buildContactSheet({ inputFilenames: ["rain.gif", "night.gif"], outputFilename: "variants-sheet.png", manifestFilename: "variants-sheet.json", cellWidth: 32, cellHeight: 32, columns: 2, padding: 2 });
+    expect(result).toMatchObject({ operation: "build_contact_sheet", output: "variants-sheet.png", manifest: "variants-sheet.json", assets: 2, columns: 2, sourcePreserved: true });
+    expect(gateway.calls.at(-1)).toMatchObject({ name: "build_contact_sheet", args: { input_filenames: ["rain.gif", "night.gif"], output_filename: "variants-sheet.png", manifest_filename: "variants-sheet.json", cell_width: 32, cell_height: 32, columns: 2, padding: 2 } });
   });
 
   it("maps seamless texture to the shared MCP effects service", async () => {

@@ -1,4 +1,4 @@
-import type { AssetGateway, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetPresetGenerationView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetVariantKind, AssetVariantPackView, BiomeTransitionView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, PaletteHarmonizeView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SceneExtensionView, SpriteEffectKind, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { AssetGateway, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetPresetGenerationView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetVariantKind, AssetVariantPackView, BiomeTransitionView, ContactSheetView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, PaletteHarmonizeView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SceneExtensionView, SpriteEffectKind, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { RuntimeDiagnostics } from "../domain/aseprite.js";
 import type { OperationEvent, OperationLogPort } from "../ports/OperationLogPort.js";
 import { ToolResponseParser } from "./ToolResponseParser.js";
@@ -148,6 +148,13 @@ export class AssetStudioService {
       const response = await this.gateway.callTool("harmonize_asset_palette", { input_filename: filename, output_filename: outputFilename, accent_color: accentColor, strength, max_colors: maxColors, format: "png" });
       return this.responseParser.parseJson<PaletteHarmonizeView>(response, "El MCP no devolvió la paleta armonizada");
     }, { filename, outputFilename, accentColor, strength, maxColors });
+  }
+
+  public async buildContactSheet(input: { inputFilenames: string[]; outputFilename: string; manifestFilename: string; cellWidth: number; cellHeight: number; columns?: number; padding: number }): Promise<ContactSheetView> {
+    return this.trace("build_contact_sheet", async () => {
+      const response = await this.gateway.callTool("build_contact_sheet", { input_filenames: input.inputFilenames, output_filename: input.outputFilename, manifest_filename: input.manifestFilename, cell_width: input.cellWidth, cell_height: input.cellHeight, ...(input.columns === undefined ? {} : { columns: input.columns }), padding: input.padding });
+      return this.responseParser.parseJson<ContactSheetView>(response, "El MCP no devolvió el contact sheet");
+    }, { assets: input.inputFilenames.length, outputFilename: input.outputFilename, cellWidth: input.cellWidth, cellHeight: input.cellHeight });
   }
 
   private async trace<T>(operation: string, action: () => Promise<T>, metadata?: Record<string, string | number | boolean>): Promise<T> {

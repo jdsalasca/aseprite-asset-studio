@@ -110,6 +110,7 @@ export interface AssetLibraryPresetCompositionView { preset: AssetLibraryPresetV
 export interface SceneExtensionView { operation: "extend_scene"; input: string; output: string; preview: string | null; width: number; height: number; padding: { top: number; right: number; bottom: number; left: number }; seed: number; layers: number; sourcePreserved: true; deterministic: true; }
 export interface BiomeTransitionView { operation: "generate_biome_transition"; input: string; output: string; preview: string | null; width: number; height: number; transitionWidth: number; transitions: number; seed: number; sourcePreserved: true; deterministic: true; }
 export interface PaletteHarmonizeView { operation: "harmonize_asset_palette"; input: string; output: string; frames: number; format: "png" | "gif"; accentColor: string; strength: number; maxColors: number; palette: string[]; sourcePreserved: true; deterministic: true; }
+export interface ContactSheetView { operation: "build_contact_sheet"; output: string; manifest: string; assets: number; columns: number; rows: number; width: number; height: number; cellWidth: number; cellHeight: number; padding: number; deterministic: true; sourcePreserved: true; }
 
 export type AssetRecipe = "pixel_art" | "animation_pixel_art" | "gif" | "atlas";
 export type AssetJobStatus = "queued" | "running" | "completed" | "failed" | "cancelled";
