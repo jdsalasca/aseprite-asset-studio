@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { PixelBadge, PixelButton, PixelDropzone, PixelLogViewer, PixelNotice, PixelPanel, PixelProgress } from "@jdsalasc/pixel-ui";
+import { PixelBadge, PixelButton, PixelDropzone, PixelNotice, PixelPanel, PixelProgress } from "@jdsalasc/pixel-ui";
 import { useAssetStudioController } from "./application/useAssetStudioController.js";
 import { AssetPreviewPanel } from "./components/AssetPreviewPanel.js";
 import { AssetJobPanel } from "./components/AssetJobPanel.js";
@@ -10,10 +10,18 @@ import { ToolGrid } from "./components/ToolGrid.js";
 import { ToolRunnerPanel } from "./components/ToolRunnerPanel.js";
 import { MaterialTexturePanel } from "./components/MaterialTexturePanel.js";
 import { LightingPanel } from "./components/LightingPanel.js";
+import { ActivityLogPanel } from "./components/ActivityLogPanel.js";
+import { PipelineStatus } from "./components/PipelineStatus.js";
+import { RuntimeMetricsPanel } from "./components/RuntimeMetricsPanel.js";
+import { buildPipelineStages } from "./application/pipelineStages.js";
+import { summarizeRuntimeMetrics } from "./application/runtimeMetrics.js";
+import { shortcutAction } from "./application/keyboardShortcuts.js";
 
 export default function App() {
   const { config, status, tools, logs, toolOutput, busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, recipe, job, notice, updateConfig, updateRecipe, start, stop, inspect, applyPlan, startJob, cancelJob, executeTool, applyMaterialTexture, applyDepthLighting, upload } = useAssetStudioController();
   const [selectedToolName, setSelectedToolName] = useState("");
+  const stages = useMemo(() => buildPipelineStages({ online: status.state === "online", hasAsset: Boolean(assetPath), hasPlan: Boolean(plan), hasQuality: Boolean(quality) }), [assetPath, plan, quality, status.state]);
+  const metrics = useMemo(() => summarizeRuntimeMetrics(logs), [logs]);
   useEffect(() => { if (!tools.some((tool) => tool.name === selectedToolName)) setSelectedToolName(tools.find((tool) => tool.name === "inspect_reference")?.name ?? tools[0]?.name ?? ""); }, [selectedToolName, tools]);
   const initialToolArgs = useMemo(() => {
     if (!assetPath) return {};
@@ -27,6 +35,20 @@ export default function App() {
   const progressValue = quality ? 100 : plan ? 70 : status.state === "online" ? 35 : 0;
   const progressLabel = quality ? "QUALITY GATE COMPLETE" : plan ? "PLAN READY FOR REVIEW" : "READY FOR A DECISION PLAN";
 
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.target as HTMLElement | null)?.matches?.("input,textarea,select")) return;
+      const action = shortcutAction(event);
+      if (!action) return;
+      event.preventDefault();
+      if (action === "inspect") void inspect();
+      if (action === "apply") void applyPlan();
+      if (action === "start_job") void startJob();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [applyPlan, inspect, startJob]);
+
   return <main className="studio-shell">
     <header className="studio-header"><div><p className="eyebrow">PIXEL FORGE / ASSET STUDIO</p><h1>Aseprite MCP Gateway</h1><p className="subtitle">Mejora assets con recetas deterministas, calidad visible y control humano.</p></div><PixelBadge tone={status.state === "online" ? "cyan" : "amber"}>{status.state.toUpperCase()}</PixelBadge></header>
     <div className="studio-grid">
@@ -38,10 +60,11 @@ export default function App() {
         {assetPath ? <MaterialTexturePanel busy={busy} online={status.state === "online"} assetName={assetName} onApply={(material, seed, intensity) => void applyMaterialTexture(material, seed, intensity)} /> : null}
         {assetPath ? <LightingPanel busy={busy} online={status.state === "online"} assetName={assetName} onApply={(direction, strength, ambient) => void applyDepthLighting(direction, strength, ambient)} /> : null}
         {assetPath ? <AssetJobPanel recipe={recipe} job={job} busy={busy} canStart={status.state === "online" && Boolean(assetPath)} onRecipeChange={updateRecipe} onStart={() => void startJob()} onCancel={() => void cancelJob()} /> : null}
+        <PipelineStatus stages={stages} />
         <PixelPanel title="ENHANCEMENT PIPELINE" accent="pink"><div className="pipeline"><span>INSPECT</span><i>→</i><span>MATERIALS</span><i>→</i><span>LIGHTING</span><i>→</i><span>QUALITY</span></div><PixelProgress value={progressValue} label={progressLabel} /></PixelPanel>
         {tools.length ? <><ToolRunnerPanel tools={tools} selectedToolName={selectedToolName} initialArgs={initialToolArgs} busy={busy} output={toolOutput} onToolChange={setSelectedToolName} onRun={(name, args) => void executeTool(name, args)} /><ToolGrid tools={tools} selectedName={selectedToolName} onSelect={setSelectedToolName} /></> : <PixelPanel title="QUICK START"><p className="muted">Carga un PNG, GIF, WebP o Aseprite y arranca el MCP. Después podrás ejecutar cualquier herramienta tipada con argumentos JSON.</p></PixelPanel>}
       </div>
-      <aside className="studio-side"><ServerSetup config={config} status={status} busy={busy} onConfigChange={updateConfig} onStart={() => void start()} onStop={() => void stop()} /><PixelPanel title="ACTIVITY LOG"><div className="activity-log"><PixelNotice tone={noticeTone} title="LATEST EVENT">{notice}</PixelNotice><p className="muted">PID: {status.pid ?? "—"} · Tools: {status.toolCount}</p><PixelLogViewer entries={logs.slice().reverse().map((entry) => ({ id: `${entry.correlationId}-${entry.outcome}`, timestamp: entry.timestamp, title: `${entry.outcome.toUpperCase()} · ${entry.operation}`, status: entry.outcome, detail: entry.error ?? `${entry.durationMs}ms · ${entry.correlationId}` }))} /></div></PixelPanel></aside>
+      <aside className="studio-side"><ServerSetup config={config} status={status} busy={busy} onConfigChange={updateConfig} onStart={() => void start()} onStop={() => void stop()} /><PixelPanel title="LATEST EVENT"><PixelNotice tone={noticeTone} title="LATEST EVENT">{notice}</PixelNotice><p className="muted">PID: {status.pid ?? "—"} · Tools: {status.toolCount} · Shortcuts: Ctrl+I inspect, Ctrl+Enter apply, Ctrl+J job</p></PixelPanel><ActivityLogPanel entries={logs} /><RuntimeMetricsPanel metrics={metrics} /></aside>
     </div>
   </main>;
 }

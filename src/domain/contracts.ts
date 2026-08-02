@@ -114,6 +114,7 @@ export interface AssetJobView {
   jobs: AssetJobItem[];
   createdAt: string;
   updatedAt: string;
+  progress?: { completed: number; total: number };
   outcome?: { ok: boolean; message: string };
   artifacts?: AssetArtifactView[];
 }

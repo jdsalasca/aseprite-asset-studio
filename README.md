@@ -28,3 +28,12 @@ ASSET_STUDIO_UPLOAD_DIR=C:\\Users\\jdsal\\Documents\\Programming-personal\\asset
 ```
 
 Los assets cargados se validan por extensión, limitan a 32 MB y se guardan mediante el adaptador `LocalAssetStore`; el navegador no escribe directamente en el filesystem.
+
+## Flujo rápido de producción
+
+- Carga un PNG, GIF, WebP o archivo Aseprite; el cliente rechaza formatos no soportados y archivos mayores de 25 MB antes de subirlos.
+- Usa `INSPECT REFERENCE` para generar un plan determinista y revisa el antes/después antes de aplicar.
+- Los paneles `MATERIAL ENHANCER` y `DEPTH LIGHTING` crean salidas separadas con seed, granularidad y luz direccional reproducibles.
+- `BACKGROUND ASSET JOB` permite presets PNG, animación, GIF y atlas; muestra progreso y artifacts con hash.
+- Filtra herramientas y logs desde la UX. Atajos: `Ctrl+I` inspeccionar, `Ctrl+Enter` aplicar, `Ctrl+J` iniciar job.
+- El panel de métricas ayuda a detectar latencia y fallos del gateway sin abrir logs del proveedor.

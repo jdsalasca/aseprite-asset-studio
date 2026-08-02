@@ -24,6 +24,16 @@ El navegador no conoce `child_process`, MCP SDK ni rutas de Aseprite. El proceso
 12. `MaterialTexturePanel` ofrece presets de agua, tierra, grass, piedra y nieve con seed/intensidad y preview separado;
 13. `LightingPanel` expone dirección, ambiente y fuerza para `apply_depth_lighting`, reutilizando el mismo gateway y preview no destructivo;
 14. las pruebas TDD cubren los casos de uso de mejora, jobs, artifacts, HTTP, preview, runner, materiales, iluminación, observabilidad y límites de almacenamiento.
+15. `AssetJobPanel` muestra progreso `completed/total` sin cargar el resultado completo;
+16. `ToolGrid` filtra localmente el catálogo para reducir el tiempo de búsqueda humana;
+17. `ActivityLogPanel` filtra por operación, outcome, correlación o error;
+18. los artifacts tienen acción de copiar ruta para handoff rápido a un agente o artista;
+19. `RecipePresets` convierte recetas frecuentes en acciones de un clic;
+20. `Ctrl+I`, `Ctrl+Enter` y `Ctrl+J` aceleran inspección, aplicación y jobs sin romper inputs;
+21. `assetValidation` bloquea extensiones no soportadas y uploads mayores de 25 MB antes del gateway;
+22. `PipelineStatus` expone estados conect, inspect, enhance y quality;
+23. `RuntimeMetricsPanel` resume operaciones, éxitos, fallos y latencia promedio;
+24. las pruebas TDD de `studio-features.test.tsx` blindan estas rutas y detectaron el ajuste de JSX en el archivo de pruebas.
 
 ## Plan de implementación
 

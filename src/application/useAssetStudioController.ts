@@ -5,6 +5,7 @@ import { RequestGenerationGuard } from "./RequestGenerationGuard.js";
 import { useAssetJobController } from "./useAssetJobController.js";
 import { HttpAssetGateway } from "../adapters/mcp/HttpAssetGateway.js";
 import { InMemoryOperationLogger } from "../adapters/observability/InMemoryOperationLogger.js";
+import { validateAssetFile } from "./assetValidation.js";
 import type { AssetJobView, AssetRecipe, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, RuntimeConfig, ToolDescriptor, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { OperationLogEntry } from "../ports/OperationLogPort.js";
 
@@ -149,6 +150,8 @@ export function useAssetStudioController(): AssetStudioController {
   function upload(files: File[]): void {
     const file = files[0];
     if (!file) return;
+    const validationError = validateAssetFile(file);
+    if (validationError) { setNotice(validationError); return; }
     const request = uploadGuard.next();
     setBusy(true); setAssetName(file.name); setAssetPath(null); setPreviewUrl(null); setPlan(null); setEnhancedPreviewUrl(null); setQuality(null); setNotice(`Subiendo ${file.name}...`);
     void service.upload(file).then((stored) => {
