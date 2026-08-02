@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PixelButton, PixelField, PixelPanel, PixelSelect, PixelSlider } from "@jdsalasc/pixel-ui";
+import { PixelButton, PixelField, PixelPanel, PixelSelect, PixelSlider, PixelTimeline } from "@jdsalasc/pixel-ui";
 import type { SpriteEffectKind } from "../domain/contracts.js";
 
 interface SpriteEffectsPanelProps {
@@ -21,6 +21,7 @@ const EFFECTS: Array<{ value: SpriteEffectKind; label: string }> = [
   { value: "seamless", label: "SEAMLESS TEXTURE" },
   { value: "reflection", label: "WATER REFLECTION" },
   { value: "caustics", label: "WATER CAUSTICS" },
+  { value: "day_night", label: "DAY / NIGHT CYCLE" },
 ];
 
 export function SpriteEffectsPanel({ busy, online, assetName, onApply }: SpriteEffectsPanelProps) {
@@ -36,6 +37,8 @@ export function SpriteEffectsPanel({ busy, online, assetName, onApply }: SpriteE
   const [causticsIntensity, setCausticsIntensity] = useState("0.7");
   const [causticsScale, setCausticsScale] = useState("4");
   const [causticsSeed, setCausticsSeed] = useState("1");
+  const [dayNightIntensity, setDayNightIntensity] = useState("0.8");
+  const [dayNightSeed, setDayNightSeed] = useState("1");
 
   const disabled = busy || !online;
 
@@ -71,6 +74,14 @@ export function SpriteEffectsPanel({ busy, online, assetName, onApply }: SpriteE
       onApply(kind, { frames: parsedFrames, intensity: parsedIntensity, scale: parsedScale, seed: parsedSeed, color });
       return;
     }
+    if (kind === "day_night") {
+      const parsedFrames = Number(frames);
+      const parsedIntensity = Number(dayNightIntensity);
+      const parsedSeed = Number(dayNightSeed);
+      if (!Number.isInteger(parsedFrames) || parsedFrames < 4 || parsedFrames > 24 || !Number.isFinite(parsedIntensity) || parsedIntensity < 0 || parsedIntensity > 1 || !Number.isInteger(parsedSeed)) return;
+      onApply(kind, { frames: parsedFrames, intensity: parsedIntensity, seed: parsedSeed });
+      return;
+    }
     if (kind === "particles") {
       const parsedFrames = Number(frames);
       const parsedCount = Number(particleCount);
@@ -90,7 +101,7 @@ export function SpriteEffectsPanel({ busy, online, assetName, onApply }: SpriteE
     onApply(kind, kind === "normal_map" ? { strength: parsedStrength } : kind === "rain" ? { color, intensity: Math.max(0, Math.min(1, parsedStrength / 8)), wind: 0, seed: 1 } : { color, thickness: Math.max(1, Math.min(8, Math.round(parsedStrength))) });
   }
 
-  const showColor = kind !== "motion" && kind !== "upscale" && kind !== "seamless" && kind !== "reflection";
+  const showColor = kind !== "motion" && kind !== "upscale" && kind !== "seamless" && kind !== "reflection" && kind !== "day_night";
 
   return (
     <PixelPanel title="SPRITE EFFECTS" accent="pink">
@@ -114,6 +125,11 @@ export function SpriteEffectsPanel({ busy, online, assetName, onApply }: SpriteE
           <PixelSlider label={`INTENSITY · ${causticsIntensity}`} min={0} max={1} step={0.05} value={Number(causticsIntensity)} onChange={(event) => setCausticsIntensity(event.target.value)} disabled={disabled} />
           <PixelField label="SCALE" type="number" min="1" max="32" value={causticsScale} onChange={(event) => setCausticsScale(event.target.value)} disabled={disabled} />
           <PixelField label="SEED" type="number" value={causticsSeed} onChange={(event) => setCausticsSeed(event.target.value)} disabled={disabled} />
+        </> : kind === "day_night" ? <>
+          <PixelTimeline aria-label="DAY NIGHT STAGES" activeId="day" items={[{ id: "day", label: "DAY", state: "complete" }, { id: "sunset", label: "SUNSET", state: "current" }, { id: "night", label: "NIGHT", state: "pending" }, { id: "sunrise", label: "SUNRISE", state: "pending" }]} />
+          <PixelField label="FRAMES" type="number" min="4" max="24" value={frames} onChange={(event) => setFrames(event.target.value)} disabled={disabled} />
+          <PixelSlider label={`INTENSITY · ${dayNightIntensity}`} min={0} max={1} step={0.05} value={Number(dayNightIntensity)} onChange={(event) => setDayNightIntensity(event.target.value)} disabled={disabled} />
+          <PixelField label="SEED" type="number" value={dayNightSeed} onChange={(event) => setDayNightSeed(event.target.value)} disabled={disabled} />
         </> : <PixelSlider label={kind === "upscale" ? `SCALE · ${strength}` : kind === "seamless" ? `SEAM WIDTH · ${strength}` : kind === "normal_map" ? `STRENGTH · ${strength}` : kind === "rain" ? `RAIN INTENSITY · ${strength}` : `THICKNESS · ${strength}`} min={kind === "upscale" ? 2 : kind === "normal_map" ? 0 : 1} max={kind === "upscale" ? 16 : kind === "seamless" ? 32 : 8} step={1} value={Number(strength)} onChange={(event) => setStrength(event.target.value)} disabled={disabled} />}
       </div>
       <div className="tool-runner-actions"><PixelButton tone="pink" disabled={disabled} onClick={apply}>{busy ? "APPLYING..." : "APPLY SPRITE EFFECT"}</PixelButton></div>

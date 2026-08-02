@@ -30,6 +30,7 @@ class FakeGateway implements AssetGateway {
     if (name === "generate_seamless_texture") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: "png", deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_water_reflection") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_water_caustics") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
+    if (name === "generate_day_night_cycle") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "create_asset_recipe") return { content: [{ text: JSON.stringify({ recipeId: "recipe-1", schemaVersion: 1, algorithmVersion: "asset-recipe-v1", assetId: args.asset_id, inputFilename: args.input_filename, outputPrefix: args.output_prefix, format: "png", seed: args.seed, steps: [], sourcePreserved: true, deterministic: true }) }] };
     if (name === "execute_asset_recipe") return { content: [{ text: JSON.stringify({ ok: true, recipeId: "recipe-1", outputFilename: "hero-recipe-quality_gate.png", steps: [{ id: "outline", operation: "apply_pixel_outline", ok: true, message: "ok" }, { id: "quality_gate", operation: "run_asset_quality_gate", ok: true, message: "ok" }], sourcePreserved: true, deterministic: true } satisfies AssetRecipeExecutionView) }] };
     if (name === "get_asset_library") return { content: [{ text: JSON.stringify({ query: { query: typeof args.query === "string" ? args.query : "", limit: 24 }, total: 1, categories: [], items: [{ id: "oak", title: "Oak", category: "flora", folder: "flora/oak", kind: "sprite", description: "Tree", tags: ["tree"], variants: ["rain"], formats: ["png", "svg", "json"], readmePath: "flora/oak/README.md", previewPath: "flora/oak/preview.png", spritePath: "flora/oak/sprite-sheet.png", deterministic: true }], presets: [] } satisfies AssetLibrarySearchView) }] };
@@ -131,6 +132,13 @@ describe("AssetStudioService enhancement use cases", () => {
     const result = await new AssetStudioService(gateway).applySpriteEffect("caustics", "pool.png", "pool-caustics.gif", { frames: 6, seed: 5, intensity: 0.8, scale: 3, color: "#DFF6FF" });
     expect(result).toMatchObject({ operation: "generate_water_caustics", output: "pool-caustics.gif", format: "gif", frames: 6 });
     expect(gateway.calls.at(-1)).toMatchObject({ name: "generate_water_caustics", args: { input_filename: "pool.png", output_filename: "pool-caustics.gif", frames: 6, seed: 5, intensity: 0.8, scale: 3, color: "#DFF6FF", format: "gif" } });
+  });
+
+  it("maps day night cycle to the shared MCP effects service", async () => {
+    const gateway = new FakeGateway();
+    const result = await new AssetStudioService(gateway).applySpriteEffect("day_night", "village.png", "village-day-night.gif", { frames: 8, seed: 9, intensity: 0.75 });
+    expect(result).toMatchObject({ operation: "generate_day_night_cycle", output: "village-day-night.gif", format: "gif", frames: 8 });
+    expect(gateway.calls.at(-1)).toMatchObject({ name: "generate_day_night_cycle", args: { input_filename: "village.png", output_filename: "village-day-night.gif", frames: 8, seed: 9, intensity: 0.75, format: "gif" } });
   });
 
   it("executes a recipe through the shared MCP tool and preserves typed output", async () => {
