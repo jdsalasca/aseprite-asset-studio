@@ -6,7 +6,7 @@ import { useAssetJobController } from "./useAssetJobController.js";
 import { HttpAssetGateway } from "../adapters/mcp/HttpAssetGateway.js";
 import { InMemoryOperationLogger } from "../adapters/observability/InMemoryOperationLogger.js";
 import { validateAssetFile } from "./assetValidation.js";
-import type { AssetJobView, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetRecipe, AssetRecipeStep, AssetVariantKind, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, RuntimeConfig, SpriteEffectKind, ToolDescriptor, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { AssetJobView, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetQualityBundleView, AssetRecipe, AssetRecipeStep, AssetVariantKind, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, RuntimeConfig, SpriteEffectKind, ToolDescriptor, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { OperationLogEntry } from "../ports/OperationLogPort.js";
 import type { RuntimeDiagnostics } from "../domain/aseprite.js";
 
@@ -48,6 +48,7 @@ export interface AssetStudioController {
   applyDepthLighting(direction: LightDirection, strength: number, ambient: number): Promise<void>;
   applySpriteEffect(kind: SpriteEffectKind, options: Record<string, number | string | boolean>): Promise<void>;
   generateVariantPack(variants: AssetVariantKind[], frames: number, seed: number): Promise<void>;
+  inspectAssetQualityBundle(): Promise<void>;
   createAssetRecipe(input: RecipeInput): Promise<void>;
   executeAssetRecipe(input: RecipeInput): Promise<void>;
   extendScene(input: { inputMapFilename: string; outputMapFilename: string; previewFilename?: string; top: number; right: number; bottom: number; left: number; seed: number }): Promise<void>;
@@ -201,6 +202,16 @@ export function useAssetStudioController(): AssetStudioController {
     finally { setBusy(false); }
   }
 
+  async function inspectAssetQualityBundle(): Promise<void> {
+    if (!assetPath || status.state !== "online") return;
+    setBusy(true); setToolOutput(null); setNotice("Inspeccionando calidad compacta del asset...");
+    try {
+      const result: AssetQualityBundleView = await service.inspectAssetQualityBundle(assetPath);
+      setQuality(result.quality); setToolOutput(JSON.stringify(result, null, 2)); setNotice(result.quality.valid ? "Quality bundle aprobado." : `Quality bundle detectó ${result.quality.violations.length} alerta(s).`);
+    } catch (error) { setNotice(errorMessage(error)); }
+    finally { setBusy(false); }
+  }
+
   function recipeRequest(input: RecipeInput) {
     if (!assetPath) return null;
     return { assetId: assetName.replace(/\.[^./\\]+$/, ""), filename: assetPath, outputPrefix: assetPath.replace(/\.[^./\\]+$/, "-recipe"), ...input };
@@ -271,5 +282,5 @@ export function useAssetStudioController(): AssetStudioController {
     }).catch((error) => { if (uploadGuard.accepts(request)) { setNotice(errorMessage(error)); setBusy(false); } });
   }
 
-  return { config, status, diagnostics, tools, logs, toolOutput, busy: busy || jobController.busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, assetLibrary, assetPresetComposition, libraryQuery, recipe: jobController.recipe, updateRecipe: jobController.updateRecipe, job: jobController.job, notice, updateConfig: setConfig, start, stop, detectAseprite, inspect, applyPlan, startJob: jobController.start, cancelJob: jobController.cancel, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, generateVariantPack, createAssetRecipe, executeAssetRecipe, extendScene, searchAssetLibrary, composeAssetPreset, updateLibraryQuery: setLibraryQuery, upload };
+  return { config, status, diagnostics, tools, logs, toolOutput, busy: busy || jobController.busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, assetLibrary, assetPresetComposition, libraryQuery, recipe: jobController.recipe, updateRecipe: jobController.updateRecipe, job: jobController.job, notice, updateConfig: setConfig, start, stop, detectAseprite, inspect, applyPlan, startJob: jobController.start, cancelJob: jobController.cancel, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, generateVariantPack, inspectAssetQualityBundle, createAssetRecipe, executeAssetRecipe, extendScene, searchAssetLibrary, composeAssetPreset, updateLibraryQuery: setLibraryQuery, upload };
 }

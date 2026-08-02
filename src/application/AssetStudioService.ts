@@ -1,4 +1,4 @@
-import type { AssetGateway, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetVariantKind, AssetVariantPackView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, RuntimeConfig, SceneExtensionView, SpriteEffectKind, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { AssetGateway, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetVariantKind, AssetVariantPackView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, RuntimeConfig, SceneExtensionView, SpriteEffectKind, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { RuntimeDiagnostics } from "../domain/aseprite.js";
 import type { OperationEvent, OperationLogPort } from "../ports/OperationLogPort.js";
 import { ToolResponseParser } from "./ToolResponseParser.js";
@@ -76,6 +76,13 @@ export class AssetStudioService {
       const response = await this.gateway.callTool("generate_variant_pack", { input_filename: input.filename, output_prefix: input.outputPrefix, variants: input.variants, frames: input.frames, seed: input.seed, delay_ms: 90 });
       return this.responseParser.parseJson<AssetVariantPackView>(response, "El MCP no devolvió el pack de variantes");
     }, { filename: input.filename, variants: input.variants.length, seed: input.seed });
+  }
+
+  public async inspectAssetQualityBundle(filename: string): Promise<AssetQualityBundleView> {
+    return this.trace("inspect_asset_bundle", async () => {
+      const response = await this.gateway.callTool("inspect_asset_bundle", { filename, max_colors: 64, max_isolated_pixels: 4 });
+      return this.responseParser.parseJson<AssetQualityBundleView>(response, "El MCP no devolvió el quality bundle");
+    }, { filename });
   }
 
   public async createAssetRecipe(input: { assetId: string; filename: string; outputPrefix: string; steps: AssetRecipeStep[]; seed: number; material: MaterialTextureKind; direction: LightDirection }): Promise<AssetRecipePlanView> {

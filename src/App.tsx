@@ -23,14 +23,14 @@ import { summarizeRuntimeMetrics } from "./application/runtimeMetrics.js";
 import { shortcutAction } from "./application/keyboardShortcuts.js";
 
 export default function App() {
-  const { config, status, diagnostics, tools, logs, toolOutput, busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, assetLibrary, assetPresetComposition, libraryQuery, recipe, job, notice, updateConfig, updateRecipe, start, stop, detectAseprite, inspect, applyPlan, startJob, cancelJob, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, generateVariantPack, createAssetRecipe, executeAssetRecipe, extendScene, searchAssetLibrary, composeAssetPreset, updateLibraryQuery, upload } = useAssetStudioController();
+  const { config, status, diagnostics, tools, logs, toolOutput, busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, assetLibrary, assetPresetComposition, libraryQuery, recipe, job, notice, updateConfig, updateRecipe, start, stop, detectAseprite, inspect, applyPlan, startJob, cancelJob, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, generateVariantPack, inspectAssetQualityBundle, createAssetRecipe, executeAssetRecipe, extendScene, searchAssetLibrary, composeAssetPreset, updateLibraryQuery, upload } = useAssetStudioController();
   const [selectedToolName, setSelectedToolName] = useState("");
   const stages = useMemo(() => buildPipelineStages({ online: status.state === "online", hasAsset: Boolean(assetPath), hasPlan: Boolean(plan), hasQuality: Boolean(quality) }), [assetPath, plan, quality, status.state]);
   const metrics = useMemo(() => summarizeRuntimeMetrics(logs), [logs]);
   useEffect(() => { if (!tools.some((tool) => tool.name === selectedToolName)) setSelectedToolName(tools.find((tool) => tool.name === "inspect_reference")?.name ?? tools[0]?.name ?? ""); }, [selectedToolName, tools]);
   const initialToolArgs = useMemo(() => {
     if (!assetPath) return {};
-    if (selectedToolName === "inspect_reference" || selectedToolName === "run_asset_quality_gate") return { filename: assetPath };
+    if (selectedToolName === "inspect_reference" || selectedToolName === "run_asset_quality_gate" || selectedToolName === "inspect_asset_bundle") return { filename: assetPath };
     if (selectedToolName === "apply_material_texture") return { input_filename: assetPath, output_filename: /\.[^./\\]+$/.test(assetPath) ? assetPath.replace(/\.[^./\\]+$/, "-textured.png") : `${assetPath}-textured.png`, material: "earth", seed: 1, intensity: 0.6 };
     if (selectedToolName === "apply_depth_lighting") return { input_filename: assetPath, output_filename: /\.[^./\\]+$/.test(assetPath) ? assetPath.replace(/\.[^./\\]+$/, "-lit.png") : `${assetPath}-lit.png`, direction: "south_east", strength: 0.7, ambient: 0.35 };
     if (selectedToolName === "suggest_enhancement_plan") return { filename: assetPath, goals: ["cleanup", "terrain_grain", "water_flow", "directional_lighting", "particles"] };
@@ -58,7 +58,7 @@ export default function App() {
     <header className="studio-header"><div><p className="eyebrow">PIXEL FORGE / ASSET STUDIO</p><h1>Aseprite MCP Gateway</h1><p className="subtitle">Mejora assets con recetas deterministas, calidad visible y control humano.</p></div><PixelBadge tone={status.state === "online" ? "cyan" : "amber"}>{status.state.toUpperCase()}</PixelBadge></header>
     <div className="studio-grid">
       <div className="studio-main">
-        <PixelPanel title="ASSET INTAKE"><PixelDropzone onFiles={upload} /><div className="asset-row"><span>{assetName}</span><PixelButton disabled={busy || status.state !== "online" || !assetPath} onClick={() => void inspect()}>INSPECT REFERENCE</PixelButton></div></PixelPanel>
+        <PixelPanel title="ASSET INTAKE"><PixelDropzone onFiles={upload} /><div className="asset-row"><span>{assetName}</span><div className="tool-runner-actions"><PixelButton disabled={busy || status.state !== "online" || !assetPath} onClick={() => void inspect()}>INSPECT REFERENCE</PixelButton><PixelButton tone="cyan" disabled={busy || status.state !== "online" || !assetPath} onClick={() => void inspectAssetQualityBundle()}>QUALITY BUNDLE</PixelButton></div></div></PixelPanel>
         {previewUrl ? <AssetPreviewPanel before={previewUrl} after={enhancedPreviewUrl ?? undefined} /> : null}
         {plan ? <><DecisionPlanPanel plan={plan} /><div className="asset-row"><span className="muted">Salida: archivo separado -enhanced.png</span><PixelButton disabled={busy || status.state !== "online" || !assetPath} onClick={() => void applyPlan()}>APPLY ENHANCEMENT</PixelButton></div></> : null}
         {quality ? <QualityGatePanel quality={quality} /> : null}

@@ -32,6 +32,7 @@ class FakeGateway implements AssetGateway {
     if (name === "generate_water_caustics") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_day_night_cycle") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_variant_pack") return { content: [{ text: JSON.stringify({ operation: name, input: args.input_filename, outputPrefix: args.output_prefix, seed: args.seed, artifacts: (args.variants as string[]).map((variant) => ({ variant, outputFilename: `${args.output_prefix}-${variant}.gif`, operation: `generate_${variant}_variant`, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true })), deterministic: true, sourcePreserved: true }) }] };
+    if (name === "inspect_asset_bundle") return { content: [{ text: JSON.stringify({ operation: name, filename: args.filename, inspection: { frameCount: 1, width: 16, height: 16, totalColors: 4, reports: [], delaysMs: [0] }, quality: { valid: true, maxColors: 64, maxIsolatedPixels: 4, violations: [] }, recommendations: ["Asset passes the requested compact quality checks."], deterministic: true, sourcePreserved: true }) }] };
     if (name === "create_asset_recipe") return { content: [{ text: JSON.stringify({ recipeId: "recipe-1", schemaVersion: 1, algorithmVersion: "asset-recipe-v1", assetId: args.asset_id, inputFilename: args.input_filename, outputPrefix: args.output_prefix, format: "png", seed: args.seed, steps: [], sourcePreserved: true, deterministic: true }) }] };
     if (name === "execute_asset_recipe") return { content: [{ text: JSON.stringify({ ok: true, recipeId: "recipe-1", outputFilename: "hero-recipe-quality_gate.png", steps: [{ id: "outline", operation: "apply_pixel_outline", ok: true, message: "ok" }, { id: "quality_gate", operation: "run_asset_quality_gate", ok: true, message: "ok" }], sourcePreserved: true, deterministic: true } satisfies AssetRecipeExecutionView) }] };
     if (name === "get_asset_library") return { content: [{ text: JSON.stringify({ query: { query: typeof args.query === "string" ? args.query : "", limit: 24 }, total: 1, categories: [], items: [{ id: "oak", title: "Oak", category: "flora", folder: "flora/oak", kind: "sprite", description: "Tree", tags: ["tree"], variants: ["rain"], formats: ["png", "svg", "json"], readmePath: "flora/oak/README.md", previewPath: "flora/oak/preview.png", spritePath: "flora/oak/sprite-sheet.png", deterministic: true }], presets: [] } satisfies AssetLibrarySearchView) }] };
@@ -148,6 +149,13 @@ describe("AssetStudioService enhancement use cases", () => {
     expect(result).toMatchObject({ operation: "generate_variant_pack", input: "oak.png", outputPrefix: "oak-variants", seed: 4, deterministic: true });
     expect(result.artifacts.map((artifact) => artifact.variant)).toEqual(["rain", "fire", "birds"]);
     expect(gateway.calls.at(-1)).toMatchObject({ name: "generate_variant_pack", args: { input_filename: "oak.png", output_prefix: "oak-variants", variants: ["rain", "fire", "birds"], frames: 6, seed: 4 } });
+  });
+
+  it("maps compact quality inspection to the shared MCP gateway", async () => {
+    const gateway = new FakeGateway();
+    const result = await new AssetStudioService(gateway).inspectAssetQualityBundle("oak.png");
+    expect(result).toMatchObject({ operation: "inspect_asset_bundle", filename: "oak.png", deterministic: true, sourcePreserved: true });
+    expect(gateway.calls.at(-1)).toMatchObject({ name: "inspect_asset_bundle", args: { filename: "oak.png", max_colors: 64, max_isolated_pixels: 4 } });
   });
 
   it("executes a recipe through the shared MCP tool and preserves typed output", async () => {
