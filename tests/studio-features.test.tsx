@@ -19,6 +19,7 @@ import { AssetSceneComposerPanel } from "../src/components/AssetSceneComposerPan
 import { AssetLibraryVariantPackPanel } from "../src/components/AssetLibraryVariantPackPanel.js";
 import { AssetManifestAuditPanel } from "../src/components/AssetManifestAuditPanel.js";
 import { AssetSceneRecommendationPanel } from "../src/components/AssetSceneRecommendationPanel.js";
+import { AssetSceneBundlePanel } from "../src/components/AssetSceneBundlePanel.js";
 import { SceneExtensionPanel } from "../src/components/SceneExtensionPanel.js";
 import { VariantPackPanel } from "../src/components/VariantPackPanel.js";
 import { SceneEffectStackPanel } from "../src/components/SceneEffectStackPanel.js";
@@ -111,6 +112,10 @@ describe("studio feature contracts", () => {
     expect(recommendationMarkup).toContain("SCENE FINDER");
     expect(recommendationMarkup).toContain("RECOMMEND SCENE");
     expect(recommendationMarkup).toContain("Ocean Waves");
+    const bundleMarkup = renderToStaticMarkup(<AssetSceneBundlePanel busy={false} online result={{ operation: "build_scene_bundle", outputPrefix: "out/bundle", itemIds: ["oak"], static: { operation: "compose_asset_scene", output: "scene.png", manifest: "scene.json", libraryVersion: "v1", itemIds: ["oak"], width: 64, height: 48, padding: 2, layers: [], deterministic: true, sourcePreserved: true }, animation: { operation: "compose_asset_scene_animation", output: "scene.gif", manifest: "scene-animation.json", libraryVersion: "v1", itemIds: ["oak"], width: 64, height: 48, padding: 2, frames: 8, delayMs: 90, frameLayers: [], deterministic: true, sourcePreserved: true }, deterministic: true, sourcePreserved: true }} previewUrl={(path) => `/preview?path=${encodeURIComponent(path)}`} onBuild={() => undefined} />);
+    expect(bundleMarkup).toContain("SCENE BUNDLE FACTORY");
+    expect(bundleMarkup).toContain("BUILD SCENE BUNDLE");
+    expect(bundleMarkup).toContain("SCENE BUNDLE");
     expect(renderToStaticMarkup(<PaletteHarmonizerPanel busy={false} online assetName="hero.png" palette={["#3155D8", "#8AA0F0"]} onApply={() => undefined} />)).toContain("HARMONIZE PALETTE");
     expect(renderToStaticMarkup(<PaletteHarmonizerPanel busy={false} online assetName="hero.png" palette={["#3155D8", "#8AA0F0"]} onApply={() => undefined} />)).toContain("#3155D8");
     expect(renderToStaticMarkup(<ContactSheetPanel busy={false} online assetCount={3} sourceNames={["rain.gif", "night.gif", "fire.gif"]} previewUrl="sheet.png" result={{ operation: "build_contact_sheet", output: "sheet.png", manifest: "sheet.json", assets: 3, columns: 2, rows: 2, width: 66, height: 66, cellWidth: 32, cellHeight: 32, padding: 2, deterministic: true, sourcePreserved: true }} onBuild={() => undefined} />)).toContain("BUILD CONTACT SHEET");

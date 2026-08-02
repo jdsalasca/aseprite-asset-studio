@@ -42,6 +42,8 @@
 .manifest-audit-controls { align-items: end; display: grid; gap: .7rem; grid-template-columns: minmax(0, 1fr) auto; margin-top: .8rem; }
 .scene-recommendation-controls { @include m.studio-grid(repeat(7, minmax(0, 1fr))); align-items: end; margin-top: .8rem; }
 .scene-recommendation-controls .pixel-field:nth-child(1), .scene-recommendation-controls .pixel-field:nth-child(2), .scene-recommendation-controls .pixel-field:nth-child(3), .scene-recommendation-controls .pixel-field:nth-child(4) { grid-column: span 2; }
+.scene-bundle-controls { @include m.studio-grid(repeat(8, minmax(0, 1fr))); align-items: end; margin-top: .8rem; }
+.scene-bundle-controls .pixel-field:nth-child(1), .scene-bundle-controls .pixel-field:nth-child(2) { grid-column: span 2; }
 .log-line { align-items: flex-start; display: flex; gap: .6rem; line-height: 1.5; }
 .log-line .pixel-badge { flex: none; }
 .normalization-controls { @include m.studio-grid(repeat(2, minmax(0, 1fr))); margin-top: .8rem; }

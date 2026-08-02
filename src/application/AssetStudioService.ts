@@ -1,4 +1,4 @@
-import type { AnimationQualityView, AnimationSheetView, AssetGateway, AssetLibraryAuditView, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetLibrarySummaryView, AssetLibraryVariantPackView, AssetManifestAuditView, AssetPresetGenerationView, AssetQualityBatchView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetSceneAnimationCompositionView, AssetSceneCompositionView, AssetScenePlanView, AssetSceneRecommendationView, AssetVariantKind, AssetVariantPackView, BiomeTransitionView, ContactSheetView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, PaletteHarmonizeView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SceneExtensionView, SpriteEffectKind, SpriteGeometryView, SpriteHitboxView, SpriteNormalizationView, SpritePivotMode, SpriteRuntimeBundleView, SpriteAnchorsView, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { AnimationQualityView, AnimationSheetView, AssetGateway, AssetLibraryAuditView, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetLibrarySummaryView, AssetLibraryVariantPackView, AssetManifestAuditView, AssetPresetGenerationView, AssetQualityBatchView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetSceneAnimationCompositionView, AssetSceneBundleView, AssetSceneCompositionView, AssetScenePlanView, AssetSceneRecommendationView, AssetVariantKind, AssetVariantPackView, BiomeTransitionView, ContactSheetView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, PaletteHarmonizeView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SceneExtensionView, SpriteEffectKind, SpriteGeometryView, SpriteHitboxView, SpriteNormalizationView, SpritePivotMode, SpriteRuntimeBundleView, SpriteAnchorsView, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { RuntimeDiagnostics } from "../domain/aseprite.js";
 import type { OperationEvent, OperationLogPort } from "../ports/OperationLogPort.js";
 import { ToolResponseParser } from "./ToolResponseParser.js";
@@ -205,6 +205,13 @@ export class AssetStudioService {
       const response = await this.gateway.callTool("recommend_asset_scene", { ...(input.prompt === undefined ? {} : { prompt: input.prompt }), ...(input.category === undefined ? {} : { category: input.category }), ...(input.requiredKinds === undefined ? {} : { required_kinds: input.requiredKinds }), ...(input.requiredTags === undefined ? {} : { required_tags: input.requiredTags }), ...(input.requiredVariants === undefined ? {} : { required_variants: input.requiredVariants }), limit: input.limit, seed: input.seed });
       return this.responseParser.parseJson<AssetSceneRecommendationView>(response, "El MCP no devolvió recomendaciones de escena");
     }, { ...(input.prompt === undefined ? {} : { prompt: input.prompt }), ...(input.category === undefined ? {} : { category: input.category }), limit: input.limit, seed: input.seed });
+  }
+
+  public async buildSceneBundle(input: { itemIds: string[]; outputPrefix: string; width: number; height: number; padding: number; frames: number; delayMs: number }): Promise<AssetSceneBundleView> {
+    return this.trace("build_scene_bundle", async () => {
+      const response = await this.gateway.callTool("build_scene_bundle", { item_ids: input.itemIds, output_prefix: input.outputPrefix, width: input.width, height: input.height, padding: input.padding, frames: input.frames, delay_ms: input.delayMs });
+      return this.responseParser.parseJson<AssetSceneBundleView>(response, "El MCP no devolvió el bundle de escena");
+    }, { itemCount: input.itemIds.length, outputPrefix: input.outputPrefix, frames: input.frames });
   }
 
   public async summarizeAssetLibrary(): Promise<AssetLibrarySummaryView> {
