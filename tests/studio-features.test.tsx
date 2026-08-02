@@ -14,6 +14,7 @@ import { ToolGrid } from "../src/components/ToolGrid.js";
 import { AssetLibraryPanel } from "../src/components/AssetLibraryPanel.js";
 import { SceneExtensionPanel } from "../src/components/SceneExtensionPanel.js";
 import { VariantPackPanel } from "../src/components/VariantPackPanel.js";
+import { VariantPreviewPanel } from "../src/components/VariantPreviewPanel.js";
 
 describe("studio feature contracts", () => {
   it("validates supported asset formats and size limits", () => {
@@ -51,6 +52,7 @@ describe("studio feature contracts", () => {
     expect(effectsMarkup).toContain("DAY / NIGHT CYCLE");
     expect(renderToStaticMarkup(<SceneExtensionPanel busy={false} online onExtend={() => undefined} />)).toContain("SCENE EXTENSION");
     expect(renderToStaticMarkup(<VariantPackPanel busy={false} online assetName="oak.png" onGenerate={() => undefined} />)).toContain("ENVIRONMENT VARIANT PACK");
+    expect(renderToStaticMarkup(<VariantPreviewPanel previewUrl={(path) => `/preview?path=${encodeURIComponent(path)}`} artifacts={[{ variant: "rain", outputFilename: "oak-rain.gif", operation: "generate_rain_overlay", frames: 8, format: "gif", deterministic: true, sourcePreserved: true }]} />)).toContain("VARIANT PREVIEWS");
     const markup = renderToStaticMarkup(<RecipeCreatorPanel busy={false} online assetName="hero.png" onCreate={() => undefined} onExecute={() => undefined} />);
     expect(markup).toContain("RECIPE CREATOR");
     expect(markup).toContain("Quality gate");

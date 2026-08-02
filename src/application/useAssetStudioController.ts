@@ -6,7 +6,7 @@ import { useAssetJobController } from "./useAssetJobController.js";
 import { HttpAssetGateway } from "../adapters/mcp/HttpAssetGateway.js";
 import { InMemoryOperationLogger } from "../adapters/observability/InMemoryOperationLogger.js";
 import { validateAssetFile } from "./assetValidation.js";
-import type { AssetJobView, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetQualityBundleView, AssetRecipe, AssetRecipeStep, AssetVariantKind, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, RuntimeConfig, SpriteEffectKind, ToolDescriptor, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { AssetJobView, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetQualityBundleView, AssetRecipe, AssetRecipeStep, AssetVariantArtifactView, AssetVariantKind, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, RuntimeConfig, SpriteEffectKind, ToolDescriptor, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { OperationLogEntry } from "../ports/OperationLogPort.js";
 import type { RuntimeDiagnostics } from "../domain/aseprite.js";
 
@@ -27,7 +27,9 @@ export interface AssetStudioController {
   plan: EnhancementPlanView | null;
   previewUrl: string | null;
   enhancedPreviewUrl: string | null;
+  variantPreviewUrl(path: string): string;
   quality: EnhancementApplyView["quality"] | null;
+  variantArtifacts: AssetVariantArtifactView[];
   recipe: AssetRecipe;
   assetLibrary: AssetLibrarySearchView | null;
   assetPresetComposition: AssetLibraryPresetCompositionView | null;
@@ -79,6 +81,7 @@ export function useAssetStudioController(): AssetStudioController {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [enhancedPreviewUrl, setEnhancedPreviewUrl] = useState<string | null>(null);
   const [quality, setQuality] = useState<EnhancementApplyView["quality"] | null>(null);
+  const [variantArtifacts, setVariantArtifacts] = useState<AssetVariantArtifactView[]>([]);
   const [assetLibrary, setAssetLibrary] = useState<AssetLibrarySearchView | null>(null);
   const [assetPresetComposition, setAssetPresetComposition] = useState<AssetLibraryPresetCompositionView | null>(null);
   const [libraryQuery, setLibraryQuery] = useState("");
@@ -196,6 +199,7 @@ export function useAssetStudioController(): AssetStudioController {
     try {
       const result = await service.generateVariantPack({ filename: assetPath, outputPrefix, variants, frames, seed });
       const first = result.artifacts[0];
+      setVariantArtifacts(result.artifacts);
       if (first) setEnhancedPreviewUrl(service.assetPreviewUrl(first.outputFilename));
       setToolOutput(JSON.stringify(result, null, 2)); setNotice(`Pack listo: ${result.artifacts.length} variantes deterministas.`);
     } catch (error) { setNotice(errorMessage(error)); }
@@ -275,12 +279,12 @@ export function useAssetStudioController(): AssetStudioController {
     const validationError = validateAssetFile(file);
     if (validationError) { setNotice(validationError); return; }
     const request = uploadGuard.next();
-    setBusy(true); setAssetName(file.name); setAssetPath(null); setPreviewUrl(null); setPlan(null); setEnhancedPreviewUrl(null); setQuality(null); setNotice(`Subiendo ${file.name}...`);
+    setBusy(true); setAssetName(file.name); setAssetPath(null); setPreviewUrl(null); setPlan(null); setEnhancedPreviewUrl(null); setQuality(null); setVariantArtifacts([]); setNotice(`Subiendo ${file.name}...`);
     void service.upload(file).then((stored) => {
       if (!uploadGuard.accepts(request)) return;
       setAssetPath(stored.path); setPreviewUrl(service.assetPreviewUrl(stored.path)); setNotice(`${stored.filename} cargado (${stored.sizeBytes} bytes).`); setBusy(false);
     }).catch((error) => { if (uploadGuard.accepts(request)) { setNotice(errorMessage(error)); setBusy(false); } });
   }
 
-  return { config, status, diagnostics, tools, logs, toolOutput, busy: busy || jobController.busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, assetLibrary, assetPresetComposition, libraryQuery, recipe: jobController.recipe, updateRecipe: jobController.updateRecipe, job: jobController.job, notice, updateConfig: setConfig, start, stop, detectAseprite, inspect, applyPlan, startJob: jobController.start, cancelJob: jobController.cancel, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, generateVariantPack, inspectAssetQualityBundle, createAssetRecipe, executeAssetRecipe, extendScene, searchAssetLibrary, composeAssetPreset, updateLibraryQuery: setLibraryQuery, upload };
+  return { config, status, diagnostics, tools, logs, toolOutput, busy: busy || jobController.busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, variantPreviewUrl: service.assetPreviewUrl.bind(service), quality, variantArtifacts, assetLibrary, assetPresetComposition, libraryQuery, recipe: jobController.recipe, updateRecipe: jobController.updateRecipe, job: jobController.job, notice, updateConfig: setConfig, start, stop, detectAseprite, inspect, applyPlan, startJob: jobController.start, cancelJob: jobController.cancel, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, generateVariantPack, inspectAssetQualityBundle, createAssetRecipe, executeAssetRecipe, extendScene, searchAssetLibrary, composeAssetPreset, updateLibraryQuery: setLibraryQuery, upload };
 }
