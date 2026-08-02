@@ -221,7 +221,7 @@ export function useAssetStudioController(): AssetStudioController {
 
   async function generateAssetPreset(id: string): Promise<void> {
     if (status.state !== "online") return;
-    const outputPrefix = `artifacts/${id}-${Date.now()}`;
+    const outputPrefix = assetPath ? assetPath.replace(/\.[^./\\]+$/, `-${id}`) : `artifacts/${id}`;
     setBusy(true); setToolOutput(null); setNotice(`Generando preset ${id}...`);
     try {
       const result = await service.generateAssetPreset({ presetId: id, outputPrefix, width: 64, height: 40, seed: 1 });
