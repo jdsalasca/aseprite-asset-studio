@@ -26,6 +26,7 @@ class FakeGateway implements AssetGateway {
     if (name === "remove_background") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: args.format, deterministic: true, sourcePreserved: true }) }] };
     if (name === "cleanup_isolated_pixels") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: args.format, deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_sprite_glow") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: args.format, deterministic: true, sourcePreserved: true }) }] };
+    if (name === "generate_sprite_silhouette") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: args.format, deterministic: true, sourcePreserved: true }) }] };
     if (name === "apply_sprite_rim_light") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: args.format, deterministic: true, sourcePreserved: true }) }] };
     if (name === "apply_sprite_ambient_occlusion") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: args.format, deterministic: true, sourcePreserved: true }) }] };
     if (name === "apply_sprite_specular_highlight") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: args.format, deterministic: true, sourcePreserved: true }) }] };
@@ -218,6 +219,13 @@ describe("AssetStudioService enhancement use cases", () => {
     const result = await new AssetStudioService(gateway).applySpriteEffect("color_temperature", "source.gif", "source-warm.gif", { temperature: 1, intensity: 0.7 });
     expect(result).toMatchObject({ operation: "apply_sprite_color_temperature", output: "source-warm.gif", format: "gif", sourcePreserved: true });
     expect(gateway.calls.at(-1)).toMatchObject({ name: "apply_sprite_color_temperature", args: { input_filename: "source.gif", output_filename: "source-warm.gif", temperature: 1, intensity: 0.7, format: "gif" } });
+  });
+
+  it("maps sprite silhouette controls to the shared MCP effects service", async () => {
+    const gateway = new FakeGateway();
+    const result = await new AssetStudioService(gateway).applySpriteEffect("silhouette", "source.gif", "source-silhouette.gif", { color: "#08111F", opacity: 0.6 });
+    expect(result).toMatchObject({ operation: "generate_sprite_silhouette", output: "source-silhouette.gif", format: "gif", sourcePreserved: true });
+    expect(gateway.calls.at(-1)).toMatchObject({ name: "generate_sprite_silhouette", args: { input_filename: "source.gif", output_filename: "source-silhouette.gif", color: "#08111F", opacity: 0.6, format: "gif" } });
   });
 
   it("normalizes raster frames through the shared MCP gateway and keeps pivot metadata", async () => {
