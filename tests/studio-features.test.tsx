@@ -40,7 +40,9 @@ describe("studio feature contracts", () => {
     expect(renderToStaticMarkup(<ToolGrid tools={[{ name: "apply_depth_lighting", description: "Light" }]} selectedName="" onSelect={() => undefined} />)).toContain("FILTER TOOLS");
     expect(renderToStaticMarkup(<PipelineStatus stages={buildPipelineStages({ online: false, hasAsset: false, hasPlan: false, hasQuality: false })} />)).toContain("PIPELINE STATUS");
     expect(renderToStaticMarkup(<RuntimeMetricsPanel metrics={{ total: 2, successes: 1, failures: 1, averageMs: 20 }} />)).toContain("AVG");
-    expect(renderToStaticMarkup(<SpriteEffectsPanel busy={false} online assetName="hero.png" onApply={() => undefined} />)).toContain("SPRITE EFFECTS");
+    const effectsMarkup = renderToStaticMarkup(<SpriteEffectsPanel busy={false} online assetName="hero.png" onApply={() => undefined} />);
+    expect(effectsMarkup).toContain("SPRITE EFFECTS");
+    expect(effectsMarkup).toContain("NEAREST UPSCALE");
     const markup = renderToStaticMarkup(<RecipeCreatorPanel busy={false} online assetName="hero.png" onCreate={() => undefined} onExecute={() => undefined} />);
     expect(markup).toContain("RECIPE CREATOR");
     expect(markup).toContain("Quality gate");
