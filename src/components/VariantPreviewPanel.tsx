@@ -1,4 +1,4 @@
-import { PixelArtifactStrip, PixelBadge, PixelPanel } from "@jdsalasc/pixel-ui";
+import { PixelArtifactStrip, PixelBadge, PixelOperationSummary, PixelPanel } from "@jdsalasc/pixel-ui";
 import type { AssetVariantArtifactView } from "../domain/contracts.js";
 
 interface VariantPreviewPanelProps {
@@ -10,6 +10,7 @@ export function VariantPreviewPanel({ previewUrl, artifacts }: VariantPreviewPan
   if (artifacts.length === 0) return null;
   return <PixelPanel title="VARIANT PREVIEWS" accent="cyan">
     <p className="muted">Compara todas las salidas del pack sin abrir archivos manualmente.</p>
+    <PixelOperationSummary label="PACK CONTRACT" operation="generate_variant_pack" artifactCount={artifacts.length} deterministic sourcePreserved />
     <PixelArtifactStrip label="VARIANT ARTIFACTS" items={artifacts.map((artifact) => ({
       id: artifact.variant,
       name: artifact.variant.replaceAll("_", " ").toUpperCase(),
