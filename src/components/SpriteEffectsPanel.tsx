@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PixelAmbientOcclusionControls, PixelBackgroundRemoval, PixelButton, PixelCleanupControls, PixelColorRampControls, PixelField, PixelGlowControls, PixelPanel, PixelRimLightControls, PixelSelect, PixelSlider, PixelSpecularHighlightControls, PixelTimeline } from "@jdsalasc/pixel-ui";
+import { PixelAmbientOcclusionControls, PixelBackgroundRemoval, PixelButton, PixelCleanupControls, PixelColorRampControls, PixelField, PixelGlowControls, PixelGrainControls, PixelPanel, PixelRimLightControls, PixelSelect, PixelSlider, PixelSpecularHighlightControls, PixelTimeline } from "@jdsalasc/pixel-ui";
 import type { PixelRimLightDirection } from "@jdsalasc/pixel-ui";
 import type { SpriteEffectKind } from "../domain/contracts.js";
 
@@ -30,6 +30,7 @@ const EFFECTS: Array<{ value: SpriteEffectKind; label: string }> = [
   { value: "ambient_occlusion", label: "AMBIENT OCCLUSION" },
   { value: "specular_highlight", label: "SPECULAR HIGHLIGHT" },
   { value: "color_ramp", label: "COLOR RAMP" },
+  { value: "grain", label: "MATERIAL GRAIN" },
 ];
 
 export function SpriteEffectsPanel({ busy, online, assetName, onApply }: SpriteEffectsPanelProps) {
@@ -64,6 +65,9 @@ export function SpriteEffectsPanel({ busy, online, assetName, onApply }: SpriteE
   const [rampHighlightColor, setRampHighlightColor] = useState("#FFFFFF");
   const [rampShadowThreshold, setRampShadowThreshold] = useState(0.3);
   const [rampHighlightThreshold, setRampHighlightThreshold] = useState(0.7);
+  const [grainSeed, setGrainSeed] = useState(1);
+  const [grainIntensity, setGrainIntensity] = useState(0.45);
+  const [grainScale, setGrainScale] = useState(1);
 
   const disabled = busy || !online;
 
@@ -103,6 +107,11 @@ export function SpriteEffectsPanel({ busy, online, assetName, onApply }: SpriteE
     if (kind === "color_ramp") {
       if (rampShadowThreshold >= rampHighlightThreshold) return;
       onApply(kind, { shadow_color: rampShadowColor, mid_color: rampMidColor, highlight_color: rampHighlightColor, shadow_threshold: rampShadowThreshold, highlight_threshold: rampHighlightThreshold });
+      return;
+    }
+    if (kind === "grain") {
+      if (!Number.isInteger(grainSeed) || !Number.isFinite(grainIntensity) || grainIntensity < 0 || grainIntensity > 1 || !Number.isInteger(grainScale) || grainScale < 1 || grainScale > 8) return;
+      onApply(kind, { seed: grainSeed, intensity: grainIntensity, scale: grainScale });
       return;
     }
     if (kind === "seamless") {
@@ -157,7 +166,7 @@ export function SpriteEffectsPanel({ busy, online, assetName, onApply }: SpriteE
     onApply(kind, kind === "normal_map" ? { strength: parsedStrength } : kind === "rain" ? { color, intensity: Math.max(0, Math.min(1, parsedStrength / 8)), wind: 0, seed: 1 } : { color, thickness: Math.max(1, Math.min(8, Math.round(parsedStrength))) });
   }
 
-  const showColor = kind !== "motion" && kind !== "upscale" && kind !== "seamless" && kind !== "reflection" && kind !== "day_night" && kind !== "background" && kind !== "cleanup" && kind !== "glow" && kind !== "rim_light" && kind !== "ambient_occlusion" && kind !== "specular_highlight" && kind !== "color_ramp";
+  const showColor = kind !== "motion" && kind !== "upscale" && kind !== "seamless" && kind !== "reflection" && kind !== "day_night" && kind !== "background" && kind !== "cleanup" && kind !== "glow" && kind !== "rim_light" && kind !== "ambient_occlusion" && kind !== "specular_highlight" && kind !== "color_ramp" && kind !== "grain";
 
   return (
     <PixelPanel title="SPRITE EFFECTS" accent="pink">
@@ -165,7 +174,7 @@ export function SpriteEffectsPanel({ busy, online, assetName, onApply }: SpriteE
       <PixelSelect label="EFFECT" value={kind} onChange={(event) => setKind(event.target.value as SpriteEffectKind)} disabled={disabled}>
         {EFFECTS.map((effect) => <option key={effect.value} value={effect.value}>{effect.label}</option>)}
       </PixelSelect>
-      {kind === "motion" ? <PixelSelect label="MOTION" value={motion} onChange={(event) => setMotion(event.target.value)} disabled={disabled}><option value="idle">IDLE</option><option value="walk">WALK</option><option value="run">RUN</option><option value="jump">JUMP</option><option value="attack">ATTACK</option></PixelSelect> : kind === "background" ? <PixelBackgroundRemoval color={color} tolerance={Number(strength)} connectedOnly={connectedOnly} disabled={disabled} onColorChange={setColor} onToleranceChange={(value) => setStrength(String(value))} onConnectedOnlyChange={setConnectedOnly} /> : kind === "cleanup" ? <PixelCleanupControls minNeighbors={minNeighbors} iterations={cleanupIterations} disabled={disabled} onMinNeighborsChange={setMinNeighbors} onIterationsChange={setCleanupIterations} /> : kind === "glow" ? <PixelGlowControls color={color} radius={glowRadius} opacity={glowOpacity} disabled={disabled} onColorChange={setColor} onRadiusChange={setGlowRadius} onOpacityChange={setGlowOpacity} /> : kind === "rim_light" ? <PixelRimLightControls color={color} direction={rimDirection} strength={rimStrength} disabled={disabled} onColorChange={setColor} onDirectionChange={setRimDirection} onStrengthChange={setRimStrength} /> : kind === "ambient_occlusion" ? <PixelAmbientOcclusionControls color={color} radius={ambientRadius} strength={ambientStrength} disabled={disabled} onColorChange={setColor} onRadiusChange={setAmbientRadius} onStrengthChange={setAmbientStrength} /> : kind === "specular_highlight" ? <PixelSpecularHighlightControls color={color} direction={specularDirection} radius={specularRadius} strength={specularStrength} disabled={disabled} onColorChange={setColor} onDirectionChange={setSpecularDirection} onRadiusChange={setSpecularRadius} onStrengthChange={setSpecularStrength} /> : kind === "color_ramp" ? <PixelColorRampControls shadowColor={rampShadowColor} midColor={rampMidColor} highlightColor={rampHighlightColor} shadowThreshold={rampShadowThreshold} highlightThreshold={rampHighlightThreshold} disabled={disabled} onShadowColorChange={setRampShadowColor} onMidColorChange={setRampMidColor} onHighlightColorChange={setRampHighlightColor} onShadowThresholdChange={setRampShadowThreshold} onHighlightThresholdChange={setRampHighlightThreshold} /> : showColor ? <PixelField label="COLOR" value={color} onChange={(event) => setColor(event.target.value)} disabled={disabled} /> : null}
+      {kind === "motion" ? <PixelSelect label="MOTION" value={motion} onChange={(event) => setMotion(event.target.value)} disabled={disabled}><option value="idle">IDLE</option><option value="walk">WALK</option><option value="run">RUN</option><option value="jump">JUMP</option><option value="attack">ATTACK</option></PixelSelect> : kind === "background" ? <PixelBackgroundRemoval color={color} tolerance={Number(strength)} connectedOnly={connectedOnly} disabled={disabled} onColorChange={setColor} onToleranceChange={(value) => setStrength(String(value))} onConnectedOnlyChange={setConnectedOnly} /> : kind === "cleanup" ? <PixelCleanupControls minNeighbors={minNeighbors} iterations={cleanupIterations} disabled={disabled} onMinNeighborsChange={setMinNeighbors} onIterationsChange={setCleanupIterations} /> : kind === "glow" ? <PixelGlowControls color={color} radius={glowRadius} opacity={glowOpacity} disabled={disabled} onColorChange={setColor} onRadiusChange={setGlowRadius} onOpacityChange={setGlowOpacity} /> : kind === "rim_light" ? <PixelRimLightControls color={color} direction={rimDirection} strength={rimStrength} disabled={disabled} onColorChange={setColor} onDirectionChange={setRimDirection} onStrengthChange={setRimStrength} /> : kind === "ambient_occlusion" ? <PixelAmbientOcclusionControls color={color} radius={ambientRadius} strength={ambientStrength} disabled={disabled} onColorChange={setColor} onRadiusChange={setAmbientRadius} onStrengthChange={setAmbientStrength} /> : kind === "specular_highlight" ? <PixelSpecularHighlightControls color={color} direction={specularDirection} radius={specularRadius} strength={specularStrength} disabled={disabled} onColorChange={setColor} onDirectionChange={setSpecularDirection} onRadiusChange={setSpecularRadius} onStrengthChange={setSpecularStrength} /> : kind === "color_ramp" ? <PixelColorRampControls shadowColor={rampShadowColor} midColor={rampMidColor} highlightColor={rampHighlightColor} shadowThreshold={rampShadowThreshold} highlightThreshold={rampHighlightThreshold} disabled={disabled} onShadowColorChange={setRampShadowColor} onMidColorChange={setRampMidColor} onHighlightColorChange={setRampHighlightColor} onShadowThresholdChange={setRampShadowThreshold} onHighlightThresholdChange={setRampHighlightThreshold} /> : kind === "grain" ? <PixelGrainControls seed={grainSeed} intensity={grainIntensity} scale={grainScale} disabled={disabled} onSeedChange={setGrainSeed} onIntensityChange={setGrainIntensity} onScaleChange={setGrainScale} /> : showColor ? <PixelField label="COLOR" value={color} onChange={(event) => setColor(event.target.value)} disabled={disabled} /> : null}
       <div className="effect-controls">
         {kind === "particles" || kind === "motion" ? <>
           <PixelField label="FRAMES" type="number" min="2" max="24" value={frames} onChange={(event) => setFrames(event.target.value)} disabled={disabled} />
@@ -186,7 +195,7 @@ export function SpriteEffectsPanel({ busy, online, assetName, onApply }: SpriteE
           <PixelField label="FRAMES" type="number" min="4" max="24" value={frames} onChange={(event) => setFrames(event.target.value)} disabled={disabled} />
           <PixelSlider label={`INTENSITY · ${dayNightIntensity}`} min={0.05} max={1} step={0.05} value={Number(dayNightIntensity)} onChange={(event) => setDayNightIntensity(event.target.value)} disabled={disabled} />
           <PixelField label="SEED" type="number" value={dayNightSeed} onChange={(event) => setDayNightSeed(event.target.value)} disabled={disabled} />
-        </> : kind === "background" || kind === "cleanup" || kind === "glow" || kind === "rim_light" || kind === "ambient_occlusion" || kind === "specular_highlight" || kind === "color_ramp" ? null : <PixelSlider label={kind === "upscale" ? `SCALE · ${strength}` : kind === "seamless" ? `SEAM WIDTH · ${strength}` : kind === "normal_map" ? `STRENGTH · ${strength}` : kind === "rain" ? `RAIN INTENSITY · ${strength}` : `THICKNESS · ${strength}`} min={kind === "upscale" ? 2 : kind === "normal_map" ? 0 : 1} max={kind === "upscale" ? 16 : kind === "seamless" ? 32 : 8} step={1} value={Number(strength)} onChange={(event) => setStrength(event.target.value)} disabled={disabled} />}
+        </> : kind === "background" || kind === "cleanup" || kind === "glow" || kind === "rim_light" || kind === "ambient_occlusion" || kind === "specular_highlight" || kind === "color_ramp" || kind === "grain" ? null : <PixelSlider label={kind === "upscale" ? `SCALE · ${strength}` : kind === "seamless" ? `SEAM WIDTH · ${strength}` : kind === "normal_map" ? `STRENGTH · ${strength}` : kind === "rain" ? `RAIN INTENSITY · ${strength}` : `THICKNESS · ${strength}`} min={kind === "upscale" ? 2 : kind === "normal_map" ? 0 : 1} max={kind === "upscale" ? 16 : kind === "seamless" ? 32 : 8} step={1} value={Number(strength)} onChange={(event) => setStrength(event.target.value)} disabled={disabled} />}
       </div>
       <div className="tool-runner-actions"><PixelButton tone="pink" disabled={disabled} onClick={apply}>{busy ? "APPLYING..." : "APPLY SPRITE EFFECT"}</PixelButton></div>
     </PixelPanel>
