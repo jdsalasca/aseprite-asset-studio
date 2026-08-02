@@ -19,6 +19,7 @@ import { AssetLibraryPanel } from "./components/AssetLibraryPanel.js";
 import { AssetLibraryAuditPanel } from "./components/AssetLibraryAuditPanel.js";
 import { AssetLibrarySummaryPanel } from "./components/AssetLibrarySummaryPanel.js";
 import { AssetScenePlannerPanel } from "./components/AssetScenePlannerPanel.js";
+import { AssetSceneComposerPanel } from "./components/AssetSceneComposerPanel.js";
 import { SceneExtensionPanel } from "./components/SceneExtensionPanel.js";
 import { VariantPackPanel } from "./components/VariantPackPanel.js";
 import { VariantPreviewPanel } from "./components/VariantPreviewPanel.js";
@@ -39,7 +40,7 @@ import { summarizeRuntimeMetrics } from "./application/runtimeMetrics.js";
 import { shortcutAction } from "./application/keyboardShortcuts.js";
 
 export default function App() {
-  const { config, status, diagnostics, tools, logs, toolOutput, busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, qualityRecommendations, batchQuality, animationQuality, normalizedSprite, animationSheet, spriteGeometry, spriteHitboxes, spriteRuntimeBundle, spriteAnchors, harmonizedPalette, contactSheet, contactSheetPreviewUrl, variantArtifacts, variantPreviewUrl, assetLibrary, assetPresetComposition, assetLibraryAudit, assetLibrarySummary, assetScenePlan, libraryQuery, recipe, job, notice, updateConfig, updateRecipe, start, stop, detectAseprite, inspect, applyPlan, startJob, cancelJob, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, generateVariantPack, generateSceneEffectStack, generateAssetPreset, inspectAssetQualityBundle, inspectAssetBatch, inspectAnimationQuality, normalizeSprite, buildAnimationSheet, inspectSpriteGeometry, generateSpriteHitboxes, buildSpriteRuntimeBundle, generateSpriteAnchors, createAssetRecipe, executeAssetRecipe, extendScene, generateBiomeTransition, harmonizePalette, buildContactSheet, searchAssetLibrary, composeAssetPreset, auditAssetLibrary, summarizeAssetLibrary, planAssetScene, updateLibraryQuery, upload } = useAssetStudioController();
+  const { config, status, diagnostics, tools, logs, toolOutput, busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, qualityRecommendations, batchQuality, animationQuality, normalizedSprite, animationSheet, spriteGeometry, spriteHitboxes, spriteRuntimeBundle, spriteAnchors, harmonizedPalette, contactSheet, contactSheetPreviewUrl, variantArtifacts, variantPreviewUrl, assetLibrary, assetPresetComposition, assetLibraryAudit, assetLibrarySummary, assetScenePlan, assetSceneComposition, libraryQuery, recipe, job, notice, updateConfig, updateRecipe, start, stop, detectAseprite, inspect, applyPlan, startJob, cancelJob, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, generateVariantPack, generateSceneEffectStack, generateAssetPreset, inspectAssetQualityBundle, inspectAssetBatch, inspectAnimationQuality, normalizeSprite, buildAnimationSheet, inspectSpriteGeometry, generateSpriteHitboxes, buildSpriteRuntimeBundle, generateSpriteAnchors, createAssetRecipe, executeAssetRecipe, extendScene, generateBiomeTransition, harmonizePalette, buildContactSheet, searchAssetLibrary, composeAssetPreset, auditAssetLibrary, summarizeAssetLibrary, planAssetScene, composeAssetScene, updateLibraryQuery, upload } = useAssetStudioController();
   const [selectedToolName, setSelectedToolName] = useState("");
   const stages = useMemo(() => buildPipelineStages({ online: status.state === "online", hasAsset: Boolean(assetPath), hasPlan: Boolean(plan), hasQuality: Boolean(quality) }), [assetPath, plan, quality, status.state]);
   const metrics = useMemo(() => summarizeRuntimeMetrics(logs), [logs]);
@@ -100,6 +101,7 @@ export default function App() {
         <AssetLibraryAuditPanel busy={busy} online={status.state === "online"} result={assetLibraryAudit} onAudit={() => void auditAssetLibrary()} />
         <AssetLibrarySummaryPanel busy={busy} online={status.state === "online"} result={assetLibrarySummary} onSummarize={() => void summarizeAssetLibrary()} />
         <AssetScenePlannerPanel busy={busy} online={status.state === "online"} result={assetScenePlan} onPlan={(itemIds) => void planAssetScene(itemIds)} />
+        <AssetSceneComposerPanel busy={busy} online={status.state === "online"} result={assetSceneComposition} previewUrl={variantPreviewUrl} onCompose={(input) => void composeAssetScene(input)} />
         <SceneExtensionPanel busy={busy} online={status.state === "online"} onExtend={(input) => void extendScene(input)} onTransition={(input) => void generateBiomeTransition(input)} />
         {assetPath ? <AssetJobPanel recipe={recipe} job={job} busy={busy} canStart={status.state === "online" && Boolean(assetPath)} onRecipeChange={updateRecipe} onStart={() => void startJob()} onCancel={() => void cancelJob()} /> : null}
         <PipelineStatus stages={stages} />
