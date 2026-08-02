@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { PixelButton, PixelNotice, PixelPanel, PixelSelect, PixelTextarea } from "@jdsalasc/pixel-ui";
+import { PixelButton, PixelNotice, PixelPanel, PixelSchemaHint, PixelSelect, PixelTextarea } from "@jdsalasc/pixel-ui";
 import type { ToolDescriptor } from "../domain/contracts.js";
 
 interface ToolRunnerPanelProps {
@@ -36,6 +36,7 @@ export function ToolRunnerPanel({ tools, selectedToolName, initialArgs, busy, ou
       {tools.map((tool) => <option key={tool.name} value={tool.name}>{tool.name}</option>)}
     </PixelSelect>
     <p className="muted tool-description">{selected?.description ?? "Selecciona una herramienta tipada del MCP."}</p>
+    <PixelSchemaHint schema={selected?.inputSchema} />
     <PixelTextarea label="ARGUMENTS JSON" value={argsText} onChange={(event) => setArgsText(event.target.value)} spellCheck={false} disabled={busy || !selectedToolName} />
     {error ? <PixelNotice tone="danger" title="INVALID JSON">{error}</PixelNotice> : null}
     <div className="tool-runner-actions"><PixelButton tone="pink" disabled={busy || !selectedToolName} onClick={run}>{busy ? "RUNNING..." : "RUN MCP TOOL"}</PixelButton></div>

@@ -61,6 +61,18 @@ export interface EnhancementApplyView {
   quality: { valid: boolean; violations?: string[] };
 }
 
+export type MaterialTextureKind = "water" | "earth" | "grass" | "stone" | "snow";
+
+export interface MaterialTextureView {
+  outputFilename: string;
+  material: MaterialTextureKind;
+  seed: number;
+  intensity: number;
+  frames: number;
+  format: "png" | "gif";
+  sourcePreserved: true;
+}
+
 export type AssetRecipe = "pixel_art" | "animation_pixel_art" | "gif" | "atlas";
 export type AssetJobStatus = "queued" | "running" | "completed" | "failed" | "cancelled";
 

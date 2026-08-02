@@ -5,7 +5,7 @@ import { RequestGenerationGuard } from "./RequestGenerationGuard.js";
 import { useAssetJobController } from "./useAssetJobController.js";
 import { HttpAssetGateway } from "../adapters/mcp/HttpAssetGateway.js";
 import { InMemoryOperationLogger } from "../adapters/observability/InMemoryOperationLogger.js";
-import type { AssetJobView, AssetRecipe, EnhancementApplyView, EnhancementPlanView, RuntimeConfig, ToolDescriptor, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { AssetJobView, AssetRecipe, EnhancementApplyView, EnhancementPlanView, MaterialTextureKind, RuntimeConfig, ToolDescriptor, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { OperationLogEntry } from "../ports/OperationLogPort.js";
 
 const defaultConfig: RuntimeConfig = { workspacePath: "", executablePath: "", gatewayPort: 3765 };
@@ -36,6 +36,7 @@ export interface AssetStudioController {
   startJob(): Promise<void>;
   cancelJob(): Promise<void>;
   executeTool(name: string, args: Record<string, unknown>): Promise<void>;
+  applyMaterialTexture(material: MaterialTextureKind, seed: number, intensity: number): Promise<void>;
   upload(files: File[]): void;
 }
 
@@ -118,6 +119,19 @@ export function useAssetStudioController(): AssetStudioController {
     finally { setBusy(false); }
   }
 
+  async function applyMaterialTexture(material: MaterialTextureKind, seed: number, intensity: number): Promise<void> {
+    if (!assetPath || status.state !== "online") return;
+    const outputFilename = /\.[^./\\]+$/.test(assetPath) ? assetPath.replace(/\.[^./\\]+$/, "-textured.png") : `${assetPath}-textured.png`;
+    setBusy(true); setToolOutput(null); setNotice(`Aplicando textura determinista ${material}...`);
+    try {
+      const result = await service.applyMaterialTexture(assetPath, outputFilename, material, seed, intensity);
+      setEnhancedPreviewUrl(service.assetPreviewUrl(result.outputFilename));
+      setToolOutput(JSON.stringify(result, null, 2));
+      setNotice(`Textura ${result.material} aplicada con seed ${result.seed}; salida preservada.`);
+    } catch (error) { setNotice(errorMessage(error)); }
+    finally { setBusy(false); }
+  }
+
   function upload(files: File[]): void {
     const file = files[0];
     if (!file) return;
@@ -129,5 +143,5 @@ export function useAssetStudioController(): AssetStudioController {
     }).catch((error) => { if (uploadGuard.accepts(request)) { setNotice(errorMessage(error)); setBusy(false); } });
   }
 
-  return { config, status, tools, logs, toolOutput, busy: busy || jobController.busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, recipe: jobController.recipe, updateRecipe: jobController.updateRecipe, job: jobController.job, notice, updateConfig: setConfig, start, stop, inspect, applyPlan, startJob: jobController.start, cancelJob: jobController.cancel, executeTool, upload };
+  return { config, status, tools, logs, toolOutput, busy: busy || jobController.busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, recipe: jobController.recipe, updateRecipe: jobController.updateRecipe, job: jobController.job, notice, updateConfig: setConfig, start, stop, inspect, applyPlan, startJob: jobController.start, cancelJob: jobController.cancel, executeTool, applyMaterialTexture, upload };
 }

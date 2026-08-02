@@ -21,7 +21,8 @@ El navegador no conoce `child_process`, MCP SDK ni rutas de Aseprite. El proceso
 9. `AssetArtifactView` conserva metadata genérica de outputs y `AssetJobPanel` muestra formato, tamaño y hash abreviado;
 10. `AssetPreviewPanel` usa `PixelCompare` para revisar el antes/después con teclado y ARIA;
 11. `ToolRunnerPanel` ejecuta cualquier herramienta MCP con argumentos JSON editables y `InMemoryOperationLogger` publica eventos en vivo hacia `PixelLogViewer`;
-12. las pruebas TDD cubren los casos de uso de mejora, jobs, artifacts, HTTP, preview, runner, observabilidad y límites de almacenamiento.
+12. `MaterialTexturePanel` ofrece presets de agua, tierra, grass, piedra y nieve con seed/intensidad y preview separado;
+13. las pruebas TDD cubren los casos de uso de mejora, jobs, artifacts, HTTP, preview, runner, materiales, observabilidad y límites de almacenamiento.
 
 ## Plan de implementación
 

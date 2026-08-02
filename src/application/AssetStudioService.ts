@@ -1,4 +1,4 @@
-import type { AssetGateway, EnhancementApplyView, EnhancementPlanView, RuntimeConfig, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { AssetGateway, EnhancementApplyView, EnhancementPlanView, MaterialTextureKind, MaterialTextureView, RuntimeConfig, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { OperationEvent, OperationLogPort } from "../ports/OperationLogPort.js";
 import { ToolResponseParser } from "./ToolResponseParser.js";
 
@@ -28,6 +28,13 @@ export class AssetStudioService {
       if (!parsed.applied || !parsed.quality) throw new Error("El MCP devolvió una aplicación sin quality gate");
       return { ...parsed.applied, quality: parsed.quality };
     }, { filename, outputFilename });
+  }
+
+  public async applyMaterialTexture(filename: string, outputFilename: string, material: MaterialTextureKind, seed: number, intensity: number): Promise<MaterialTextureView> {
+    return this.trace("apply_material_texture", async () => {
+      const response = await this.gateway.callTool("apply_material_texture", { input_filename: filename, output_filename: outputFilename, material, seed, intensity, format: "png" });
+      return this.responseParser.parseJson<MaterialTextureView>(response, "El MCP no devolvió el resultado de textura");
+    }, { filename, outputFilename, material, seed, intensity });
   }
 
   public assetPreviewUrl(path: string): string { return this.gateway.assetPreviewUrl(path); }
