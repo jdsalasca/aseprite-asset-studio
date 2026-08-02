@@ -34,7 +34,8 @@ describe("hexagonal boundaries", () => {
     expect(main).not.toContain('import "./styles/app.css"');
     expect(foundation).toContain("body {");
     expect(typography).toContain(".eyebrow");
-    expect(workflow).toContain(".preview-grid");
+    expect(components).toContain(".preview-grid");
+    expect(workflow).not.toContain(".preview-grid");
     expect(workflow).not.toContain("@extend");
     expect(workflow.match(/\.quality-recommendations \{/g)?.length).toBe(1);
     expect(components).not.toContain(".quality-recommendations {");

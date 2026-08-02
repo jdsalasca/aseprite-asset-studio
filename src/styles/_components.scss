@@ -1,12 +1,5 @@
 @use "mixins" as m;
 
-.eyebrow { color: var(--studio-cyan); font-size: .7rem; letter-spacing: .18em; margin: 0 0 .6rem; }
-.studio-header h1 { font-size: clamp(1.8rem, 4vw, 3.2rem); margin: 0; text-shadow: 4px 4px 0 var(--studio-shadow); }
-.subtitle, .muted, .setup-status span { color: var(--studio-muted); font-size: .85rem; }
-.setup-status span { font-size: .75rem; }
-.setup-guide { color: var(--studio-muted); font-size: .75rem; line-height: 1.6; margin-top: 1rem; }
-.setup-guide summary { color: var(--studio-amber); cursor: pointer; }
-.setup-guide code { color: var(--studio-cyan); }
 .preview-grid { @include m.studio-grid; }
 .preview-grid figure { background: var(--studio-ink); margin: 0; min-height: 160px; padding: .7rem; }
 .preview-grid img { display: block; image-rendering: pixelated; max-height: 320px; max-width: 100%; object-fit: contain; width: 100%; }
@@ -22,7 +15,6 @@
 .artifact-list article span { color: #d4def0; font-size: .78rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .artifact-list article small { color: var(--studio-muted); font-size: .68rem; }
 .tool-runner-actions { display: flex; justify-content: flex-end; margin-top: 1rem; }
-.tool-description { line-height: 1.5; }
 .tool-output { background: var(--studio-ink); border: 1px solid var(--studio-cyan); margin-top: 1rem; padding: .7rem; }
 .tool-output summary { color: var(--studio-cyan); cursor: pointer; font-size: .7rem; letter-spacing: .1em; }
 .tool-output pre { color: #d4def0; font-size: .7rem; max-height: 280px; overflow: auto; white-space: pre-wrap; }
