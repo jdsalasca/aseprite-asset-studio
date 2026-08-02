@@ -19,7 +19,8 @@ El navegador no conoce `child_process`, MCP SDK ni rutas de Aseprite. El proceso
 7. `AssetJobService` traduce recetas genéricas al contrato externo, mientras la UX solo consume estados tipados;
 8. `useAssetJobController` aísla polling, cancelación y selección de receta del controlador principal;
 9. `AssetArtifactView` conserva metadata genérica de outputs y `AssetJobPanel` muestra formato, tamaño y hash abreviado;
-10. las pruebas TDD cubren los casos de uso de mejora, jobs, artifacts, HTTP y límites de almacenamiento.
+10. `AssetPreviewPanel` usa `PixelCompare` para revisar el antes/después con teclado y ARIA;
+11. las pruebas TDD cubren los casos de uso de mejora, jobs, artifacts, HTTP, preview y límites de almacenamiento.
 
 ## Plan de implementación
 
@@ -32,11 +33,12 @@ El navegador no conoce `child_process`, MCP SDK ni rutas de Aseprite. El proceso
 - mostrar los artifacts generados en la UX sin exponer detalles del proveedor;
 - probar primero las transiciones de estado y después el flujo contra el gateway real.
 
-### Fase 4 · UX de producción
+### Fase 4 · UX de producción — comparación implementada
 
 - añadir comparación antes/después, selector de receta y navegación de frames;
+- `PixelCompare` ya está integrado; la navegación de frames queda como siguiente incremento;
 - mostrar señales detectadas, warnings y quality gate sin mezclar reglas de dominio en React;
-- usar componentes de `pixel-art-ui` para estados accesibles, teclado y reduced motion;
+- usar componentes de `pixel-art-ui` para estados accesibles, teclado y reduced motion; los estilos se importan explícitamente para no romper SSR;
 - añadir pruebas de interacción y un E2E del flujo upload → inspect → plan → apply.
 
 ### Fase 5 · Contratos y releases
