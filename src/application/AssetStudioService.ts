@@ -1,4 +1,4 @@
-import type { AnimationQualityView, AnimationSheetView, AssetGateway, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetPresetGenerationView, AssetQualityBatchView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetVariantKind, AssetVariantPackView, BiomeTransitionView, ContactSheetView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, PaletteHarmonizeView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SceneExtensionView, SpriteEffectKind, SpriteGeometryView, SpriteNormalizationView, SpritePivotMode, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { AnimationQualityView, AnimationSheetView, AssetGateway, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetPresetGenerationView, AssetQualityBatchView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetVariantKind, AssetVariantPackView, BiomeTransitionView, ContactSheetView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, PaletteHarmonizeView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SceneExtensionView, SpriteEffectKind, SpriteGeometryView, SpriteHitboxView, SpriteNormalizationView, SpritePivotMode, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { RuntimeDiagnostics } from "../domain/aseprite.js";
 import type { OperationEvent, OperationLogPort } from "../ports/OperationLogPort.js";
 import { ToolResponseParser } from "./ToolResponseParser.js";
@@ -126,6 +126,13 @@ export class AssetStudioService {
       const response = await this.gateway.callTool("inspect_sprite_geometry", { filename, min_component_pixels: minComponentPixels });
       return this.responseParser.parseJson<SpriteGeometryView>(response, "El MCP no devolvió la geometría del sprite");
     }, { filename, minComponentPixels });
+  }
+
+  public async generateSpriteHitboxes(input: { filename: string; outputFilename: string; mode: "components" | "union"; padding: number; minComponentPixels?: number }): Promise<SpriteHitboxView> {
+    return this.trace("generate_sprite_hitboxes", async () => {
+      const response = await this.gateway.callTool("generate_sprite_hitboxes", { filename: input.filename, output_filename: input.outputFilename, mode: input.mode, padding: input.padding, min_component_pixels: input.minComponentPixels ?? 1 });
+      return this.responseParser.parseJson<SpriteHitboxView>(response, "El MCP no devolvió los hitboxes del sprite");
+    }, { filename: input.filename, mode: input.mode, padding: input.padding });
   }
 
   public async generateAssetPreset(input: { presetId: string; outputPrefix: string; width: number; height: number; seed: number }): Promise<AssetPresetGenerationView> {
