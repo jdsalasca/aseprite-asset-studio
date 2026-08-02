@@ -1,4 +1,4 @@
-import type { AnimationQualityView, AnimationSheetView, AssetGateway, AssetLibraryAuditView, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetLibrarySummaryView, AssetPresetGenerationView, AssetQualityBatchView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetVariantKind, AssetVariantPackView, BiomeTransitionView, ContactSheetView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, PaletteHarmonizeView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SceneExtensionView, SpriteEffectKind, SpriteGeometryView, SpriteHitboxView, SpriteNormalizationView, SpritePivotMode, SpriteRuntimeBundleView, SpriteAnchorsView, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { AnimationQualityView, AnimationSheetView, AssetGateway, AssetLibraryAuditView, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetLibrarySummaryView, AssetPresetGenerationView, AssetQualityBatchView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetScenePlanView, AssetVariantKind, AssetVariantPackView, BiomeTransitionView, ContactSheetView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, PaletteHarmonizeView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SceneExtensionView, SpriteEffectKind, SpriteGeometryView, SpriteHitboxView, SpriteNormalizationView, SpritePivotMode, SpriteRuntimeBundleView, SpriteAnchorsView, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { RuntimeDiagnostics } from "../domain/aseprite.js";
 import type { OperationEvent, OperationLogPort } from "../ports/OperationLogPort.js";
 import { ToolResponseParser } from "./ToolResponseParser.js";
@@ -198,6 +198,13 @@ export class AssetStudioService {
       const response = await this.gateway.callTool("summarize_asset_library", {});
       return this.responseParser.parseJson<AssetLibrarySummaryView>(response, "El MCP no devolvió el resumen de la biblioteca");
     });
+  }
+
+  public async planAssetScene(itemIds: string[]): Promise<AssetScenePlanView> {
+    return this.trace("plan_asset_scene", async () => {
+      const response = await this.gateway.callTool("plan_asset_scene", { item_ids: itemIds });
+      return this.responseParser.parseJson<AssetScenePlanView>(response, "El MCP no devolvió el plan de escena");
+    }, { itemCount: itemIds.length });
   }
 
   public async extendScene(input: { inputMapFilename: string; outputMapFilename: string; previewFilename?: string; top: number; right: number; bottom: number; left: number; seed: number }): Promise<SceneExtensionView> {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { AssetStudioService } from "../src/application/AssetStudioService.js";
-import type { AssetGateway, AssetLibraryAuditView, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetLibrarySummaryView, AssetRecipeExecutionView, HealthResponse, RuntimeConfig, StoredAsset, ToolDescriptor, ToolRuntimeStatus } from "../src/domain/contracts.js";
+import type { AssetGateway, AssetLibraryAuditView, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetLibrarySummaryView, AssetRecipeExecutionView, AssetScenePlanView, HealthResponse, RuntimeConfig, StoredAsset, ToolDescriptor, ToolRuntimeStatus } from "../src/domain/contracts.js";
 import type { OperationEvent, OperationLogPort } from "../src/ports/OperationLogPort.js";
 
 const status: ToolRuntimeStatus = { state: "online", pid: 7, serverName: "fake", serverVersion: "1", toolCount: 1, message: "online" };
@@ -52,6 +52,7 @@ class FakeGateway implements AssetGateway {
     if (name === "compose_asset_preset") return { content: [{ text: JSON.stringify({ preset: { id: String(args.id), title: "Rainy grove", description: "Oak", category: "flora", itemIds: ["oak"], recommendedTools: ["generate_world_map"], deterministic: true }, items: [], layers: [{ id: "rainy-grove-oak", assetId: "oak", role: "background", order: 0 }], deterministic: true } satisfies AssetLibraryPresetCompositionView) }] };
     if (name === "audit_asset_library") return { content: [{ text: JSON.stringify({ operation: name, libraryVersion: "catalog-v1", totalItems: 339, totalCategories: 24, totalPresets: 12, totalFolders: 339, readmePaths: 339, previewPaths: 339, spritePaths: 339, valid: true, violations: [], deterministic: true, sourcePreserved: true } satisfies AssetLibraryAuditView) }] };
     if (name === "summarize_asset_library") return { content: [{ text: JSON.stringify({ operation: name, libraryVersion: "catalog-v2", totalItems: 339, totalCategories: 24, totalPresets: 12, categories: [{ id: "flora", title: "Flora", itemCount: 42, examples: ["oak", "pine"] }], presets: [{ id: "grove", title: "Living grove", category: "flora", itemCount: 8 }], deterministic: true, sourcePreserved: true } satisfies AssetLibrarySummaryView) }] };
+    if (name === "plan_asset_scene") return { content: [{ text: JSON.stringify({ operation: name, libraryVersion: "catalog-scene-v1", itemIds: ["oak"], layers: [{ id: "scene-oak", assetId: "oak", title: "Oak", category: "flora", kind: "scene", role: "background", order: 0, previewPath: "flora/oak/preview.png", spritePath: "flora/oak/sprite-sheet.png" }], deterministic: true, sourcePreserved: true } satisfies AssetScenePlanView) }] };
     return { content: [{ text: JSON.stringify({ applied: { planId: "plan-1", outputFilename: args.output_filename, format: "png", frames: 1, passesApplied: ["cleanup"], sourcePreserved: true }, quality: { valid: true, violations: [] } }) }] };
   }
   public async upload(file: File): Promise<StoredAsset> { return { filename: file.name, path: `/tmp/${file.name}`, sizeBytes: file.size }; }
@@ -300,6 +301,13 @@ describe("AssetStudioService enhancement use cases", () => {
     const result = await new AssetStudioService(gateway).summarizeAssetLibrary();
     expect(result).toMatchObject({ operation: "summarize_asset_library", totalCategories: 24, totalPresets: 12 });
     expect(gateway.calls[0]).toMatchObject({ name: "summarize_asset_library", args: {} });
+  });
+
+  it("plans a scene through the shared MCP gateway", async () => {
+    const gateway = new FakeGateway();
+    const result = await new AssetStudioService(gateway).planAssetScene(["oak"]);
+    expect(result).toMatchObject({ operation: "plan_asset_scene", itemIds: ["oak"] });
+    expect(gateway.calls[0]).toMatchObject({ name: "plan_asset_scene", args: { item_ids: ["oak"] } });
   });
 
   it("surfaces the MCP error instead of replacing it with a missing-plan message", async () => {
