@@ -73,6 +73,25 @@ export interface EnhancementBundleView {
   sourcePreserved: true;
 }
 
+export interface EnhancementBatchItemView {
+  filename: string;
+  outputFilename: string;
+  ok: boolean;
+  planId?: string;
+  frames?: number;
+  passesApplied?: string[];
+  quality?: { valid: boolean; violations?: string[] };
+  error?: string;
+}
+
+export interface EnhancementBatchView {
+  operation: "apply_enhancement_batch";
+  items: EnhancementBatchItemView[];
+  summary: { total: number; succeeded: number; failed: number };
+  deterministic: true;
+  sourcePreserved: true;
+}
+
 export type MaterialTextureKind = "water" | "earth" | "grass" | "stone" | "snow";
 
 export interface MaterialTextureView {

@@ -1,4 +1,4 @@
-import type { AnimationQualityView, AnimationSheetView, AssetGateway, AssetLibraryAuditView, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetLibrarySummaryView, AssetLibraryVariantPackView, AssetManifestAuditView, AssetPresetGenerationView, AssetQualityBatchView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetSceneAnimationCompositionView, AssetSceneBundleView, AssetSceneCompositionView, AssetScenePlanView, AssetSceneRecommendationView, AssetVariantKind, AssetVariantPackView, BiomeTransitionView, ContactSheetView, DepthLightingView, EnhancementApplyView, EnhancementBundleView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, PaletteHarmonizeView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SceneExtensionView, SpriteEffectKind, SpriteGeometryView, SpriteHitboxView, SpriteNormalizationView, SpritePivotMode, SpriteRuntimeBundleView, SpriteAnchorsView, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { AnimationQualityView, AnimationSheetView, AssetGateway, AssetLibraryAuditView, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetLibrarySummaryView, AssetLibraryVariantPackView, AssetManifestAuditView, AssetPresetGenerationView, AssetQualityBatchView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetSceneAnimationCompositionView, AssetSceneBundleView, AssetSceneCompositionView, AssetScenePlanView, AssetSceneRecommendationView, AssetVariantKind, AssetVariantPackView, BiomeTransitionView, ContactSheetView, DepthLightingView, EnhancementApplyView, EnhancementBatchView, EnhancementBundleView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, PaletteHarmonizeView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SceneExtensionView, SpriteEffectKind, SpriteGeometryView, SpriteHitboxView, SpriteNormalizationView, SpritePivotMode, SpriteRuntimeBundleView, SpriteAnchorsView, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { RuntimeDiagnostics } from "../domain/aseprite.js";
 import type { OperationEvent, OperationLogPort } from "../ports/OperationLogPort.js";
 import { ToolResponseParser } from "./ToolResponseParser.js";
@@ -29,6 +29,15 @@ export class AssetStudioService {
       if (parsed.operation !== "apply_enhancement_bundle" || !parsed.applied || !parsed.quality) throw new Error("El MCP devolvió un bundle de mejora incompleto");
       return { ...parsed.applied, quality: parsed.quality };
     }, { filename, outputFilename });
+  }
+
+  public async applyEnhancementBatch(input: { items: Array<{ filename: string; outputFilename: string; format: "png" | "gif" }>; goals?: string[]; maxColors?: number; seed?: number }): Promise<EnhancementBatchView> {
+    return this.trace("apply_enhancement_batch", async () => {
+      const response = await this.gateway.callTool("apply_enhancement_batch", { items: input.items.map((item) => ({ filename: item.filename, output_filename: item.outputFilename, format: item.format })), ...(input.goals ? { goals: input.goals } : {}), max_colors: input.maxColors ?? 64, seed: input.seed ?? 1 });
+      const parsed = this.responseParser.parseJson<EnhancementBatchView>(response, "El MCP no devolvió el resultado batch de mejora");
+      if (parsed.operation !== "apply_enhancement_batch" || parsed.items.length !== input.items.length) throw new Error("El MCP devolvió un batch de mejora incompleto");
+      return parsed;
+    }, { assets: input.items.length });
   }
 
   public async applyMaterialTexture(filename: string, outputFilename: string, material: MaterialTextureKind, seed: number, intensity: number): Promise<MaterialTextureView> {

@@ -60,6 +60,7 @@ class FakeGateway implements AssetGateway {
     if (name === "compose_asset_scene_animation") return { content: [{ text: JSON.stringify({ operation: name, output: String(args.output_filename), manifest: String(args.manifest_filename), libraryVersion: "catalog-scene-v1", itemIds: args.item_ids as string[], width: Number(args.width), height: Number(args.height), padding: Number(args.padding), frames: Number(args.frames), delayMs: Number(args.delay_ms), frameLayers: [{ index: 0, layers: [{ id: "scene-rain", assetId: "rain", title: "Rain", category: "effects", kind: "effect", role: "effect", order: 0, previewPath: "effects/rain/preview.gif", spritePath: "effects/rain/sprite-sheet.gif", x: 2, y: 2, width: 60, height: 60 }] }], deterministic: true, sourcePreserved: true } satisfies AssetSceneAnimationCompositionView) }] };
     if (name === "generate_library_variant_pack") return { content: [{ text: JSON.stringify({ operation: name, manifest: "out/library.json", libraryVersion: "catalog-v1", itemIds: args.item_ids as string[], outputPrefix: String(args.output_prefix), variants: args.variants as AssetLibraryVariantPackView["variants"], frames: Number(args.frames), seed: Number(args.seed), assets: [{ assetId: "oak", title: "Oak", outputPrefix: "out/library/oak", artifacts: [{ variant: "rain", outputFilename: "out/library/oak-rain.gif", operation: "generate_rain_overlay", frames: Number(args.frames), format: "gif", deterministic: true, sourcePreserved: true }] }], deterministic: true, sourcePreserved: true } satisfies AssetLibraryVariantPackView) }] };
     if (name === "apply_enhancement_bundle") return { content: [{ text: JSON.stringify({ operation: name, plan: { planId: "plan-1", algorithmVersion: "enhancement-plan-v1", filename: "source.png", seed: 1, detectedSignals: [], warnings: [], passes: [{ id: "cleanup", reason: "cleanup", parameters: {} }], destructive: false }, applied: { planId: "plan-1", outputFilename: args.output_filename, format: "png", frames: 1, passesApplied: ["cleanup"], sourcePreserved: true }, quality: { valid: true, violations: [] }, deterministic: true, sourcePreserved: true }) }] };
+    if (name === "apply_enhancement_batch") return { content: [{ text: JSON.stringify({ operation: name, items: (args.items as Array<{ filename: string; output_filename: string }>).map((item) => ({ filename: item.filename, outputFilename: item.output_filename, ok: true, planId: "plan-1", frames: 1, passesApplied: ["cleanup"], quality: { valid: true, violations: [] } })), summary: { total: (args.items as unknown[]).length, succeeded: (args.items as unknown[]).length, failed: 0 }, deterministic: true, sourcePreserved: true }) }] };
     return { content: [{ text: JSON.stringify({ applied: { planId: "plan-1", outputFilename: args.output_filename, format: "png", frames: 1, passesApplied: ["cleanup"], sourcePreserved: true }, quality: { valid: true, violations: [] } }) }] };
   }
   public async upload(file: File): Promise<StoredAsset> { return { filename: file.name, path: `/tmp/${file.name}`, sizeBytes: file.size }; }
@@ -92,6 +93,13 @@ describe("AssetStudioService enhancement use cases", () => {
 
     expect(result).toMatchObject({ outputFilename: "source-textured.png", material: "water", seed: 42, intensity: 0.7, sourcePreserved: true });
     expect(gateway.calls[0]).toMatchObject({ name: "apply_material_texture", args: { input_filename: "source.png", output_filename: "source-textured.png", material: "water" } });
+  });
+
+  it("applies one deterministic enhancement batch through the typed gateway", async () => {
+    const gateway = new FakeGateway();
+    const result = await new AssetStudioService(gateway).applyEnhancementBatch({ items: [{ filename: "source.png", outputFilename: "source-batch.png", format: "png" }, { filename: "variant.gif", outputFilename: "variant-batch.gif", format: "gif" }], goals: ["cleanup"], seed: 4 });
+    expect(result.summary).toEqual({ total: 2, succeeded: 2, failed: 0 });
+    expect(gateway.calls[0]).toMatchObject({ name: "apply_enhancement_batch", args: { max_colors: 64, seed: 4 } });
   });
 
   it("executes the depth lighting pass through the generic gateway contract", async () => {
