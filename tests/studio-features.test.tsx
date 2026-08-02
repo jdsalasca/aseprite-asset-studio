@@ -17,6 +17,7 @@ import { AssetLibrarySummaryPanel } from "../src/components/AssetLibrarySummaryP
 import { AssetScenePlannerPanel } from "../src/components/AssetScenePlannerPanel.js";
 import { AssetSceneComposerPanel } from "../src/components/AssetSceneComposerPanel.js";
 import { AssetLibraryVariantPackPanel } from "../src/components/AssetLibraryVariantPackPanel.js";
+import { AssetManifestAuditPanel } from "../src/components/AssetManifestAuditPanel.js";
 import { SceneExtensionPanel } from "../src/components/SceneExtensionPanel.js";
 import { VariantPackPanel } from "../src/components/VariantPackPanel.js";
 import { SceneEffectStackPanel } from "../src/components/SceneEffectStackPanel.js";
@@ -101,6 +102,10 @@ describe("studio feature contracts", () => {
     expect(libraryVariantMarkup).toContain("LIBRARY VARIANT FACTORY");
     expect(libraryVariantMarkup).toContain("GENERATE LIBRARY PACK");
     expect(libraryVariantMarkup).toContain("LIBRARY VARIANT PACK");
+    const manifestAuditMarkup = renderToStaticMarkup(<AssetManifestAuditPanel busy={false} online result={{ operation: "audit_asset_manifest", manifest: "out/scene.json", artifacts: [{ filename: "out/scene.png", status: "missing", sizeBytes: 0, format: "png", sha256: null }], totalArtifacts: 1, missingArtifacts: 1, emptyArtifacts: 0, valid: false, deterministic: true, sourcePreserved: true }} onAudit={() => undefined} />);
+    expect(manifestAuditMarkup).toContain("MANIFEST AUDIT");
+    expect(manifestAuditMarkup).toContain("MANIFEST INTEGRITY");
+    expect(manifestAuditMarkup).toContain("out/scene.png");
     expect(renderToStaticMarkup(<PaletteHarmonizerPanel busy={false} online assetName="hero.png" palette={["#3155D8", "#8AA0F0"]} onApply={() => undefined} />)).toContain("HARMONIZE PALETTE");
     expect(renderToStaticMarkup(<PaletteHarmonizerPanel busy={false} online assetName="hero.png" palette={["#3155D8", "#8AA0F0"]} onApply={() => undefined} />)).toContain("#3155D8");
     expect(renderToStaticMarkup(<ContactSheetPanel busy={false} online assetCount={3} sourceNames={["rain.gif", "night.gif", "fire.gif"]} previewUrl="sheet.png" result={{ operation: "build_contact_sheet", output: "sheet.png", manifest: "sheet.json", assets: 3, columns: 2, rows: 2, width: 66, height: 66, cellWidth: 32, cellHeight: 32, padding: 2, deterministic: true, sourcePreserved: true }} onBuild={() => undefined} />)).toContain("BUILD CONTACT SHEET");
