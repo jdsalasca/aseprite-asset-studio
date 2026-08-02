@@ -28,6 +28,7 @@ Variables opcionales:
 MCP_REPO_PATH=C:\\Users\\jdsal\\Documents\\Programming-personal\\aseprite-mcp
 ASEPRITE_PATH=C:\\Program Files\\Aseprite\\Aseprite.exe
 ASSET_STUDIO_GATEWAY_PORT=3765
+MCP_REST_PORT=3766
 ASSET_STUDIO_UPLOAD_DIR=C:\\Users\\jdsal\\Documents\\Programming-personal\\asset-studio\\.asset-studio\\uploads
 ```
 
@@ -40,6 +41,9 @@ Los assets cargados se validan por extensión, limitan a 32 MB y se guardan medi
 - Los paneles `MATERIAL ENHANCER` y `DEPTH LIGHTING` crean salidas separadas con seed, granularidad y luz direccional reproducibles.
 - `SPRITE EFFECTS` añade outline, color grade, sombra, partículas y normal map con outputs separados.
 - `RECIPE CREATOR` genera un plan MCP determinista con pasos seleccionables, material, luz y seed para revisión humana.
+- `EXECUTE RECIPE` ejecuta el pipeline seleccionado en el servicio compartido del MCP, muestra cada paso, conserva el original y carga el artifact final en la comparación.
 - `BACKGROUND ASSET JOB` permite presets PNG, animación, GIF y atlas; muestra progreso y artifacts con hash.
 - Filtra herramientas y logs desde la UX. Atajos: `Ctrl+I` inspeccionar, `Ctrl+Enter` aplicar, `Ctrl+J` iniciar job.
 - El panel de métricas ayuda a detectar latencia y fallos del gateway sin abrir logs del proveedor.
+
+El Studio detecta Aseprite en la ruta configurada, en `ASEPRITE_PATH` y en rutas comunes. Al pulsar `START MCP` lanza el servidor por stdio, propaga `MCP_REST_PORT` y expone diagnósticos de runtime, detección y último error. Los endpoints REST del MCP permanecen en el repositorio MCP y reutilizan sus mismos servicios de dominio.
