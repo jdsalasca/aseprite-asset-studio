@@ -24,6 +24,7 @@ class FakeGateway implements AssetGateway {
     if (name === "apply_depth_lighting") return { content: [{ text: JSON.stringify({ outputFilename: args.output_filename, direction: args.direction, strength: args.strength, ambient: args.ambient, frames: 1, format: "png", sourcePreserved: true }) }] };
     if (name === "apply_pixel_outline") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: "png", deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_rain_overlay") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: "gif", deterministic: true, sourcePreserved: true }) }] };
+    if (name === "generate_motion_pack") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "create_asset_recipe") return { content: [{ text: JSON.stringify({ recipeId: "recipe-1", schemaVersion: 1, algorithmVersion: "asset-recipe-v1", assetId: args.asset_id, inputFilename: args.input_filename, outputPrefix: args.output_prefix, format: "png", seed: args.seed, steps: [], sourcePreserved: true, deterministic: true }) }] };
     if (name === "execute_asset_recipe") return { content: [{ text: JSON.stringify({ ok: true, recipeId: "recipe-1", outputFilename: "hero-recipe-quality_gate.png", steps: [{ id: "outline", operation: "apply_pixel_outline", ok: true, message: "ok" }, { id: "quality_gate", operation: "run_asset_quality_gate", ok: true, message: "ok" }], sourcePreserved: true, deterministic: true } satisfies AssetRecipeExecutionView) }] };
     if (name === "get_asset_library") return { content: [{ text: JSON.stringify({ query: { query: typeof args.query === "string" ? args.query : "", limit: 24 }, total: 1, categories: [], items: [{ id: "oak", title: "Oak", category: "flora", folder: "flora/oak", kind: "sprite", description: "Tree", tags: ["tree"], variants: ["rain"], formats: ["png", "svg", "json"], readmePath: "flora/oak/README.md", previewPath: "flora/oak/preview.png", spritePath: "flora/oak/sprite-sheet.png", deterministic: true }], presets: [] } satisfies AssetLibrarySearchView) }] };
@@ -83,6 +84,13 @@ describe("AssetStudioService enhancement use cases", () => {
     expect(gateway.calls.map((call) => call.name)).toEqual(["apply_pixel_outline", "generate_rain_overlay", "create_asset_recipe"]);
     expect(gateway.calls[1]?.args).toMatchObject({ input_filename: "source.png", output_filename: "source-rain.gif", format: "gif", seed: 9, intensity: 0.7, wind: 0.2 });
     expect(gateway.calls[2]?.args.steps).toEqual(["outline", "quality_gate"]);
+  });
+
+  it("maps motion controls to the shared MCP cycle generator", async () => {
+    const gateway = new FakeGateway();
+    const result = await new AssetStudioService(gateway).applySpriteEffect("motion", "source.png", "source-walk.gif", { motion: "walk", frames: 8, amplitude: 2, seed: 3 });
+    expect(result).toMatchObject({ operation: "generate_motion_pack", output: "source-walk.gif", format: "gif" });
+    expect(gateway.calls.at(-1)).toMatchObject({ name: "generate_motion_pack", args: { motion: "walk", frames: 8, amplitude: 2, seed: 3, format: "gif" } });
   });
 
   it("executes a recipe through the shared MCP tool and preserves typed output", async () => {
