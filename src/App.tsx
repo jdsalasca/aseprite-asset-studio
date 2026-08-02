@@ -8,9 +8,10 @@ import { QualityGatePanel } from "./components/QualityGatePanel.js";
 import { ServerSetup } from "./components/ServerSetup.js";
 import { ToolGrid } from "./components/ToolGrid.js";
 import { ToolRunnerPanel } from "./components/ToolRunnerPanel.js";
+import { MaterialTexturePanel } from "./components/MaterialTexturePanel.js";
 
 export default function App() {
-  const { config, status, tools, logs, toolOutput, busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, recipe, job, notice, updateConfig, updateRecipe, start, stop, inspect, applyPlan, startJob, cancelJob, executeTool, upload } = useAssetStudioController();
+  const { config, status, tools, logs, toolOutput, busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, recipe, job, notice, updateConfig, updateRecipe, start, stop, inspect, applyPlan, startJob, cancelJob, executeTool, applyMaterialTexture, upload } = useAssetStudioController();
   const [selectedToolName, setSelectedToolName] = useState("");
   useEffect(() => { if (!tools.some((tool) => tool.name === selectedToolName)) setSelectedToolName(tools.find((tool) => tool.name === "inspect_reference")?.name ?? tools[0]?.name ?? ""); }, [selectedToolName, tools]);
   const initialToolArgs = useMemo(() => {
@@ -32,6 +33,7 @@ export default function App() {
         {previewUrl ? <AssetPreviewPanel before={previewUrl} after={enhancedPreviewUrl ?? undefined} /> : null}
         {plan ? <><DecisionPlanPanel plan={plan} /><div className="asset-row"><span className="muted">Salida: archivo separado -enhanced.png</span><PixelButton disabled={busy || status.state !== "online" || !assetPath} onClick={() => void applyPlan()}>APPLY ENHANCEMENT</PixelButton></div></> : null}
         {quality ? <QualityGatePanel quality={quality} /> : null}
+        {assetPath ? <MaterialTexturePanel busy={busy} online={status.state === "online"} assetName={assetName} onApply={(material, seed, intensity) => void applyMaterialTexture(material, seed, intensity)} /> : null}
         {assetPath ? <AssetJobPanel recipe={recipe} job={job} busy={busy} canStart={status.state === "online" && Boolean(assetPath)} onRecipeChange={updateRecipe} onStart={() => void startJob()} onCancel={() => void cancelJob()} /> : null}
         <PixelPanel title="ENHANCEMENT PIPELINE" accent="pink"><div className="pipeline"><span>INSPECT</span><i>→</i><span>MATERIALS</span><i>→</i><span>LIGHTING</span><i>→</i><span>QUALITY</span></div><PixelProgress value={progressValue} label={progressLabel} /></PixelPanel>
         {tools.length ? <><ToolRunnerPanel tools={tools} selectedToolName={selectedToolName} initialArgs={initialToolArgs} busy={busy} output={toolOutput} onToolChange={setSelectedToolName} onRun={(name, args) => void executeTool(name, args)} /><ToolGrid tools={tools} selectedName={selectedToolName} onSelect={setSelectedToolName} /></> : <PixelPanel title="QUICK START"><p className="muted">Carga un PNG, GIF, WebP o Aseprite y arranca el MCP. Después podrás ejecutar cualquier herramienta tipada con argumentos JSON.</p></PixelPanel>}
