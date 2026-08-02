@@ -43,6 +43,7 @@ Los assets cargados se validan por extensión, limitan a 32 MB y se guardan medi
 - `RECIPE CREATOR` genera un plan MCP determinista con pasos seleccionables, material, luz y seed para revisión humana.
 - `EXECUTE RECIPE` ejecuta el pipeline seleccionado en el servicio compartido del MCP, muestra cada paso, conserva el original y carga el artifact final en la comparación.
 - `BACKGROUND ASSET JOB` permite presets PNG, animación, GIF y atlas; muestra progreso y artifacts con hash.
+- `SCENE EXTENSION` amplía un mapa JSON existente con padding configurable, seed reproducible, preview y feedback de capas/landmarks preservados.
 - Filtra herramientas y logs desde la UX. Atajos: `Ctrl+I` inspeccionar, `Ctrl+Enter` aplicar, `Ctrl+J` iniciar job.
 - El panel de métricas ayuda a detectar latencia y fallos del gateway sin abrir logs del proveedor.
 
