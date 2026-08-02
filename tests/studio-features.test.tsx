@@ -17,6 +17,7 @@ import { VariantPackPanel } from "../src/components/VariantPackPanel.js";
 import { SceneEffectStackPanel } from "../src/components/SceneEffectStackPanel.js";
 import { VariantPreviewPanel } from "../src/components/VariantPreviewPanel.js";
 import { QualityRecommendationsPanel } from "../src/components/QualityRecommendationsPanel.js";
+import { PaletteHarmonizerPanel } from "../src/components/PaletteHarmonizerPanel.js";
 
 describe("studio feature contracts", () => {
   it("validates supported asset formats and size limits", () => {
@@ -68,5 +69,7 @@ describe("studio feature contracts", () => {
     expect(libraryMarkup).toContain('role="listbox"');
     const presetReadyMarkup = renderToStaticMarkup(<AssetLibraryPanel busy={false} online restPort={3766} query="" items={[]} presets={[]} total={0} composition={{ preset: { id: "coastal-sunset", title: "Coastal sunset", description: "Beach", category: "biomes-and-maps", itemIds: [], recommendedTools: [], deterministic: true }, items: [], layers: [], deterministic: true }} onQueryChange={() => undefined} onSearch={() => undefined} onGeneratePreset={() => undefined} />);
     expect(presetReadyMarkup).toContain("GENERATE SCENE");
+    expect(renderToStaticMarkup(<PaletteHarmonizerPanel busy={false} online assetName="hero.png" palette={["#3155D8", "#8AA0F0"]} onApply={() => undefined} />)).toContain("HARMONIZE PALETTE");
+    expect(renderToStaticMarkup(<PaletteHarmonizerPanel busy={false} online assetName="hero.png" palette={["#3155D8", "#8AA0F0"]} onApply={() => undefined} />)).toContain("#3155D8");
   });
 });

@@ -28,6 +28,7 @@ class FakeGateway implements AssetGateway {
     if (name === "upscale_pixel_art") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, scale: args.scale, frames: 1, format: "png", deterministic: true, sourcePreserved: true }) }] };
     if (name === "extend_scene") return { content: [{ text: JSON.stringify({ operation: name, input: args.input_map_filename, output: args.output_map_filename, preview: null, width: 32, height: 24, padding: { top: args.top, right: args.right, bottom: args.bottom, left: args.left }, seed: args.seed, layers: 3, deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_biome_transition") return { content: [{ text: JSON.stringify({ operation: name, input: args.input_map_filename, output: args.output_map_filename, preview: args.preview_filename ?? null, width: 32, height: 24, transitionWidth: args.transition_width, transitions: 42, seed: args.seed, deterministic: true, sourcePreserved: true }) }] };
+    if (name === "harmonize_asset_palette") return { content: [{ text: JSON.stringify({ operation: name, input: args.input_filename, output: args.output_filename, frames: 1, format: "png", accentColor: args.accent_color, strength: args.strength, maxColors: args.max_colors, palette: ["#3155D8", "#8AA0F0"], deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_seamless_texture") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: "png", deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_water_reflection") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_water_caustics") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
@@ -123,6 +124,13 @@ describe("AssetStudioService enhancement use cases", () => {
     const result = await new AssetStudioService(gateway).generateBiomeTransition({ inputMapFilename: "world.json", outputMapFilename: "world-transition.json", previewFilename: "world-transition.png", transitionWidth: 2, seed: 9 });
     expect(result).toMatchObject({ operation: "generate_biome_transition", output: "world-transition.json", transitionWidth: 2, transitions: 42, sourcePreserved: true });
     expect(gateway.calls.at(-1)).toMatchObject({ name: "generate_biome_transition", args: { input_map_filename: "world.json", output_map_filename: "world-transition.json", preview_filename: "world-transition.png", transition_width: 2, seed: 9 } });
+  });
+
+  it("maps palette harmonization to the shared MCP image service", async () => {
+    const gateway = new FakeGateway();
+    const result = await new AssetStudioService(gateway).harmonizePalette("source.png", "source-harmonized.png", "#3155d8", 0.8, 8);
+    expect(result).toMatchObject({ operation: "harmonize_asset_palette", output: "source-harmonized.png", format: "png", maxColors: 8, sourcePreserved: true });
+    expect(gateway.calls.at(-1)).toMatchObject({ name: "harmonize_asset_palette", args: { input_filename: "source.png", output_filename: "source-harmonized.png", accent_color: "#3155d8", strength: 0.8, max_colors: 8, format: "png" } });
   });
 
   it("maps seamless texture to the shared MCP effects service", async () => {

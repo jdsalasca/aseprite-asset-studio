@@ -1,4 +1,4 @@
-import type { AssetGateway, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetPresetGenerationView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetVariantKind, AssetVariantPackView, BiomeTransitionView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SceneExtensionView, SpriteEffectKind, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { AssetGateway, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetPresetGenerationView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetVariantKind, AssetVariantPackView, BiomeTransitionView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, PaletteHarmonizeView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SceneExtensionView, SpriteEffectKind, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { RuntimeDiagnostics } from "../domain/aseprite.js";
 import type { OperationEvent, OperationLogPort } from "../ports/OperationLogPort.js";
 import { ToolResponseParser } from "./ToolResponseParser.js";
@@ -141,6 +141,13 @@ export class AssetStudioService {
       const response = await this.gateway.callTool("generate_biome_transition", { input_map_filename: input.inputMapFilename, output_map_filename: input.outputMapFilename, ...(input.previewFilename ? { preview_filename: input.previewFilename } : {}), transition_width: input.transitionWidth, seed: input.seed });
       return this.responseParser.parseJson<BiomeTransitionView>(response, "El MCP no devolvió las transiciones de bioma");
     }, { inputMapFilename: input.inputMapFilename, outputMapFilename: input.outputMapFilename, transitionWidth: input.transitionWidth, seed: input.seed });
+  }
+
+  public async harmonizePalette(filename: string, outputFilename: string, accentColor: string, strength: number, maxColors: number): Promise<PaletteHarmonizeView> {
+    return this.trace("harmonize_asset_palette", async () => {
+      const response = await this.gateway.callTool("harmonize_asset_palette", { input_filename: filename, output_filename: outputFilename, accent_color: accentColor, strength, max_colors: maxColors, format: "png" });
+      return this.responseParser.parseJson<PaletteHarmonizeView>(response, "El MCP no devolvió la paleta armonizada");
+    }, { filename, outputFilename, accentColor, strength, maxColors });
   }
 
   private async trace<T>(operation: string, action: () => Promise<T>, metadata?: Record<string, string | number | boolean>): Promise<T> {

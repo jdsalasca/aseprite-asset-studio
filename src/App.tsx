@@ -21,12 +21,13 @@ import { VariantPackPanel } from "./components/VariantPackPanel.js";
 import { VariantPreviewPanel } from "./components/VariantPreviewPanel.js";
 import { SceneEffectStackPanel } from "./components/SceneEffectStackPanel.js";
 import { QualityRecommendationsPanel } from "./components/QualityRecommendationsPanel.js";
+import { PaletteHarmonizerPanel } from "./components/PaletteHarmonizerPanel.js";
 import { buildPipelineStages } from "./application/pipelineStages.js";
 import { summarizeRuntimeMetrics } from "./application/runtimeMetrics.js";
 import { shortcutAction } from "./application/keyboardShortcuts.js";
 
 export default function App() {
-  const { config, status, diagnostics, tools, logs, toolOutput, busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, qualityRecommendations, variantArtifacts, variantPreviewUrl, assetLibrary, assetPresetComposition, libraryQuery, recipe, job, notice, updateConfig, updateRecipe, start, stop, detectAseprite, inspect, applyPlan, startJob, cancelJob, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, generateVariantPack, generateSceneEffectStack, generateAssetPreset, inspectAssetQualityBundle, createAssetRecipe, executeAssetRecipe, extendScene, generateBiomeTransition, searchAssetLibrary, composeAssetPreset, updateLibraryQuery, upload } = useAssetStudioController();
+  const { config, status, diagnostics, tools, logs, toolOutput, busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, qualityRecommendations, harmonizedPalette, variantArtifacts, variantPreviewUrl, assetLibrary, assetPresetComposition, libraryQuery, recipe, job, notice, updateConfig, updateRecipe, start, stop, detectAseprite, inspect, applyPlan, startJob, cancelJob, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, generateVariantPack, generateSceneEffectStack, generateAssetPreset, inspectAssetQualityBundle, createAssetRecipe, executeAssetRecipe, extendScene, generateBiomeTransition, harmonizePalette, searchAssetLibrary, composeAssetPreset, updateLibraryQuery, upload } = useAssetStudioController();
   const [selectedToolName, setSelectedToolName] = useState("");
   const stages = useMemo(() => buildPipelineStages({ online: status.state === "online", hasAsset: Boolean(assetPath), hasPlan: Boolean(plan), hasQuality: Boolean(quality) }), [assetPath, plan, quality, status.state]);
   const metrics = useMemo(() => summarizeRuntimeMetrics(logs), [logs]);
@@ -68,6 +69,7 @@ export default function App() {
         <QualityRecommendationsPanel recommendations={qualityRecommendations} />
         {assetPath ? <MaterialTexturePanel busy={busy} online={status.state === "online"} assetName={assetName} onApply={(material, seed, intensity) => void applyMaterialTexture(material, seed, intensity)} /> : null}
         {assetPath ? <LightingPanel busy={busy} online={status.state === "online"} assetName={assetName} onApply={(direction, strength, ambient) => void applyDepthLighting(direction, strength, ambient)} /> : null}
+        {assetPath ? <PaletteHarmonizerPanel busy={busy} online={status.state === "online"} assetName={assetName} palette={harmonizedPalette} onApply={(accentColor, strength, maxColors) => void harmonizePalette(accentColor, strength, maxColors)} /> : null}
         {assetPath ? <SpriteEffectsPanel busy={busy} online={status.state === "online"} assetName={assetName} onApply={(kind, options) => void applySpriteEffect(kind, options)} /> : null}
         {assetPath ? <VariantPackPanel busy={busy} online={status.state === "online"} assetName={assetName} onGenerate={(variants, frames, seed) => void generateVariantPack(variants, frames, seed)} /> : null}
         {assetPath ? <SceneEffectStackPanel busy={busy} online={status.state === "online"} assetName={assetName} onGenerate={(effects, frames, seed, material, direction) => void generateSceneEffectStack(effects, frames, seed, material, direction)} /> : null}
