@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PixelButton, PixelField, PixelPanel, PixelSelect } from "@jdsalasc/pixel-ui";
+import { PixelButton, PixelField, PixelPanel, PixelSelect, PixelSlider } from "@jdsalasc/pixel-ui";
 import type { LightDirection } from "../domain/contracts.js";
 
 interface LightingPanelProps {
@@ -36,7 +36,7 @@ export function LightingPanel({ busy, online, assetName, onApply }: LightingPane
     <PixelSelect label="LIGHT DIRECTION" value={direction} onChange={(event) => setDirection(event.target.value as LightDirection)} disabled={busy || !online}>
       {DIRECTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
     </PixelSelect>
-    <div className="lighting-controls"><PixelField label="STRENGTH (0–1)" type="number" min="0" max="1" step="0.05" value={strength} onChange={(event) => setStrength(event.target.value)} disabled={busy || !online} /><PixelField label="AMBIENT (0–1)" type="number" min="0" max="1" step="0.05" value={ambient} onChange={(event) => setAmbient(event.target.value)} disabled={busy || !online} /></div>
+    <div className="lighting-controls"><PixelSlider label={`STRENGTH (0–1) · ${strength}`} min={0} max={1} step={0.05} value={Number(strength)} onChange={(event) => setStrength(event.target.value)} disabled={busy || !online} /><PixelSlider label={`AMBIENT (0–1) · ${ambient}`} min={0} max={1} step={0.05} value={Number(ambient)} onChange={(event) => setAmbient(event.target.value)} disabled={busy || !online} /></div>
     <div className="tool-runner-actions"><PixelButton tone="cyan" disabled={busy || !online} onClick={apply}>{busy ? "LIGHTING..." : "APPLY DEPTH LIGHTING"}</PixelButton></div>
   </PixelPanel>;
 }

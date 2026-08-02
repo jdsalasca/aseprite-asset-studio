@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PixelButton, PixelField, PixelPanel, PixelSelect } from "@jdsalasc/pixel-ui";
+import { PixelButton, PixelField, PixelPanel, PixelSelect, PixelSlider } from "@jdsalasc/pixel-ui";
 import type { MaterialTextureKind } from "../domain/contracts.js";
 
 interface MaterialTexturePanelProps {
@@ -33,7 +33,7 @@ export function MaterialTexturePanel({ busy, online, assetName, onApply }: Mater
     <PixelSelect label="MATERIAL PASS" value={material} onChange={(event) => setMaterial(event.target.value as MaterialTextureKind)} disabled={busy || !online}>
       {MATERIALS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
     </PixelSelect>
-    <div className="material-controls"><PixelField label="SEED" type="number" value={seed} onChange={(event) => setSeed(event.target.value)} disabled={busy || !online} /><PixelField label="INTENSITY (0–1)" type="number" min="0" max="1" step="0.05" value={intensity} onChange={(event) => setIntensity(event.target.value)} disabled={busy || !online} /></div>
+    <div className="material-controls"><PixelField label="SEED" type="number" value={seed} onChange={(event) => setSeed(event.target.value)} disabled={busy || !online} /><PixelSlider label={`INTENSITY (0–1) · ${intensity}`} min={0} max={1} step={0.05} value={Number(intensity)} onChange={(event) => setIntensity(event.target.value)} disabled={busy || !online} /></div>
     <div className="tool-runner-actions"><PixelButton tone="amber" disabled={busy || !online} onClick={apply}>{busy ? "ENHANCING..." : "APPLY MATERIAL PASS"}</PixelButton></div>
   </PixelPanel>;
 }
