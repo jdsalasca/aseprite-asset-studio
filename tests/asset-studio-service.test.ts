@@ -24,6 +24,7 @@ class FakeGateway implements AssetGateway {
     if (name === "apply_depth_lighting") return { content: [{ text: JSON.stringify({ outputFilename: args.output_filename, direction: args.direction, strength: args.strength, ambient: args.ambient, frames: 1, format: "png", sourcePreserved: true }) }] };
     if (name === "apply_pixel_outline") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: "png", deterministic: true, sourcePreserved: true }) }] };
     if (name === "remove_background") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: args.format, deterministic: true, sourcePreserved: true }) }] };
+    if (name === "cleanup_isolated_pixels") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: args.format, deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_rain_overlay") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_motion_pack") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "upscale_pixel_art") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, scale: args.scale, frames: 1, format: "png", deterministic: true, sourcePreserved: true }) }] };
@@ -138,6 +139,13 @@ describe("AssetStudioService enhancement use cases", () => {
     const result = await new AssetStudioService(gateway).applySpriteEffect("background", "source.png", "source-background.png", { background_color: "#142850", tolerance: 12, connected_only: true });
     expect(result).toMatchObject({ operation: "remove_background", output: "source-background.png", format: "png", sourcePreserved: true });
     expect(gateway.calls.at(-1)).toMatchObject({ name: "remove_background", args: { input_filename: "source.png", output_filename: "source-background.png", background_color: "#142850", tolerance: 12, connected_only: true, format: "png" } });
+  });
+
+  it("maps isolated-pixel cleanup to the shared MCP effects service", async () => {
+    const gateway = new FakeGateway();
+    const result = await new AssetStudioService(gateway).applySpriteEffect("cleanup", "source.gif", "source-cleanup.gif", { min_neighbors: 1, iterations: 2 });
+    expect(result).toMatchObject({ operation: "cleanup_isolated_pixels", output: "source-cleanup.gif", format: "gif", sourcePreserved: true });
+    expect(gateway.calls.at(-1)).toMatchObject({ name: "cleanup_isolated_pixels", args: { input_filename: "source.gif", output_filename: "source-cleanup.gif", min_neighbors: 1, iterations: 2, format: "gif" } });
   });
 
   it("normalizes raster frames through the shared MCP gateway and keeps pivot metadata", async () => {
