@@ -27,6 +27,7 @@ class FakeGateway implements AssetGateway {
     if (name === "generate_motion_pack") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "upscale_pixel_art") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, scale: args.scale, frames: 1, format: "png", deterministic: true, sourcePreserved: true }) }] };
     if (name === "extend_scene") return { content: [{ text: JSON.stringify({ operation: name, input: args.input_map_filename, output: args.output_map_filename, preview: null, width: 32, height: 24, padding: { top: args.top, right: args.right, bottom: args.bottom, left: args.left }, seed: args.seed, layers: 3, deterministic: true, sourcePreserved: true }) }] };
+    if (name === "generate_biome_transition") return { content: [{ text: JSON.stringify({ operation: name, input: args.input_map_filename, output: args.output_map_filename, preview: args.preview_filename ?? null, width: 32, height: 24, transitionWidth: args.transition_width, transitions: 42, seed: args.seed, deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_seamless_texture") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: "png", deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_water_reflection") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_water_caustics") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
@@ -115,6 +116,13 @@ describe("AssetStudioService enhancement use cases", () => {
     const result = await new AssetStudioService(gateway).extendScene({ inputMapFilename: "world.json", outputMapFilename: "world-expanded.json", top: 2, right: 8, bottom: 1, left: 4, seed: 9 });
     expect(result).toMatchObject({ operation: "extend_scene", output: "world-expanded.json", width: 32, height: 24, sourcePreserved: true });
     expect(gateway.calls.at(-1)).toMatchObject({ name: "extend_scene", args: { input_map_filename: "world.json", output_map_filename: "world-expanded.json", top: 2, right: 8, bottom: 1, left: 4, seed: 9 } });
+  });
+
+  it("maps biome transition generation to the shared MCP world service", async () => {
+    const gateway = new FakeGateway();
+    const result = await new AssetStudioService(gateway).generateBiomeTransition({ inputMapFilename: "world.json", outputMapFilename: "world-transition.json", previewFilename: "world-transition.png", transitionWidth: 2, seed: 9 });
+    expect(result).toMatchObject({ operation: "generate_biome_transition", output: "world-transition.json", transitionWidth: 2, transitions: 42, sourcePreserved: true });
+    expect(gateway.calls.at(-1)).toMatchObject({ name: "generate_biome_transition", args: { input_map_filename: "world.json", output_map_filename: "world-transition.json", preview_filename: "world-transition.png", transition_width: 2, seed: 9 } });
   });
 
   it("maps seamless texture to the shared MCP effects service", async () => {

@@ -108,6 +108,7 @@ export interface AssetLibraryPresetView { id: string; title: string; description
 export interface AssetLibrarySearchView { query: { query?: string; category?: string; limit?: number }; total: number; categories: Array<{ id: string; title: string; description: string; itemCount: number }>; items: AssetLibraryItemView[]; presets: AssetLibraryPresetView[]; }
 export interface AssetLibraryPresetCompositionView { preset: AssetLibraryPresetView; items: AssetLibraryItemView[]; layers: Array<{ id: string; assetId: string; role: "background" | "midground" | "foreground" | "effect"; order: number }>; deterministic: true; }
 export interface SceneExtensionView { operation: "extend_scene"; input: string; output: string; preview: string | null; width: number; height: number; padding: { top: number; right: number; bottom: number; left: number }; seed: number; layers: number; sourcePreserved: true; deterministic: true; }
+export interface BiomeTransitionView { operation: "generate_biome_transition"; input: string; output: string; preview: string | null; width: number; height: number; transitionWidth: number; transitions: number; seed: number; sourcePreserved: true; deterministic: true; }
 
 export type AssetRecipe = "pixel_art" | "animation_pixel_art" | "gif" | "atlas";
 export type AssetJobStatus = "queued" | "running" | "completed" | "failed" | "cancelled";

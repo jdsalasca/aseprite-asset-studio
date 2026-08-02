@@ -1,4 +1,4 @@
-import type { AssetGateway, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetPresetGenerationView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetVariantKind, AssetVariantPackView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SceneExtensionView, SpriteEffectKind, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { AssetGateway, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetPresetGenerationView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetVariantKind, AssetVariantPackView, BiomeTransitionView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SceneExtensionView, SpriteEffectKind, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { RuntimeDiagnostics } from "../domain/aseprite.js";
 import type { OperationEvent, OperationLogPort } from "../ports/OperationLogPort.js";
 import { ToolResponseParser } from "./ToolResponseParser.js";
@@ -134,6 +134,13 @@ export class AssetStudioService {
       const response = await this.gateway.callTool("extend_scene", { input_map_filename: input.inputMapFilename, output_map_filename: input.outputMapFilename, ...(input.previewFilename ? { preview_filename: input.previewFilename } : {}), top: input.top, right: input.right, bottom: input.bottom, left: input.left, seed: input.seed });
       return this.responseParser.parseJson<SceneExtensionView>(response, "El MCP no devolvió la extensión de escena");
     }, { inputMapFilename: input.inputMapFilename, outputMapFilename: input.outputMapFilename, seed: input.seed });
+  }
+
+  public async generateBiomeTransition(input: { inputMapFilename: string; outputMapFilename: string; previewFilename?: string; transitionWidth: number; seed: number }): Promise<BiomeTransitionView> {
+    return this.trace("generate_biome_transition", async () => {
+      const response = await this.gateway.callTool("generate_biome_transition", { input_map_filename: input.inputMapFilename, output_map_filename: input.outputMapFilename, ...(input.previewFilename ? { preview_filename: input.previewFilename } : {}), transition_width: input.transitionWidth, seed: input.seed });
+      return this.responseParser.parseJson<BiomeTransitionView>(response, "El MCP no devolvió las transiciones de bioma");
+    }, { inputMapFilename: input.inputMapFilename, outputMapFilename: input.outputMapFilename, transitionWidth: input.transitionWidth, seed: input.seed });
   }
 
   private async trace<T>(operation: string, action: () => Promise<T>, metadata?: Record<string, string | number | boolean>): Promise<T> {

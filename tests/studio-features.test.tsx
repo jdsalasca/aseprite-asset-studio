@@ -52,7 +52,8 @@ describe("studio feature contracts", () => {
     expect(effectsMarkup).toContain("WATER REFLECTION");
     expect(effectsMarkup).toContain("WATER CAUSTICS");
     expect(effectsMarkup).toContain("DAY / NIGHT CYCLE");
-    expect(renderToStaticMarkup(<SceneExtensionPanel busy={false} online onExtend={() => undefined} />)).toContain("SCENE EXTENSION");
+    expect(renderToStaticMarkup(<SceneExtensionPanel busy={false} online onExtend={() => undefined} onTransition={() => undefined} />)).toContain("SCENE EXTENSION");
+    expect(renderToStaticMarkup(<SceneExtensionPanel busy={false} online onExtend={() => undefined} onTransition={() => undefined} />)).toContain("BLEND BIOMES");
     expect(renderToStaticMarkup(<VariantPackPanel busy={false} online assetName="oak.png" onGenerate={() => undefined} />)).toContain("ENVIRONMENT VARIANT PACK");
     expect(renderToStaticMarkup(<SceneEffectStackPanel busy={false} online assetName="oak.png" onGenerate={() => undefined} />)).toContain("SCENE EFFECT STACK");
     expect(renderToStaticMarkup(<VariantPreviewPanel previewUrl={(path) => `/preview?path=${encodeURIComponent(path)}`} artifacts={[{ variant: "rain", outputFilename: "oak-rain.gif", operation: "generate_rain_overlay", frames: 8, format: "gif", deterministic: true, sourcePreserved: true }]} />)).toContain("VARIANT PREVIEWS");
