@@ -1,0 +1,37 @@
+@use "mixins" as m;
+
+.preview-grid { @include m.studio-grid; }
+.preview-grid figure { background: var(--studio-ink); margin: 0; min-height: 160px; padding: .7rem; }
+.preview-grid img { display: block; image-rendering: pixelated; max-height: 320px; max-width: 100%; object-fit: contain; width: 100%; }
+.preview-grid figcaption { color: var(--studio-cyan); font-size: .7rem; letter-spacing: .12em; margin-top: .6rem; text-align: center; }
+.plan-meta, .plan-warning { align-items: center; display: flex; gap: .6rem; }
+.plan-meta { color: var(--studio-muted); font-size: .72rem; justify-content: space-between; }
+.plan-warning { color: var(--studio-amber); font-size: .78rem; line-height: 1.5; }
+.plan-passes { display: grid; gap: .55rem; margin-top: 1rem; }
+.plan-passes article { @include m.studio-surface(var(--studio-pink)); display: flex; gap: .7rem; padding: .7rem; }
+.plan-passes p { color: #d4def0; font-size: .78rem; line-height: 1.5; margin: 0; }
+.artifact-list { display: grid; gap: .55rem; margin-top: 1rem; }
+.artifact-list article { @include m.studio-surface(var(--studio-cyan)); display: grid; gap: .25rem; min-width: 0; padding: .65rem; }
+.artifact-list article span { color: #d4def0; font-size: .78rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.artifact-list article small { color: var(--studio-muted); font-size: .68rem; }
+.quality-recommendations { color: #d4def0; display: grid; gap: .55rem; line-height: 1.5; margin: 0; padding-left: 1.2rem; }
+.quality-recommendations li::marker { color: var(--studio-amber); }
+.tool-runner-actions { display: flex; justify-content: flex-end; margin-top: 1rem; }
+.tool-output { background: var(--studio-ink); border: 1px solid var(--studio-cyan); margin-top: 1rem; padding: .7rem; }
+.tool-output summary { color: var(--studio-cyan); cursor: pointer; font-size: .7rem; letter-spacing: .1em; }
+.tool-output pre { color: #d4def0; font-size: .7rem; max-height: 280px; overflow: auto; white-space: pre-wrap; }
+.runtime-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.runtime-metrics span { @include m.studio-surface(var(--studio-cyan)); font-size: .7rem; padding: .7rem; }
+.runtime-metrics strong { color: var(--studio-cyan); display: block; font-size: 1rem; margin-top: .25rem; }
+.material-controls, .lighting-controls, .effect-controls { @include m.studio-grid; margin-top: .8rem; }
+.recipe-controls { @include m.studio-grid(repeat(3, minmax(0, 1fr))); margin-top: .8rem; }
+.pipeline-status, .recipe-presets { display: flex; flex-wrap: wrap; gap: .55rem; margin-top: .8rem; }
+.asset-library-search { align-items: center; display: flex; gap: .7rem; margin-top: .8rem; }
+.asset-library-search .pixel-command-bar { flex: 1; }
+.asset-library-grid { display: grid; gap: .7rem; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-top: .8rem; }
+.asset-library-grid .pixel-asset-card { min-width: 0; }
+.asset-library-grid .pixel-asset-card small { color: var(--studio-cyan); font-size: .62rem; letter-spacing: .1em; }
+.log-line { align-items: flex-start; display: flex; gap: .6rem; line-height: 1.5; }
+.log-line .pixel-badge { flex: none; }
+.activity-log { display: grid; gap: .7rem; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { @include m.studio-focus; }

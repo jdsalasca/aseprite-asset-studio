@@ -1,5 +1,7 @@
-// SCSS presentation composition. Domain/application layers do not import this entrypoint.
+// SCSS entrypoint: each module owns one presentation responsibility.
 @use "./tokens";
 @use "./foundation";
 @use "./layout";
 @use "./components";
+@use "./typography";
+@use "./workflow";
