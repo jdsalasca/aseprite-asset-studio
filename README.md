@@ -39,7 +39,7 @@ Los assets cargados se validan por extensión, limitan a 32 MB y se guardan medi
 - Carga un PNG, GIF, WebP o archivo Aseprite; el cliente rechaza formatos no soportados y archivos mayores de 25 MB antes de subirlos.
 - Usa `INSPECT REFERENCE` para generar un plan determinista y revisa el antes/después antes de aplicar.
 - Los paneles `MATERIAL ENHANCER` y `DEPTH LIGHTING` crean salidas separadas con seed, granularidad y luz direccional reproducibles.
-- `SPRITE EFFECTS` añade outline, color grade, sombra, partículas, normal map, lluvia, ciclos de movimiento y nearest upscale con outputs separados.
+- `SPRITE EFFECTS` añade outline, color grade, sombra, partículas, normal map, lluvia, ciclos de movimiento, nearest upscale y seamless texture con outputs separados.
 - `RECIPE CREATOR` genera un plan MCP determinista con pasos seleccionables, material, luz y seed para revisión humana.
 - `EXECUTE RECIPE` ejecuta el pipeline seleccionado en el servicio compartido del MCP, muestra cada paso, conserva el original y carga el artifact final en la comparación.
 - `BACKGROUND ASSET JOB` permite presets PNG, animación, GIF y atlas; muestra progreso y artifacts con hash.

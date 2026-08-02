@@ -44,6 +44,7 @@ describe("studio feature contracts", () => {
     const effectsMarkup = renderToStaticMarkup(<SpriteEffectsPanel busy={false} online assetName="hero.png" onApply={() => undefined} />);
     expect(effectsMarkup).toContain("SPRITE EFFECTS");
     expect(effectsMarkup).toContain("NEAREST UPSCALE");
+    expect(effectsMarkup).toContain("SEAMLESS TEXTURE");
     expect(renderToStaticMarkup(<SceneExtensionPanel busy={false} online onExtend={() => undefined} />)).toContain("SCENE EXTENSION");
     const markup = renderToStaticMarkup(<RecipeCreatorPanel busy={false} online assetName="hero.png" onCreate={() => undefined} onExecute={() => undefined} />);
     expect(markup).toContain("RECIPE CREATOR");
