@@ -62,9 +62,12 @@ export function useAssetStudioController(): AssetStudioController {
 
   useEffect(() => {
     if (!job || !["queued", "running"].includes(job.status)) return undefined;
-    const timer = window.setInterval(() => { void jobs.status(job.id).then(setJob).catch((error) => setNotice(errorMessage(error))); }, 700);
-    return () => window.clearInterval(timer);
-  }, [job, jobs]);
+    const jobId = job.id;
+    let active = true;
+    const refresh = () => { void jobs.status(jobId).then((next) => { if (active) setJob(next); }).catch((error) => { if (active) setNotice(errorMessage(error)); }); };
+    const timer = window.setInterval(refresh, 700);
+    return () => { active = false; window.clearInterval(timer); };
+  }, [job?.id, job?.status, jobs]);
 
   async function start(): Promise<void> {
     setBusy(true); setNotice("Lanzando aseprite-mcp y comprobando herramientas...");
