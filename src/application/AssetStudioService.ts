@@ -1,4 +1,4 @@
-import type { AssetGateway, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetVariantKind, AssetVariantPackView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, RuntimeConfig, SceneExtensionView, SpriteEffectKind, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { AssetGateway, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetPresetGenerationView, AssetQualityBundleView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, AssetVariantKind, AssetVariantPackView, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, RuntimeConfig, SceneExtensionView, SpriteEffectKind, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { RuntimeDiagnostics } from "../domain/aseprite.js";
 import type { OperationEvent, OperationLogPort } from "../ports/OperationLogPort.js";
 import { ToolResponseParser } from "./ToolResponseParser.js";
@@ -83,6 +83,13 @@ export class AssetStudioService {
       const response = await this.gateway.callTool("inspect_asset_bundle", { filename, max_colors: 64, max_isolated_pixels: 4 });
       return this.responseParser.parseJson<AssetQualityBundleView>(response, "El MCP no devolvió el quality bundle");
     }, { filename });
+  }
+
+  public async generateAssetPreset(input: { presetId: string; outputPrefix: string; width: number; height: number; seed: number }): Promise<AssetPresetGenerationView> {
+    return this.trace("generate_asset_preset", async () => {
+      const response = await this.gateway.callTool("generate_asset_preset", { preset_id: input.presetId, output_prefix: input.outputPrefix, width: input.width, height: input.height, seed: input.seed, tile_size: 16, detail_level: "high" });
+      return this.responseParser.parseJson<AssetPresetGenerationView>(response, "El MCP no devolvió la escena del preset");
+    }, { presetId: input.presetId, width: input.width, height: input.height, seed: input.seed });
   }
 
   public async createAssetRecipe(input: { assetId: string; filename: string; outputPrefix: string; steps: AssetRecipeStep[]; seed: number; material: MaterialTextureKind; direction: LightDirection }): Promise<AssetRecipePlanView> {

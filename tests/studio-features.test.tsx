@@ -63,5 +63,7 @@ describe("studio feature contracts", () => {
     expect(libraryMarkup).toContain("http://127.0.0.1:3766/api/v1/library/items/oak/preview");
     expect(libraryMarkup).toContain("Scene presets");
     expect(libraryMarkup).toContain('role="listbox"');
+    const presetReadyMarkup = renderToStaticMarkup(<AssetLibraryPanel busy={false} online restPort={3766} query="" items={[]} presets={[]} total={0} composition={{ preset: { id: "coastal-sunset", title: "Coastal sunset", description: "Beach", category: "biomes-and-maps", itemIds: [], recommendedTools: [], deterministic: true }, items: [], layers: [], deterministic: true }} onQueryChange={() => undefined} onSearch={() => undefined} onGeneratePreset={() => undefined} />);
+    expect(presetReadyMarkup).toContain("GENERATE SCENE");
   });
 });

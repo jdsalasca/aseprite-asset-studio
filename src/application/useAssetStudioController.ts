@@ -51,6 +51,7 @@ export interface AssetStudioController {
   applyDepthLighting(direction: LightDirection, strength: number, ambient: number): Promise<void>;
   applySpriteEffect(kind: SpriteEffectKind, options: Record<string, number | string | boolean>): Promise<void>;
   generateVariantPack(variants: AssetVariantKind[], frames: number, seed: number): Promise<void>;
+  generateAssetPreset(id: string): Promise<void>;
   inspectAssetQualityBundle(): Promise<void>;
   createAssetRecipe(input: RecipeInput): Promise<void>;
   executeAssetRecipe(input: RecipeInput): Promise<void>;
@@ -218,6 +219,19 @@ export function useAssetStudioController(): AssetStudioController {
     finally { setBusy(false); }
   }
 
+  async function generateAssetPreset(id: string): Promise<void> {
+    if (status.state !== "online") return;
+    const outputPrefix = `artifacts/${id}-${Date.now()}`;
+    setBusy(true); setToolOutput(null); setNotice(`Generando preset ${id}...`);
+    try {
+      const result = await service.generateAssetPreset({ presetId: id, outputPrefix, width: 64, height: 40, seed: 1 });
+      const preview = result.generation.artifacts?.previewPng;
+      if (preview) setEnhancedPreviewUrl(service.assetPreviewUrl(preview));
+      setToolOutput(JSON.stringify(result, null, 2)); setNotice(`Preset ${result.presetId} generado como ${result.environmentKind}.`);
+    } catch (error) { setNotice(errorMessage(error)); }
+    finally { setBusy(false); }
+  }
+
   function recipeRequest(input: RecipeInput) {
     if (!assetPath) return null;
     return { assetId: assetName.replace(/\.[^./\\]+$/, ""), filename: assetPath, outputPrefix: assetPath.replace(/\.[^./\\]+$/, "-recipe"), ...input };
@@ -288,5 +302,5 @@ export function useAssetStudioController(): AssetStudioController {
     }).catch((error) => { if (uploadGuard.accepts(request)) { setNotice(errorMessage(error)); setBusy(false); } });
   }
 
-  return { config, status, diagnostics, tools, logs, toolOutput, busy: busy || jobController.busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, variantPreviewUrl: service.assetPreviewUrl.bind(service), quality, qualityRecommendations, variantArtifacts, assetLibrary, assetPresetComposition, libraryQuery, recipe: jobController.recipe, updateRecipe: jobController.updateRecipe, job: jobController.job, notice, updateConfig: setConfig, start, stop, detectAseprite, inspect, applyPlan, startJob: jobController.start, cancelJob: jobController.cancel, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, generateVariantPack, inspectAssetQualityBundle, createAssetRecipe, executeAssetRecipe, extendScene, searchAssetLibrary, composeAssetPreset, updateLibraryQuery: setLibraryQuery, upload };
+  return { config, status, diagnostics, tools, logs, toolOutput, busy: busy || jobController.busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, variantPreviewUrl: service.assetPreviewUrl.bind(service), quality, qualityRecommendations, variantArtifacts, assetLibrary, assetPresetComposition, libraryQuery, recipe: jobController.recipe, updateRecipe: jobController.updateRecipe, job: jobController.job, notice, updateConfig: setConfig, start, stop, detectAseprite, inspect, applyPlan, startJob: jobController.start, cancelJob: jobController.cancel, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, generateVariantPack, generateAssetPreset, inspectAssetQualityBundle, createAssetRecipe, executeAssetRecipe, extendScene, searchAssetLibrary, composeAssetPreset, updateLibraryQuery: setLibraryQuery, upload };
 }
