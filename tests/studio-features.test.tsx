@@ -26,6 +26,7 @@ import { AnimationSheetPanel } from "../src/components/AnimationSheetPanel.js";
 import { SpriteGeometryPanel } from "../src/components/SpriteGeometryPanel.js";
 import { SpriteHitboxPanel } from "../src/components/SpriteHitboxPanel.js";
 import { SpriteRuntimeBundlePanel } from "../src/components/SpriteRuntimeBundlePanel.js";
+import { SpriteAnchorsPanel } from "../src/components/SpriteAnchorsPanel.js";
 
 describe("studio feature contracts", () => {
   it("validates supported asset formats and size limits", () => {
@@ -88,5 +89,6 @@ describe("studio feature contracts", () => {
     expect(renderToStaticMarkup(<SpriteGeometryPanel busy={false} online assetName="hero.gif" result={{ operation: "inspect_sprite_geometry", filename: "hero.gif", frameCount: 8, width: 32, height: 32, minComponentPixels: 1, frames: [{ index: 0, opaquePixels: 42, bounds: { x: 4, y: 8, width: 20, height: 22 }, baselineY: 29, pivot: { x: 16, y: 29, mode: "bottom_center" }, components: [{ x: 4, y: 8, width: 20, height: 22, pixels: 42 }] }], animation: { stableBounds: false, baselineDrift: 2 }, quality: { valid: true, violations: [] }, recommendations: ["Use the reported pivots."], deterministic: true, sourcePreserved: true }} onInspect={() => undefined} />)).toContain("INSPECT SPRITE GEOMETRY");
     expect(renderToStaticMarkup(<SpriteHitboxPanel busy={false} online assetName="hero.gif" result={{ operation: "generate_sprite_hitboxes", manifest: "hero-hitboxes.json", filename: "hero.gif", frames: 8, mode: "components", padding: 1, hitboxes: 24, deterministic: true, sourcePreserved: true }} onGenerate={() => undefined} />)).toContain("GENERATE SPRITE HITBOXES");
     expect(renderToStaticMarkup(<SpriteRuntimeBundlePanel busy={false} online assetName="hero.gif" result={{ operation: "build_sprite_runtime_bundle", manifest: "hero-runtime.json", filename: "hero.gif", frames: 8, artifacts: 2, deterministic: true, sourcePreserved: true }} onBuild={() => undefined} />)).toContain("BUILD SPRITE RUNTIME BUNDLE");
+    expect(renderToStaticMarkup(<SpriteAnchorsPanel busy={false} online assetName="hero.gif" result={{ operation: "generate_sprite_anchors", manifest: "hero-anchors.json", filename: "hero.gif", frames: 8, anchorTypes: 6, baselineDrift: 2, deterministic: true, sourcePreserved: true }} onGenerate={() => undefined} />)).toContain("GENERATE SPRITE ANCHORS");
   });
 });
