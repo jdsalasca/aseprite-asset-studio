@@ -1,4 +1,4 @@
-import type { AssetGateway, AssetLibrarySearchView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, RuntimeConfig, SpriteEffectKind, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { AssetGateway, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetRecipeExecutionView, AssetRecipePlanView, AssetRecipeStep, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, RuntimeConfig, SpriteEffectKind, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { RuntimeDiagnostics } from "../domain/aseprite.js";
 import type { OperationEvent, OperationLogPort } from "../ports/OperationLogPort.js";
 import { ToolResponseParser } from "./ToolResponseParser.js";
@@ -81,6 +81,13 @@ export class AssetStudioService {
   }
 
   public assetPreviewUrl(path: string): string { return this.gateway.assetPreviewUrl(path); }
+
+  public async composeAssetPreset(id: string): Promise<AssetLibraryPresetCompositionView> {
+    return this.trace("compose_asset_preset", async () => {
+      const response = await this.gateway.callTool("compose_asset_preset", { id });
+      return this.responseParser.parseJson<AssetLibraryPresetCompositionView>(response, "El MCP no devolvió la composición del preset");
+    }, { presetId: id });
+  }
 
   private async trace<T>(operation: string, action: () => Promise<T>, metadata?: Record<string, string | number | boolean>): Promise<T> {
     const startedAt = Date.now();

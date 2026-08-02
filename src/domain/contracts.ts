@@ -98,6 +98,7 @@ export interface AssetRecipeExecutionView { ok: boolean; recipeId: string; outpu
 export interface AssetLibraryItemView { id: string; title: string; category: string; folder: string; kind: "sprite" | "tileset" | "scene" | "effect" | "character" | "prop"; description: string; tags: string[]; variants: string[]; formats: Array<"png" | "gif" | "svg" | "json">; readmePath: string; previewPath: string; spritePath: string; deterministic: true; }
 export interface AssetLibraryPresetView { id: string; title: string; description: string; category: string; itemIds: string[]; recommendedTools: string[]; deterministic: true; }
 export interface AssetLibrarySearchView { query: { query?: string; category?: string; limit?: number }; total: number; categories: Array<{ id: string; title: string; description: string; itemCount: number }>; items: AssetLibraryItemView[]; presets: AssetLibraryPresetView[]; }
+export interface AssetLibraryPresetCompositionView { preset: AssetLibraryPresetView; items: AssetLibraryItemView[]; layers: Array<{ id: string; assetId: string; role: "background" | "midground" | "foreground" | "effect"; order: number }>; deterministic: true; }
 
 export type AssetRecipe = "pixel_art" | "animation_pixel_art" | "gif" | "atlas";
 export type AssetJobStatus = "queued" | "running" | "completed" | "failed" | "cancelled";

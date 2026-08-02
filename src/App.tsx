@@ -21,7 +21,7 @@ import { summarizeRuntimeMetrics } from "./application/runtimeMetrics.js";
 import { shortcutAction } from "./application/keyboardShortcuts.js";
 
 export default function App() {
-  const { config, status, diagnostics, tools, logs, toolOutput, busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, assetLibrary, libraryQuery, recipe, job, notice, updateConfig, updateRecipe, start, stop, detectAseprite, inspect, applyPlan, startJob, cancelJob, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, createAssetRecipe, executeAssetRecipe, searchAssetLibrary, updateLibraryQuery, upload } = useAssetStudioController();
+  const { config, status, diagnostics, tools, logs, toolOutput, busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, assetLibrary, assetPresetComposition, libraryQuery, recipe, job, notice, updateConfig, updateRecipe, start, stop, detectAseprite, inspect, applyPlan, startJob, cancelJob, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, createAssetRecipe, executeAssetRecipe, searchAssetLibrary, composeAssetPreset, updateLibraryQuery, upload } = useAssetStudioController();
   const [selectedToolName, setSelectedToolName] = useState("");
   const stages = useMemo(() => buildPipelineStages({ online: status.state === "online", hasAsset: Boolean(assetPath), hasPlan: Boolean(plan), hasQuality: Boolean(quality) }), [assetPath, plan, quality, status.state]);
   const metrics = useMemo(() => summarizeRuntimeMetrics(logs), [logs]);
@@ -64,7 +64,7 @@ export default function App() {
         {assetPath ? <LightingPanel busy={busy} online={status.state === "online"} assetName={assetName} onApply={(direction, strength, ambient) => void applyDepthLighting(direction, strength, ambient)} /> : null}
         {assetPath ? <SpriteEffectsPanel busy={busy} online={status.state === "online"} assetName={assetName} onApply={(kind, options) => void applySpriteEffect(kind, options)} /> : null}
         {assetPath ? <RecipeCreatorPanel busy={busy} online={status.state === "online"} assetName={assetName} onCreate={(input) => void createAssetRecipe(input)} onExecute={(input) => void executeAssetRecipe(input)} /> : null}
-        <AssetLibraryPanel busy={busy} online={status.state === "online"} restPort={config.mcpRestPort} query={libraryQuery} items={assetLibrary?.items ?? []} presets={assetLibrary?.presets ?? []} total={assetLibrary?.total ?? 0} onQueryChange={updateLibraryQuery} onSearch={() => void searchAssetLibrary()} />
+        <AssetLibraryPanel busy={busy} online={status.state === "online"} restPort={config.mcpRestPort} query={libraryQuery} items={assetLibrary?.items ?? []} presets={assetLibrary?.presets ?? []} total={assetLibrary?.total ?? 0} composition={assetPresetComposition} onQueryChange={updateLibraryQuery} onSearch={() => void searchAssetLibrary()} onComposePreset={(id) => void composeAssetPreset(id)} />
         {assetPath ? <AssetJobPanel recipe={recipe} job={job} busy={busy} canStart={status.state === "online" && Boolean(assetPath)} onRecipeChange={updateRecipe} onStart={() => void startJob()} onCancel={() => void cancelJob()} /> : null}
         <PipelineStatus stages={stages} />
         <PixelPanel title="ENHANCEMENT PIPELINE" accent="pink"><div className="pipeline"><span>INSPECT</span><i>→</i><span>MATERIALS</span><i>→</i><span>LIGHTING</span><i>→</i><span>QUALITY</span></div><PixelProgress value={progressValue} label={progressLabel} /></PixelPanel>

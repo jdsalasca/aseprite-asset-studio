@@ -6,7 +6,7 @@ import { useAssetJobController } from "./useAssetJobController.js";
 import { HttpAssetGateway } from "../adapters/mcp/HttpAssetGateway.js";
 import { InMemoryOperationLogger } from "../adapters/observability/InMemoryOperationLogger.js";
 import { validateAssetFile } from "./assetValidation.js";
-import type { AssetJobView, AssetLibrarySearchView, AssetRecipe, AssetRecipeStep, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, RuntimeConfig, SpriteEffectKind, ToolDescriptor, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { AssetJobView, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetRecipe, AssetRecipeStep, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, RuntimeConfig, SpriteEffectKind, ToolDescriptor, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { OperationLogEntry } from "../ports/OperationLogPort.js";
 import type { RuntimeDiagnostics } from "../domain/aseprite.js";
 
@@ -30,6 +30,7 @@ export interface AssetStudioController {
   quality: EnhancementApplyView["quality"] | null;
   recipe: AssetRecipe;
   assetLibrary: AssetLibrarySearchView | null;
+  assetPresetComposition: AssetLibraryPresetCompositionView | null;
   libraryQuery: string;
   updateRecipe(recipe: AssetRecipe): void;
   job: AssetJobView | null;
@@ -49,6 +50,7 @@ export interface AssetStudioController {
   createAssetRecipe(input: RecipeInput): Promise<void>;
   executeAssetRecipe(input: RecipeInput): Promise<void>;
   searchAssetLibrary(): Promise<void>;
+  composeAssetPreset(id: string): Promise<void>;
   updateLibraryQuery(query: string): void;
   upload(files: File[]): void;
 }
@@ -75,6 +77,7 @@ export function useAssetStudioController(): AssetStudioController {
   const [enhancedPreviewUrl, setEnhancedPreviewUrl] = useState<string | null>(null);
   const [quality, setQuality] = useState<EnhancementApplyView["quality"] | null>(null);
   const [assetLibrary, setAssetLibrary] = useState<AssetLibrarySearchView | null>(null);
+  const [assetPresetComposition, setAssetPresetComposition] = useState<AssetLibraryPresetCompositionView | null>(null);
   const [libraryQuery, setLibraryQuery] = useState("");
   const [notice, setNotice] = useState("Inicia el gateway para conectar Aseprite MCP.");
 
@@ -224,6 +227,14 @@ export function useAssetStudioController(): AssetStudioController {
     finally { setBusy(false); }
   }
 
+  async function composeAssetPreset(id: string): Promise<void> {
+    if (status.state !== "online") return;
+    setBusy(true); setNotice(`Componiendo preset ${id}...`);
+    try { const composition = await service.composeAssetPreset(id); setAssetPresetComposition(composition); setToolOutput(JSON.stringify(composition, null, 2)); setNotice(`Preset ${composition.preset.title} listo con ${composition.layers.length} capas ordenadas.`); }
+    catch (error) { setNotice(errorMessage(error)); }
+    finally { setBusy(false); }
+  }
+
   function upload(files: File[]): void {
     const file = files[0];
     if (!file) return;
@@ -237,5 +248,5 @@ export function useAssetStudioController(): AssetStudioController {
     }).catch((error) => { if (uploadGuard.accepts(request)) { setNotice(errorMessage(error)); setBusy(false); } });
   }
 
-  return { config, status, diagnostics, tools, logs, toolOutput, busy: busy || jobController.busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, assetLibrary, libraryQuery, recipe: jobController.recipe, updateRecipe: jobController.updateRecipe, job: jobController.job, notice, updateConfig: setConfig, start, stop, detectAseprite, inspect, applyPlan, startJob: jobController.start, cancelJob: jobController.cancel, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, createAssetRecipe, executeAssetRecipe, searchAssetLibrary, updateLibraryQuery: setLibraryQuery, upload };
+  return { config, status, diagnostics, tools, logs, toolOutput, busy: busy || jobController.busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, assetLibrary, assetPresetComposition, libraryQuery, recipe: jobController.recipe, updateRecipe: jobController.updateRecipe, job: jobController.job, notice, updateConfig: setConfig, start, stop, detectAseprite, inspect, applyPlan, startJob: jobController.start, cancelJob: jobController.cancel, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, createAssetRecipe, executeAssetRecipe, searchAssetLibrary, composeAssetPreset, updateLibraryQuery: setLibraryQuery, upload };
 }
