@@ -48,10 +48,12 @@ export class AssetStudioService {
 
   public async applySpriteEffect(kind: SpriteEffectKind, filename: string, outputFilename: string, options: Record<string, number | string | boolean> = {}): Promise<SpriteEffectView> {
     return this.trace(`apply_${kind}`, async () => {
-      const operation = kind === "outline" ? "apply_pixel_outline" : kind === "color_grade" ? "apply_color_grade" : kind === "shadow" ? "generate_sprite_shadow" : kind === "particles" ? "generate_particle_burst" : "generate_normal_map";
+      const operation = kind === "outline" ? "apply_pixel_outline" : kind === "color_grade" ? "apply_color_grade" : kind === "shadow" ? "generate_sprite_shadow" : kind === "particles" ? "generate_particle_burst" : kind === "normal_map" ? "generate_normal_map" : "generate_rain_overlay";
       const args: Record<string, unknown> = kind === "particles"
         ? { output_filename: outputFilename, width: options.width ?? 64, height: options.height ?? 64, frames: options.frames ?? 8, particle_count: options.particle_count ?? 24, seed: options.seed ?? 1, color: options.color ?? "#FFD166", delay_ms: options.delay_ms ?? 80 }
-        : { input_filename: filename, output_filename: outputFilename, format: "png", ...options };
+        : kind === "rain"
+          ? { input_filename: filename, output_filename: outputFilename, format: "gif", seed: options.seed ?? 1, intensity: options.intensity ?? 0.55, wind: options.wind ?? 0, color: options.color ?? "#B7D7FF", delay_ms: options.delay_ms ?? 90 }
+          : { input_filename: filename, output_filename: outputFilename, format: "png", ...options };
       const response = await this.gateway.callTool(operation, args);
       return this.responseParser.parseJson<SpriteEffectView>(response, "El MCP no devolvió el resultado del efecto");
     }, { filename, outputFilename, kind });
