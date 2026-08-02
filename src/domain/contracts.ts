@@ -93,6 +93,8 @@ export type AssetRecipeStep = "outline" | "color_grade" | "material_texture" | "
 export interface SpriteEffectView { operation: string; output: string; frames: number; format: "png" | "gif"; deterministic: true; sourcePreserved: true; }
 export interface AssetRecipeStepView { id: AssetRecipeStep; operation: string; inputFilename: string; outputFilename?: string; arguments: Record<string, number | string | boolean>; }
 export interface AssetRecipePlanView { recipeId: string; schemaVersion: 1; algorithmVersion: string; assetId: string; inputFilename: string; outputPrefix: string; format: "png" | "gif"; seed: number; steps: AssetRecipeStepView[]; sourcePreserved: true; deterministic: true; }
+export interface AssetRecipeExecutionStepView { id: AssetRecipeStep; operation: string; ok: boolean; message: string; }
+export interface AssetRecipeExecutionView { ok: boolean; recipeId: string; outputFilename: string; steps: AssetRecipeExecutionStepView[]; failedStep?: AssetRecipeStep; error?: string; sourcePreserved: true; deterministic: true; }
 
 export type AssetRecipe = "pixel_art" | "animation_pixel_art" | "gif" | "atlas";
 export type AssetJobStatus = "queued" | "running" | "completed" | "failed" | "cancelled";

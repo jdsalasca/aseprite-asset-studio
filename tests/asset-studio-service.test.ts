@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { AssetStudioService } from "../src/application/AssetStudioService.js";
-import type { AssetGateway, HealthResponse, RuntimeConfig, StoredAsset, ToolDescriptor, ToolRuntimeStatus } from "../src/domain/contracts.js";
+import type { AssetGateway, AssetRecipeExecutionView, HealthResponse, RuntimeConfig, StoredAsset, ToolDescriptor, ToolRuntimeStatus } from "../src/domain/contracts.js";
 import type { OperationEvent, OperationLogPort } from "../src/ports/OperationLogPort.js";
 
 const status: ToolRuntimeStatus = { state: "online", pid: 7, serverName: "fake", serverVersion: "1", toolCount: 1, message: "online" };
@@ -24,6 +24,7 @@ class FakeGateway implements AssetGateway {
     if (name === "apply_depth_lighting") return { content: [{ text: JSON.stringify({ outputFilename: args.output_filename, direction: args.direction, strength: args.strength, ambient: args.ambient, frames: 1, format: "png", sourcePreserved: true }) }] };
     if (name === "apply_pixel_outline") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: "png", deterministic: true, sourcePreserved: true }) }] };
     if (name === "create_asset_recipe") return { content: [{ text: JSON.stringify({ recipeId: "recipe-1", schemaVersion: 1, algorithmVersion: "asset-recipe-v1", assetId: args.asset_id, inputFilename: args.input_filename, outputPrefix: args.output_prefix, format: "png", seed: args.seed, steps: [], sourcePreserved: true, deterministic: true }) }] };
+    if (name === "execute_asset_recipe") return { content: [{ text: JSON.stringify({ ok: true, recipeId: "recipe-1", outputFilename: "hero-recipe-quality_gate.png", steps: [{ id: "outline", operation: "apply_pixel_outline", ok: true, message: "ok" }, { id: "quality_gate", operation: "run_asset_quality_gate", ok: true, message: "ok" }], sourcePreserved: true, deterministic: true } satisfies AssetRecipeExecutionView) }] };
     return { content: [{ text: JSON.stringify({ applied: { planId: "plan-1", outputFilename: args.output_filename, format: "png", frames: 1, passesApplied: ["cleanup"], sourcePreserved: true }, quality: { valid: true, violations: [] } }) }] };
   }
   public async upload(file: File): Promise<StoredAsset> { return { filename: file.name, path: `/tmp/${file.name}`, sizeBytes: file.size }; }
@@ -76,6 +77,14 @@ describe("AssetStudioService enhancement use cases", () => {
     expect(recipe).toMatchObject({ recipeId: "recipe-1", assetId: "hero", seed: 7, deterministic: true });
     expect(gateway.calls.map((call) => call.name)).toEqual(["apply_pixel_outline", "create_asset_recipe"]);
     expect(gateway.calls[1]?.args.steps).toEqual(["outline", "quality_gate"]);
+  });
+
+  it("executes a recipe through the shared MCP tool and preserves typed output", async () => {
+    const gateway = new FakeGateway();
+    const result = await new AssetStudioService(gateway).executeAssetRecipe({ assetId: "hero", filename: "source.png", outputPrefix: "hero-recipe", steps: ["outline", "quality_gate"], seed: 7, material: "earth", direction: "south_east" });
+
+    expect(result).toMatchObject({ ok: true, recipeId: "recipe-1", outputFilename: "hero-recipe-quality_gate.png", sourcePreserved: true, deterministic: true });
+    expect(gateway.calls[0]).toMatchObject({ name: "execute_asset_recipe", args: { asset_id: "hero", input_filename: "source.png", output_prefix: "hero-recipe" } });
   });
 
   it("surfaces the MCP error instead of replacing it with a missing-plan message", async () => {

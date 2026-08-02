@@ -9,10 +9,16 @@ describe("HttpAssetGateway", () => {
     vi.stubGlobal("fetch", fetchMock);
     const gateway = new HttpAssetGateway("http://studio.test");
 
-    const status = await gateway.startRuntime({ workspacePath: "C:\\work\\provider", executablePath: "C:\\apps\\Aseprite.exe", gatewayPort: 3765 });
+    const status = await gateway.startRuntime({ workspacePath: "C:\\work\\provider", executablePath: "C:\\apps\\Aseprite.exe", gatewayPort: 3765, mcpRestPort: 3766 });
 
     expect(status.state).toBe("online");
-    expect(JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body))).toEqual({ mcpRepoPath: "C:\\work\\provider", asepritePath: "C:\\apps\\Aseprite.exe", gatewayPort: 3765 });
+    expect(JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body))).toEqual({ mcpRepoPath: "C:\\work\\provider", asepritePath: "C:\\apps\\Aseprite.exe", gatewayPort: 3765, mcpRestPort: 3766 });
+  });
+
+  it("preserves the configured REST endpoint when loading the runtime", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ data: { mcpRepoPath: "C:\\work\\provider", asepritePath: "C:\\apps\\Aseprite.exe", gatewayPort: 3765, mcpRestPort: 3766 } }), { status: 200, headers: { "content-type": "application/json" } })));
+
+    await expect(new HttpAssetGateway("http://studio.test").config()).resolves.toEqual({ workspacePath: "C:\\work\\provider", executablePath: "C:\\apps\\Aseprite.exe", gatewayPort: 3765, mcpRestPort: 3766 });
   });
 
   it("maps the concrete health envelope into the generic runtime model", async () => {
