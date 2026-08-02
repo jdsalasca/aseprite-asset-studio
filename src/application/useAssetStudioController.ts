@@ -111,7 +111,7 @@ export function useAssetStudioController(): AssetStudioController {
     setBusy(true); setToolOutput(null); setNotice(`Ejecutando ${name}...`);
     try {
       const output = await service.callTool(name, args);
-      const serialized = typeof output === "string" ? output : JSON.stringify(output, null, 2);
+      const serialized = typeof output === "string" ? output : JSON.stringify(output, null, 2) ?? String(output);
       setToolOutput(serialized.length > 24000 ? `${serialized.slice(0, 24000)}\n… output truncado por seguridad visual` : serialized);
       setNotice(`${name} terminó correctamente.`);
     } catch (error) { setNotice(errorMessage(error)); }

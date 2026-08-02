@@ -11,7 +11,10 @@ export class InMemoryOperationLogger implements OperationLogPort, OperationLogRe
     for (const listener of this.listeners) listener(entry);
   }
 
-  public list(limit = 100): OperationLogEntry[] { return limit <= 0 ? [] : this.entries.slice(-limit); }
+  public list(limit = 100): OperationLogEntry[] {
+    const normalized = Number.isFinite(limit) ? Math.floor(limit) : 100;
+    return normalized <= 0 ? [] : this.entries.slice(-normalized);
+  }
 
   public subscribe(listener: (entry: OperationLogEntry) => void): () => void {
     this.listeners.add(listener);

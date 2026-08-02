@@ -16,7 +16,7 @@ export default function App() {
   const initialToolArgs = useMemo(() => {
     if (!assetPath) return {};
     if (selectedToolName === "inspect_reference" || selectedToolName === "run_asset_quality_gate") return { filename: assetPath };
-    if (selectedToolName === "apply_material_texture") return { input_filename: assetPath, output_filename: assetPath.replace(/\.[^./\\]+$/, "-textured.png"), material: "earth", seed: 1, intensity: 0.6 };
+    if (selectedToolName === "apply_material_texture") return { input_filename: assetPath, output_filename: /\.[^./\\]+$/.test(assetPath) ? assetPath.replace(/\.[^./\\]+$/, "-textured.png") : `${assetPath}-textured.png`, material: "earth", seed: 1, intensity: 0.6 };
     if (selectedToolName === "suggest_enhancement_plan") return { filename: assetPath, goals: ["cleanup", "terrain_grain", "water_flow", "directional_lighting", "particles"] };
     return {};
   }, [assetPath, selectedToolName]);

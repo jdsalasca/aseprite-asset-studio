@@ -15,5 +15,6 @@ describe("InMemoryOperationLogger", () => {
     expect(logger.list()).toHaveLength(3);
     expect(logger.list(1)[0]?.operation).toBe("ignored");
     expect(logger.list(0)).toEqual([]);
+    expect(logger.list(Number.NaN)).toHaveLength(3);
   });
 });
