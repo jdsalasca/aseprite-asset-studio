@@ -18,16 +18,18 @@ El navegador no conoce `child_process`, MCP SDK ni rutas de Aseprite. El proceso
 6. `QualityGatePanel` muestra resultado y violaciones con una primitive reusable, sin reglas de dominio en React;
 7. `AssetJobService` traduce recetas genéricas al contrato externo, mientras la UX solo consume estados tipados;
 8. `useAssetJobController` aísla polling, cancelación y selección de receta del controlador principal;
-9. las pruebas TDD cubren los casos de uso de mejora, jobs y límites de almacenamiento.
+9. `AssetArtifactView` conserva metadata genérica de outputs y `AssetJobPanel` muestra formato, tamaño y hash abreviado;
+10. las pruebas TDD cubren los casos de uso de mejora, jobs, artifacts, HTTP y límites de almacenamiento.
 
 ## Plan de implementación
 
-### Fase 3 · Jobs y artifacts — primera integración implementada
+### Fase 3 · Jobs y artifacts — implementada
 
 - definir puertos genéricos para `JobRepository`, `ArtifactRepository` y reloj;
 - implementar persistencia local como adaptador reemplazable, con estados `queued`, `running`, `completed`, `failed` y `cancelled`;
 - exponer operaciones de inicio, consulta y cancelación mediante el controlador HTTP genérico de herramientas;
 - conservar el input y el output separados, con checksum y metadatos de receta;
+- mostrar los artifacts generados en la UX sin exponer detalles del proveedor;
 - probar primero las transiciones de estado y después el flujo contra el gateway real.
 
 ### Fase 4 · UX de producción
