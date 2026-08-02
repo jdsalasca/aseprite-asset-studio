@@ -1,13 +1,14 @@
 import { PixelBadge, PixelButton, PixelDropzone, PixelNotice, PixelPanel, PixelProgress } from "@jdsalas/pixel-ui";
 import { useAssetStudioController } from "./application/useAssetStudioController.js";
 import { AssetPreviewPanel } from "./components/AssetPreviewPanel.js";
+import { AssetJobPanel } from "./components/AssetJobPanel.js";
 import { DecisionPlanPanel } from "./components/DecisionPlanPanel.js";
 import { QualityGatePanel } from "./components/QualityGatePanel.js";
 import { ServerSetup } from "./components/ServerSetup.js";
 import { ToolGrid } from "./components/ToolGrid.js";
 
 export default function App() {
-  const { config, status, tools, busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, notice, updateConfig, start, stop, inspect, applyPlan, upload } = useAssetStudioController();
+  const { config, status, tools, busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, recipe, job, notice, updateConfig, updateRecipe, start, stop, inspect, applyPlan, startJob, cancelJob, upload } = useAssetStudioController();
   const noticeTone = status.state === "error" ? "danger" : busy ? "amber" : status.state === "online" ? "cyan" : "neutral" as const;
   const progressValue = quality ? 100 : plan ? 70 : status.state === "online" ? 35 : 0;
   const progressLabel = quality ? "QUALITY GATE COMPLETE" : plan ? "PLAN READY FOR REVIEW" : "READY FOR A DECISION PLAN";
@@ -20,6 +21,7 @@ export default function App() {
         {previewUrl ? <AssetPreviewPanel before={previewUrl} after={enhancedPreviewUrl ?? undefined} /> : null}
         {plan ? <><DecisionPlanPanel plan={plan} /><div className="asset-row"><span className="muted">Salida: archivo separado -enhanced.png</span><PixelButton disabled={busy || status.state !== "online" || !assetPath} onClick={() => void applyPlan()}>APPLY ENHANCEMENT</PixelButton></div></> : null}
         {quality ? <QualityGatePanel quality={quality} /> : null}
+        {assetPath ? <AssetJobPanel recipe={recipe} job={job} busy={busy} canStart={status.state === "online" && Boolean(assetPath)} onRecipeChange={updateRecipe} onStart={() => void startJob()} onCancel={() => void cancelJob()} /> : null}
         <PixelPanel title="ENHANCEMENT PIPELINE" accent="pink"><div className="pipeline"><span>INSPECT</span><i>→</i><span>MATERIALS</span><i>→</i><span>LIGHTING</span><i>→</i><span>QUALITY</span></div><PixelProgress value={progressValue} label={progressLabel} /></PixelPanel>
         {tools.length ? <ToolGrid tools={tools} /> : <PixelPanel title="QUICK START"><p className="muted">Carga un PNG, GIF, WebP o Aseprite y arranca el MCP. El siguiente paso será seleccionar una receta de tierra, agua, iluminación, partículas o escenario.</p></PixelPanel>}
       </div>

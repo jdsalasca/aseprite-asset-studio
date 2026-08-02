@@ -16,15 +16,16 @@ El navegador no conoce `child_process`, MCP SDK ni rutas de Aseprite. El proceso
 4. el upload de assets pasa por un puerto y valida tamaño/formato;
 5. `ToolResponseParser` centraliza la lectura de respuestas de herramientas, preserva `isError` y diagnostica JSON inválido;
 6. `QualityGatePanel` muestra resultado y violaciones con una primitive reusable, sin reglas de dominio en React;
-7. las pruebas TDD cubren los casos de uso de mejora y los límites de almacenamiento.
+7. `AssetJobService` traduce recetas genéricas al contrato externo, mientras la UX solo consume estados tipados;
+8. las pruebas TDD cubren los casos de uso de mejora, jobs y límites de almacenamiento.
 
 ## Plan de implementación
 
-### Fase 3 · Jobs y artifacts
+### Fase 3 · Jobs y artifacts — primera integración implementada
 
 - definir puertos genéricos para `JobRepository`, `ArtifactRepository` y reloj;
 - implementar persistencia local como adaptador reemplazable, con estados `queued`, `running`, `completed`, `failed` y `cancelled`;
-- exponer controladores HTTP delgados para iniciar, consultar y cancelar jobs;
+- exponer operaciones de inicio, consulta y cancelación mediante el controlador HTTP genérico de herramientas;
 - conservar el input y el output separados, con checksum y metadatos de receta;
 - probar primero las transiciones de estado y después el flujo contra el gateway real.
 

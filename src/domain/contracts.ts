@@ -60,6 +60,28 @@ export interface EnhancementApplyView {
   quality: { valid: boolean; violations?: string[] };
 }
 
+export type AssetRecipe = "pixel_art" | "animation_pixel_art" | "gif" | "atlas";
+export type AssetJobStatus = "queued" | "running" | "completed" | "failed" | "cancelled";
+
+export interface AssetJobItem {
+  recipe: AssetRecipe;
+  inputFilenames: string[];
+  outputFilename?: string;
+  width?: number;
+  height?: number;
+  maxColors?: number;
+}
+
+export interface AssetJobRequest { jobs: AssetJobItem[]; }
+export interface AssetJobView {
+  id: string;
+  status: AssetJobStatus;
+  jobs: AssetJobItem[];
+  createdAt: string;
+  updatedAt: string;
+  outcome?: { ok: boolean; message: string };
+}
+
 export interface AssetGateway {
   health(): Promise<HealthResponse>;
   config(): Promise<RuntimeConfig>;
