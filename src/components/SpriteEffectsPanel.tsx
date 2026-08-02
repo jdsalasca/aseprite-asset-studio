@@ -2,8 +2,25 @@ import { useState } from "react";
 import { PixelButton, PixelField, PixelPanel, PixelSelect, PixelSlider } from "@jdsalasc/pixel-ui";
 import type { SpriteEffectKind } from "../domain/contracts.js";
 
-interface SpriteEffectsPanelProps { busy: boolean; online: boolean; assetName: string; onApply(kind: SpriteEffectKind, options: Record<string, number | string | boolean>): void; }
-const EFFECTS: Array<{ value: SpriteEffectKind; label: string }> = [{ value: "outline", label: "PIXEL OUTLINE" }, { value: "color_grade", label: "COLOR GRADE" }, { value: "shadow", label: "SPRITE SHADOW" }, { value: "particles", label: "PARTICLE BURST" }, { value: "normal_map", label: "NORMAL MAP" }, { value: "rain", label: "RAIN OVERLAY" }, { value: "motion", label: "MOTION PACK" }, { value: "upscale", label: "NEAREST UPSCALE" }, { value: "seamless", label: "SEAMLESS TEXTURE" }];
+interface SpriteEffectsPanelProps {
+  busy: boolean;
+  online: boolean;
+  assetName: string;
+  onApply(kind: SpriteEffectKind, options: Record<string, number | string | boolean>): void;
+}
+
+const EFFECTS: Array<{ value: SpriteEffectKind; label: string }> = [
+  { value: "outline", label: "PIXEL OUTLINE" },
+  { value: "color_grade", label: "COLOR GRADE" },
+  { value: "shadow", label: "SPRITE SHADOW" },
+  { value: "particles", label: "PARTICLE BURST" },
+  { value: "normal_map", label: "NORMAL MAP" },
+  { value: "rain", label: "RAIN OVERLAY" },
+  { value: "motion", label: "MOTION PACK" },
+  { value: "upscale", label: "NEAREST UPSCALE" },
+  { value: "seamless", label: "SEAMLESS TEXTURE" },
+  { value: "reflection", label: "WATER REFLECTION" },
+];
 
 export function SpriteEffectsPanel({ busy, online, assetName, onApply }: SpriteEffectsPanelProps) {
   const [kind, setKind] = useState<SpriteEffectKind>("outline");
@@ -12,12 +29,76 @@ export function SpriteEffectsPanel({ busy, online, assetName, onApply }: SpriteE
   const [frames, setFrames] = useState("8");
   const [particleCount, setParticleCount] = useState("24");
   const [motion, setMotion] = useState("walk");
+  const [waterline, setWaterline] = useState("16");
+  const [opacity, setOpacity] = useState("0.6");
+  const [seed, setSeed] = useState("1");
+
+  const disabled = busy || !online;
+
   function apply(): void {
-    if (kind === "upscale") { const parsedScale = Number(strength); if (!Number.isInteger(parsedScale) || parsedScale < 2 || parsedScale > 16) return; onApply(kind, { scale: parsedScale }); return; }
-    if (kind === "seamless") { const parsedSeamWidth = Number(strength); if (!Number.isInteger(parsedSeamWidth) || parsedSeamWidth < 1 || parsedSeamWidth > 32) return; onApply(kind, { seam_width: parsedSeamWidth }); return; }
-    if (kind === "particles") { const parsedFrames = Number(frames); const parsedCount = Number(particleCount); if (!Number.isInteger(parsedFrames) || parsedFrames < 2 || parsedFrames > 24 || !Number.isInteger(parsedCount) || parsedCount < 1 || parsedCount > 128) return; onApply(kind, { frames: parsedFrames, particle_count: parsedCount, color }); return; }
-    if (kind === "motion") { const parsedFrames = Number(frames); const parsedAmplitude = Number(strength); if (!Number.isInteger(parsedFrames) || parsedFrames < 2 || parsedFrames > 24 || !Number.isFinite(parsedAmplitude) || parsedAmplitude < 0 || parsedAmplitude > 8) return; onApply(kind, { motion, frames: parsedFrames, amplitude: parsedAmplitude, seed: 1 }); return; }
-    const parsedStrength = Number(strength); if (!Number.isFinite(parsedStrength) || parsedStrength < 0 || parsedStrength > 8) return; onApply(kind, kind === "normal_map" ? { strength: parsedStrength } : kind === "rain" ? { color, intensity: Math.max(0, Math.min(1, parsedStrength / 8)), wind: 0, seed: 1 } : { color, thickness: Math.max(1, Math.min(8, Math.round(parsedStrength))) });
+    if (kind === "upscale") {
+      const parsedScale = Number(strength);
+      if (!Number.isInteger(parsedScale) || parsedScale < 2 || parsedScale > 16) return;
+      onApply(kind, { scale: parsedScale });
+      return;
+    }
+    if (kind === "seamless") {
+      const parsedSeamWidth = Number(strength);
+      if (!Number.isInteger(parsedSeamWidth) || parsedSeamWidth < 1 || parsedSeamWidth > 32) return;
+      onApply(kind, { seam_width: parsedSeamWidth });
+      return;
+    }
+    if (kind === "reflection") {
+      const parsedWaterline = Number(waterline);
+      const parsedFrames = Number(frames);
+      const parsedAmplitude = Number(strength);
+      const parsedOpacity = Number(opacity);
+      const parsedSeed = Number(seed);
+      if (!Number.isInteger(parsedWaterline) || parsedWaterline < 1 || parsedWaterline > 2048 || !Number.isInteger(parsedFrames) || parsedFrames < 2 || parsedFrames > 24 || !Number.isFinite(parsedAmplitude) || parsedAmplitude < 0 || parsedAmplitude > 8 || !Number.isFinite(parsedOpacity) || parsedOpacity < 0 || parsedOpacity > 1 || !Number.isInteger(parsedSeed)) return;
+      onApply(kind, { waterline: parsedWaterline, frames: parsedFrames, amplitude: parsedAmplitude, opacity: parsedOpacity, seed: parsedSeed });
+      return;
+    }
+    if (kind === "particles") {
+      const parsedFrames = Number(frames);
+      const parsedCount = Number(particleCount);
+      if (!Number.isInteger(parsedFrames) || parsedFrames < 2 || parsedFrames > 24 || !Number.isInteger(parsedCount) || parsedCount < 1 || parsedCount > 128) return;
+      onApply(kind, { frames: parsedFrames, particle_count: parsedCount, color });
+      return;
+    }
+    if (kind === "motion") {
+      const parsedFrames = Number(frames);
+      const parsedAmplitude = Number(strength);
+      if (!Number.isInteger(parsedFrames) || parsedFrames < 2 || parsedFrames > 24 || !Number.isFinite(parsedAmplitude) || parsedAmplitude < 0 || parsedAmplitude > 8) return;
+      onApply(kind, { motion, frames: parsedFrames, amplitude: parsedAmplitude, seed: 1 });
+      return;
+    }
+    const parsedStrength = Number(strength);
+    if (!Number.isFinite(parsedStrength) || parsedStrength < 0 || parsedStrength > 8) return;
+    onApply(kind, kind === "normal_map" ? { strength: parsedStrength } : kind === "rain" ? { color, intensity: Math.max(0, Math.min(1, parsedStrength / 8)), wind: 0, seed: 1 } : { color, thickness: Math.max(1, Math.min(8, Math.round(parsedStrength))) });
   }
-  return <PixelPanel title="SPRITE EFFECTS" accent="pink"><p className="muted">Aplica un efecto determinista a <strong>{assetName}</strong> y conserva el archivo original.</p><PixelSelect label="EFFECT" value={kind} onChange={(event) => setKind(event.target.value as SpriteEffectKind)} disabled={busy || !online}>{EFFECTS.map((effect) => <option key={effect.value} value={effect.value}>{effect.label}</option>)}</PixelSelect>{kind === "motion" ? <PixelSelect label="MOTION" value={motion} onChange={(event) => setMotion(event.target.value)} disabled={busy || !online}><option value="idle">IDLE</option><option value="walk">WALK</option><option value="run">RUN</option><option value="jump">JUMP</option><option value="attack">ATTACK</option></PixelSelect> : kind === "upscale" || kind === "seamless" ? null : <PixelField label="COLOR" value={color} onChange={(event) => setColor(event.target.value)} disabled={busy || !online} />}<div className="effect-controls">{kind === "particles" || kind === "motion" ? <><PixelField label="FRAMES" type="number" min="2" max="24" value={frames} onChange={(event) => setFrames(event.target.value)} disabled={busy || !online} />{kind === "particles" ? <PixelField label="PARTICLES" type="number" min="1" max="128" value={particleCount} onChange={(event) => setParticleCount(event.target.value)} disabled={busy || !online} /> : <PixelSlider label={`AMPLITUDE · ${strength}`} min={0} max={8} step={1} value={Number(strength)} onChange={(event) => setStrength(event.target.value)} disabled={busy || !online} />}</> : <PixelSlider label={kind === "upscale" ? `SCALE · ${strength}` : kind === "seamless" ? `SEAM WIDTH · ${strength}` : kind === "normal_map" ? `STRENGTH · ${strength}` : kind === "rain" ? `RAIN INTENSITY · ${strength}` : `THICKNESS · ${strength}`} min={kind === "upscale" ? 2 : kind === "normal_map" ? 0 : 1} max={kind === "upscale" ? 16 : kind === "seamless" ? 32 : 8} step={1} value={Number(strength)} onChange={(event) => setStrength(event.target.value)} disabled={busy || !online} />}</div><div className="tool-runner-actions"><PixelButton tone="pink" disabled={busy || !online} onClick={apply}>{busy ? "APPLYING..." : "APPLY SPRITE EFFECT"}</PixelButton></div></PixelPanel>;
+
+  const showColor = kind !== "motion" && kind !== "upscale" && kind !== "seamless" && kind !== "reflection";
+
+  return (
+    <PixelPanel title="SPRITE EFFECTS" accent="pink">
+      <p className="muted">Aplica un efecto determinista a <strong>{assetName}</strong> y conserva el archivo original.</p>
+      <PixelSelect label="EFFECT" value={kind} onChange={(event) => setKind(event.target.value as SpriteEffectKind)} disabled={disabled}>
+        {EFFECTS.map((effect) => <option key={effect.value} value={effect.value}>{effect.label}</option>)}
+      </PixelSelect>
+      {kind === "motion" ? <PixelSelect label="MOTION" value={motion} onChange={(event) => setMotion(event.target.value)} disabled={disabled}><option value="idle">IDLE</option><option value="walk">WALK</option><option value="run">RUN</option><option value="jump">JUMP</option><option value="attack">ATTACK</option></PixelSelect> : showColor ? <PixelField label="COLOR" value={color} onChange={(event) => setColor(event.target.value)} disabled={disabled} /> : null}
+      <div className="effect-controls">
+        {kind === "particles" || kind === "motion" ? <>
+          <PixelField label="FRAMES" type="number" min="2" max="24" value={frames} onChange={(event) => setFrames(event.target.value)} disabled={disabled} />
+          {kind === "particles" ? <PixelField label="PARTICLES" type="number" min="1" max="128" value={particleCount} onChange={(event) => setParticleCount(event.target.value)} disabled={disabled} /> : <PixelSlider label={`AMPLITUDE · ${strength}`} min={0} max={8} step={1} value={Number(strength)} onChange={(event) => setStrength(event.target.value)} disabled={disabled} />}
+        </> : kind === "reflection" ? <>
+          <PixelField label="WATERLINE" type="number" min="1" max="2048" value={waterline} onChange={(event) => setWaterline(event.target.value)} disabled={disabled} />
+          <PixelField label="FRAMES" type="number" min="2" max="24" value={frames} onChange={(event) => setFrames(event.target.value)} disabled={disabled} />
+          <PixelSlider label={`AMPLITUDE · ${strength}`} min={0} max={8} step={1} value={Number(strength)} onChange={(event) => setStrength(event.target.value)} disabled={disabled} />
+          <PixelSlider label={`OPACITY · ${opacity}`} min={0} max={1} step={0.05} value={Number(opacity)} onChange={(event) => setOpacity(event.target.value)} disabled={disabled} />
+          <PixelField label="SEED" type="number" value={seed} onChange={(event) => setSeed(event.target.value)} disabled={disabled} />
+        </> : <PixelSlider label={kind === "upscale" ? `SCALE · ${strength}` : kind === "seamless" ? `SEAM WIDTH · ${strength}` : kind === "normal_map" ? `STRENGTH · ${strength}` : kind === "rain" ? `RAIN INTENSITY · ${strength}` : `THICKNESS · ${strength}`} min={kind === "upscale" ? 2 : kind === "normal_map" ? 0 : 1} max={kind === "upscale" ? 16 : kind === "seamless" ? 32 : 8} step={1} value={Number(strength)} onChange={(event) => setStrength(event.target.value)} disabled={disabled} />}
+      </div>
+      <div className="tool-runner-actions"><PixelButton tone="pink" disabled={disabled} onClick={apply}>{busy ? "APPLYING..." : "APPLY SPRITE EFFECT"}</PixelButton></div>
+    </PixelPanel>
+  );
 }

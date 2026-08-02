@@ -28,6 +28,7 @@ class FakeGateway implements AssetGateway {
     if (name === "upscale_pixel_art") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, scale: args.scale, frames: 1, format: "png", deterministic: true, sourcePreserved: true }) }] };
     if (name === "extend_scene") return { content: [{ text: JSON.stringify({ operation: name, input: args.input_map_filename, output: args.output_map_filename, preview: null, width: 32, height: 24, padding: { top: args.top, right: args.right, bottom: args.bottom, left: args.left }, seed: args.seed, layers: 3, deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_seamless_texture") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: "png", deterministic: true, sourcePreserved: true }) }] };
+    if (name === "generate_water_reflection") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "create_asset_recipe") return { content: [{ text: JSON.stringify({ recipeId: "recipe-1", schemaVersion: 1, algorithmVersion: "asset-recipe-v1", assetId: args.asset_id, inputFilename: args.input_filename, outputPrefix: args.output_prefix, format: "png", seed: args.seed, steps: [], sourcePreserved: true, deterministic: true }) }] };
     if (name === "execute_asset_recipe") return { content: [{ text: JSON.stringify({ ok: true, recipeId: "recipe-1", outputFilename: "hero-recipe-quality_gate.png", steps: [{ id: "outline", operation: "apply_pixel_outline", ok: true, message: "ok" }, { id: "quality_gate", operation: "run_asset_quality_gate", ok: true, message: "ok" }], sourcePreserved: true, deterministic: true } satisfies AssetRecipeExecutionView) }] };
     if (name === "get_asset_library") return { content: [{ text: JSON.stringify({ query: { query: typeof args.query === "string" ? args.query : "", limit: 24 }, total: 1, categories: [], items: [{ id: "oak", title: "Oak", category: "flora", folder: "flora/oak", kind: "sprite", description: "Tree", tags: ["tree"], variants: ["rain"], formats: ["png", "svg", "json"], readmePath: "flora/oak/README.md", previewPath: "flora/oak/preview.png", spritePath: "flora/oak/sprite-sheet.png", deterministic: true }], presets: [] } satisfies AssetLibrarySearchView) }] };
@@ -115,6 +116,13 @@ describe("AssetStudioService enhancement use cases", () => {
     const result = await new AssetStudioService(gateway).applySpriteEffect("seamless", "water.png", "water-seamless.png", { seam_width: 2 });
     expect(result).toMatchObject({ operation: "generate_seamless_texture", output: "water-seamless.png", format: "png" });
     expect(gateway.calls.at(-1)).toMatchObject({ name: "generate_seamless_texture", args: { input_filename: "water.png", output_filename: "water-seamless.png", seam_width: 2, format: "png" } });
+  });
+
+  it("maps water reflection to the shared MCP effects service", async () => {
+    const gateway = new FakeGateway();
+    const result = await new AssetStudioService(gateway).applySpriteEffect("reflection", "ocean.png", "ocean-reflection.gif", { waterline: 16, frames: 6, seed: 4, amplitude: 2, opacity: 0.65 });
+    expect(result).toMatchObject({ operation: "generate_water_reflection", output: "ocean-reflection.gif", format: "gif", frames: 6 });
+    expect(gateway.calls.at(-1)).toMatchObject({ name: "generate_water_reflection", args: { input_filename: "ocean.png", output_filename: "ocean-reflection.gif", waterline: 16, frames: 6, seed: 4, amplitude: 2, opacity: 0.65, format: "gif" } });
   });
 
   it("executes a recipe through the shared MCP tool and preserves typed output", async () => {

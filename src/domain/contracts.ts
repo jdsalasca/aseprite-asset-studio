@@ -88,7 +88,7 @@ export interface DepthLightingView {
   sourcePreserved: true;
 }
 
-export type SpriteEffectKind = "outline" | "color_grade" | "shadow" | "particles" | "normal_map" | "rain" | "motion" | "upscale" | "seamless";
+export type SpriteEffectKind = "outline" | "color_grade" | "shadow" | "particles" | "normal_map" | "rain" | "motion" | "upscale" | "seamless" | "reflection";
 export type AssetRecipeStep = "outline" | "color_grade" | "material_texture" | "depth_lighting" | "shadow" | "particles" | "normal_map" | "quality_gate";
 export interface SpriteEffectView { operation: string; output: string; frames: number; format: "png" | "gif"; deterministic: true; sourcePreserved: true; }
 export interface AssetRecipeStepView { id: AssetRecipeStep; operation: string; inputFilename: string; outputFilename?: string; arguments: Record<string, number | string | boolean>; }
