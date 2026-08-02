@@ -62,6 +62,7 @@ Los assets cargados se validan por extensión, limitan a 32 MB y se guardan medi
 - `CLEAN ISOLATED PIXELS` corrige ruido de píxeles opacos aislados con vecinos mínimos e iteraciones acotadas, manteniendo los grupos conectados y el origen.
 - `SPRITE GLOW` agrega aura radial para magia, fuego, lámparas y campanas mediante color, radio y opacidad reproducibles, sin modificar la silueta fuente.
 - `RIM LIGHT` añade iluminación de borde cardinal o diagonal mediante el mismo servicio MCP, con color y fuerza deterministas, sin duplicar lógica en la UX.
+- `AMBIENT OCCLUSION` añade sombreado de cavidades basado en vecindad alfa mediante el mismo servicio MCP, con radio, color y fuerza reproducibles.
 - `ENVIRONMENT VARIANT PACK` genera lluvia, fuego, terremoto, pájaros, noche, ciclos día/noche, walk, reflejos y caústicas desde un único asset, usando una sola llamada MCP y mostrando el manifiesto de artifacts.
 - `ENHANCE COLLECTION` aplica cleanup, granularidad, oleaje, iluminación y partículas al asset y sus variantes en un batch único, con errores aislados y salidas separadas.
 - `SCENE EFFECT STACK` agrupa materiales, iluminación, lluvia, partículas, reflejos/caústicas y ciclo día-noche en una sola llamada tipada a `generate_scene_effect_stack`; la salida y los fallos quedan visibles en el panel de logs.
