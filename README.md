@@ -63,6 +63,7 @@ Los assets cargados se validan por extensión, limitan a 32 MB y se guardan medi
 - `VARIANT PREVIEWS` muestra todas las salidas del pack en una galería horizontal reutilizable de Pixel UI, con links de preview y metadatos de frames/formato.
 - `BUILD CONTACT SHEET` reúne las variantes del pack en una rejilla nearest-neighbor y enlaza su manifest JSON para inspección rápida con una sola llamada al MCP.
 - `GENERATE SCENE` ejecuta el preset seleccionado desde la biblioteca mediante el nuevo gateway tipado `generate_asset_preset` y carga el preview resultante.
+- `LIBRARY AUDIT` valida el catálogo compartido desde la UX mediante `audit_asset_library`, mostrando métricas de assets/carpetas y referencias rotas sin duplicar lógica del MCP.
 - `RECIPE CREATOR` genera un plan MCP determinista con pasos seleccionables, material, luz y seed para revisión humana.
 - `EXECUTE RECIPE` ejecuta el pipeline seleccionado en el servicio compartido del MCP, muestra cada paso, conserva el original y carga el artifact final en la comparación.
 - `BACKGROUND ASSET JOB` permite presets PNG, animación, GIF y atlas; muestra progreso y artifacts con hash.

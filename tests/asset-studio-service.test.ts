@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { AssetStudioService } from "../src/application/AssetStudioService.js";
-import type { AssetGateway, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetRecipeExecutionView, HealthResponse, RuntimeConfig, StoredAsset, ToolDescriptor, ToolRuntimeStatus } from "../src/domain/contracts.js";
+import type { AssetGateway, AssetLibraryAuditView, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetRecipeExecutionView, HealthResponse, RuntimeConfig, StoredAsset, ToolDescriptor, ToolRuntimeStatus } from "../src/domain/contracts.js";
 import type { OperationEvent, OperationLogPort } from "../src/ports/OperationLogPort.js";
 
 const status: ToolRuntimeStatus = { state: "online", pid: 7, serverName: "fake", serverVersion: "1", toolCount: 1, message: "online" };
@@ -50,6 +50,7 @@ class FakeGateway implements AssetGateway {
     if (name === "execute_asset_recipe") return { content: [{ text: JSON.stringify({ ok: true, recipeId: "recipe-1", outputFilename: "hero-recipe-quality_gate.png", steps: [{ id: "outline", operation: "apply_pixel_outline", ok: true, message: "ok" }, { id: "quality_gate", operation: "run_asset_quality_gate", ok: true, message: "ok" }], sourcePreserved: true, deterministic: true } satisfies AssetRecipeExecutionView) }] };
     if (name === "get_asset_library") return { content: [{ text: JSON.stringify({ query: { query: typeof args.query === "string" ? args.query : "", limit: 24 }, total: 1, categories: [], items: [{ id: "oak", title: "Oak", category: "flora", folder: "flora/oak", kind: "sprite", description: "Tree", tags: ["tree"], variants: ["rain"], formats: ["png", "svg", "json"], readmePath: "flora/oak/README.md", previewPath: "flora/oak/preview.png", spritePath: "flora/oak/sprite-sheet.png", deterministic: true }], presets: [] } satisfies AssetLibrarySearchView) }] };
     if (name === "compose_asset_preset") return { content: [{ text: JSON.stringify({ preset: { id: String(args.id), title: "Rainy grove", description: "Oak", category: "flora", itemIds: ["oak"], recommendedTools: ["generate_world_map"], deterministic: true }, items: [], layers: [{ id: "rainy-grove-oak", assetId: "oak", role: "background", order: 0 }], deterministic: true } satisfies AssetLibraryPresetCompositionView) }] };
+    if (name === "audit_asset_library") return { content: [{ text: JSON.stringify({ operation: name, libraryVersion: "catalog-v1", totalItems: 339, totalCategories: 24, totalPresets: 12, totalFolders: 339, readmePaths: 339, previewPaths: 339, spritePaths: 339, valid: true, violations: [], deterministic: true, sourcePreserved: true } satisfies AssetLibraryAuditView) }] };
     return { content: [{ text: JSON.stringify({ applied: { planId: "plan-1", outputFilename: args.output_filename, format: "png", frames: 1, passesApplied: ["cleanup"], sourcePreserved: true }, quality: { valid: true, violations: [] } }) }] };
   }
   public async upload(file: File): Promise<StoredAsset> { return { filename: file.name, path: `/tmp/${file.name}`, sizeBytes: file.size }; }
@@ -284,6 +285,13 @@ describe("AssetStudioService enhancement use cases", () => {
     const result = await new AssetStudioService(gateway).composeAssetPreset("rainy-grove");
     expect(result.layers[0]?.assetId).toBe("oak");
     expect(gateway.calls[0]).toMatchObject({ name: "compose_asset_preset", args: { id: "rainy-grove" } });
+  });
+
+  it("audits the shared asset library through one compact MCP request", async () => {
+    const gateway = new FakeGateway();
+    const result = await new AssetStudioService(gateway).auditAssetLibrary();
+    expect(result).toMatchObject({ operation: "audit_asset_library", totalItems: 339, valid: true });
+    expect(gateway.calls[0]).toMatchObject({ name: "audit_asset_library", args: {} });
   });
 
   it("surfaces the MCP error instead of replacing it with a missing-plan message", async () => {

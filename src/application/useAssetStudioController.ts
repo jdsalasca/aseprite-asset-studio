@@ -6,7 +6,7 @@ import { useAssetJobController } from "./useAssetJobController.js";
 import { HttpAssetGateway } from "../adapters/mcp/HttpAssetGateway.js";
 import { InMemoryOperationLogger } from "../adapters/observability/InMemoryOperationLogger.js";
 import { validateAssetFile } from "./assetValidation.js";
-import type { AnimationQualityView, AnimationSheetView, AssetJobView, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetQualityBatchView, AssetQualityBundleView, AssetRecipe, AssetRecipeStep, AssetVariantArtifactView, AssetVariantKind, BiomeTransitionView, ContactSheetView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, PaletteHarmonizeView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SpriteEffectKind, SpriteGeometryView, SpriteHitboxView, SpriteNormalizationView, SpritePivotMode, SpriteRuntimeBundleView, SpriteAnchorsView, ToolDescriptor, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { AnimationQualityView, AnimationSheetView, AssetJobView, AssetLibraryAuditView, AssetLibraryPresetCompositionView, AssetLibrarySearchView, AssetQualityBatchView, AssetQualityBundleView, AssetRecipe, AssetRecipeStep, AssetVariantArtifactView, AssetVariantKind, BiomeTransitionView, ContactSheetView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, PaletteHarmonizeView, RuntimeConfig, SceneEffectKind, SceneEffectStackView, SpriteEffectKind, SpriteGeometryView, SpriteHitboxView, SpriteNormalizationView, SpritePivotMode, SpriteRuntimeBundleView, SpriteAnchorsView, ToolDescriptor, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { OperationLogEntry } from "../ports/OperationLogPort.js";
 import type { RuntimeDiagnostics } from "../domain/aseprite.js";
 
@@ -45,6 +45,7 @@ export interface AssetStudioController {
   recipe: AssetRecipe;
   assetLibrary: AssetLibrarySearchView | null;
   assetPresetComposition: AssetLibraryPresetCompositionView | null;
+  assetLibraryAudit: AssetLibraryAuditView | null;
   libraryQuery: string;
   updateRecipe(recipe: AssetRecipe): void;
   job: AssetJobView | null;
@@ -81,6 +82,7 @@ export interface AssetStudioController {
   buildContactSheet(cellWidth: number, cellHeight: number, columns: number, padding: number): Promise<void>;
   searchAssetLibrary(): Promise<void>;
   composeAssetPreset(id: string): Promise<void>;
+  auditAssetLibrary(): Promise<void>;
   updateLibraryQuery(query: string): void;
   upload(files: File[]): void;
 }
@@ -121,6 +123,7 @@ export function useAssetStudioController(): AssetStudioController {
   const [variantArtifacts, setVariantArtifacts] = useState<AssetVariantArtifactView[]>([]);
   const [assetLibrary, setAssetLibrary] = useState<AssetLibrarySearchView | null>(null);
   const [assetPresetComposition, setAssetPresetComposition] = useState<AssetLibraryPresetCompositionView | null>(null);
+  const [assetLibraryAudit, setAssetLibraryAudit] = useState<AssetLibraryAuditView | null>(null);
   const [libraryQuery, setLibraryQuery] = useState("");
   const [notice, setNotice] = useState("Inicia el gateway para conectar Aseprite MCP.");
 
@@ -328,6 +331,14 @@ export function useAssetStudioController(): AssetStudioController {
     finally { setBusy(false); }
   }
 
+  async function auditAssetLibrary(): Promise<void> {
+    if (status.state !== "online") return;
+    setBusy(true); setNotice("Auditando IDs, presets, categorías y rutas del catálogo...");
+    try { const result = await service.auditAssetLibrary(); setAssetLibraryAudit(result); setToolOutput(JSON.stringify(result, null, 2)); setNotice(result.valid ? `Biblioteca válida: ${result.totalItems} assets y ${result.totalFolders} carpetas.` : `La auditoría detectó ${result.violations.length} alerta(s) en la biblioteca.`); }
+    catch (error) { setNotice(errorMessage(error)); }
+    finally { setBusy(false); }
+  }
+
   async function extendScene(input: { inputMapFilename: string; outputMapFilename: string; previewFilename?: string; top: number; right: number; bottom: number; left: number; seed: number }): Promise<void> {
     if (status.state !== "online") return;
     setBusy(true); setToolOutput(null); setNotice("Extendiendo escena con el MCP compartido...");
@@ -447,12 +458,12 @@ export function useAssetStudioController(): AssetStudioController {
     const validationError = validateAssetFile(file);
     if (validationError) { setNotice(validationError); return; }
     const request = uploadGuard.next();
-    setBusy(true); setAssetName(file.name); setAssetPath(null); setPreviewUrl(null); setPlan(null); setEnhancedPreviewUrl(null); setQuality(null); setQualityRecommendations([]); setBatchQuality(null); setAnimationQuality(null); setNormalizedSprite(null); setAnimationSheet(null); setSpriteGeometry(null); setSpriteHitboxes(null); setSpriteRuntimeBundle(null); setSpriteAnchors(null); setHarmonizedPalette([]); setVariantArtifacts([]); setContactSheet(null); setContactSheetPreviewUrl(null); setNotice(`Subiendo ${file.name}...`);
+    setBusy(true); setAssetName(file.name); setAssetPath(null); setPreviewUrl(null); setPlan(null); setEnhancedPreviewUrl(null); setQuality(null); setQualityRecommendations([]); setBatchQuality(null); setAnimationQuality(null); setNormalizedSprite(null); setAnimationSheet(null); setSpriteGeometry(null); setSpriteHitboxes(null); setSpriteRuntimeBundle(null); setSpriteAnchors(null); setHarmonizedPalette([]); setVariantArtifacts([]); setContactSheet(null); setContactSheetPreviewUrl(null); setAssetLibraryAudit(null); setNotice(`Subiendo ${file.name}...`);
     void service.upload(file).then((stored) => {
       if (!uploadGuard.accepts(request)) return;
       setAssetPath(stored.path); setPreviewUrl(service.assetPreviewUrl(stored.path)); setNotice(`${stored.filename} cargado (${stored.sizeBytes} bytes).`); setBusy(false);
     }).catch((error) => { if (uploadGuard.accepts(request)) { setNotice(errorMessage(error)); setBusy(false); } });
   }
 
-  return { config, status, diagnostics, tools, logs, toolOutput, busy: busy || jobController.busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, variantPreviewUrl: service.assetPreviewUrl.bind(service), quality, qualityRecommendations, batchQuality, animationQuality, normalizedSprite, animationSheet, spriteGeometry, spriteHitboxes, spriteRuntimeBundle, spriteAnchors, harmonizedPalette, contactSheet, contactSheetPreviewUrl, variantArtifacts, assetLibrary, assetPresetComposition, libraryQuery, recipe: jobController.recipe, updateRecipe: jobController.updateRecipe, job: jobController.job, notice, updateConfig: setConfig, start, stop, detectAseprite, inspect, applyPlan, startJob: jobController.start, cancelJob: jobController.cancel, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, generateVariantPack, generateSceneEffectStack, generateAssetPreset, inspectAssetQualityBundle, inspectAssetBatch, inspectAnimationQuality, normalizeSprite, buildAnimationSheet, inspectSpriteGeometry, generateSpriteHitboxes, buildSpriteRuntimeBundle, generateSpriteAnchors, createAssetRecipe, executeAssetRecipe, extendScene, generateBiomeTransition, harmonizePalette, buildContactSheet, searchAssetLibrary, composeAssetPreset, updateLibraryQuery: setLibraryQuery, upload };
+  return { config, status, diagnostics, tools, logs, toolOutput, busy: busy || jobController.busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, variantPreviewUrl: service.assetPreviewUrl.bind(service), quality, qualityRecommendations, batchQuality, animationQuality, normalizedSprite, animationSheet, spriteGeometry, spriteHitboxes, spriteRuntimeBundle, spriteAnchors, harmonizedPalette, contactSheet, contactSheetPreviewUrl, variantArtifacts, assetLibrary, assetPresetComposition, assetLibraryAudit, libraryQuery, recipe: jobController.recipe, updateRecipe: jobController.updateRecipe, job: jobController.job, notice, updateConfig: setConfig, start, stop, detectAseprite, inspect, applyPlan, startJob: jobController.start, cancelJob: jobController.cancel, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, generateVariantPack, generateSceneEffectStack, generateAssetPreset, inspectAssetQualityBundle, inspectAssetBatch, inspectAnimationQuality, normalizeSprite, buildAnimationSheet, inspectSpriteGeometry, generateSpriteHitboxes, buildSpriteRuntimeBundle, generateSpriteAnchors, createAssetRecipe, executeAssetRecipe, extendScene, generateBiomeTransition, harmonizePalette, buildContactSheet, searchAssetLibrary, composeAssetPreset, auditAssetLibrary, updateLibraryQuery: setLibraryQuery, upload };
 }
