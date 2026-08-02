@@ -79,6 +79,7 @@ describe("studio feature contracts", () => {
     expect(effectsMarkup).toContain("SPECULAR HIGHLIGHT");
     expect(effectsMarkup).toContain("COLOR RAMP");
     expect(effectsMarkup).toContain("MATERIAL GRAIN");
+    expect(effectsMarkup).toContain("PIXEL DITHER");
     expect(renderToStaticMarkup(<SceneExtensionPanel busy={false} online onExtend={() => undefined} onTransition={() => undefined} />)).toContain("SCENE EXTENSION");
     expect(renderToStaticMarkup(<SceneExtensionPanel busy={false} online onExtend={() => undefined} onTransition={() => undefined} />)).toContain("BLEND BIOMES");
     expect(renderToStaticMarkup(<VariantPackPanel busy={false} online assetName="oak.png" onGenerate={() => undefined} />)).toContain("ENVIRONMENT VARIANT PACK");

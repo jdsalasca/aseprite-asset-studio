@@ -66,6 +66,7 @@ Los assets cargados se validan por extensión, limitan a 32 MB y se guardan medi
 - `SPECULAR HIGHLIGHT` añade una banda de brillo hacia el interior de la silueta para metal, agua, cristal y magia mediante el mismo servicio MCP, con dirección, radio y fuerza reproducibles.
 - `COLOR RAMP` remapea la luminancia a sombras, medios tonos y brillos con una paleta determinista mediante el mismo servicio MCP, ideal para dar coherencia de estilo a sprites y escenarios.
 - `MATERIAL GRAIN` aplica granularidad determinista por semilla, intensidad y escala para tierra, agua, piedra, follaje y superficies envejecidas mediante el mismo servicio MCP.
+- `PIXEL DITHER` reduce bandas con dithering Bayer 4x4 entre dos colores de paleta, fuerza y escala reproducibles mediante el mismo servicio MCP.
 - `ENVIRONMENT VARIANT PACK` genera lluvia, fuego, terremoto, pájaros, noche, ciclos día/noche, walk, reflejos y caústicas desde un único asset, usando una sola llamada MCP y mostrando el manifiesto de artifacts.
 - `ENHANCE COLLECTION` aplica cleanup, granularidad, oleaje, iluminación y partículas al asset y sus variantes en un batch único, con errores aislados y salidas separadas.
 - `SCENE EFFECT STACK` agrupa materiales, iluminación, lluvia, partículas, reflejos/caústicas y ciclo día-noche en una sola llamada tipada a `generate_scene_effect_stack`; la salida y los fallos quedan visibles en el panel de logs.

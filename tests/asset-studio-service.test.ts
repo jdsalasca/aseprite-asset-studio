@@ -31,6 +31,7 @@ class FakeGateway implements AssetGateway {
     if (name === "apply_sprite_specular_highlight") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: args.format, deterministic: true, sourcePreserved: true }) }] };
     if (name === "apply_sprite_color_ramp") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: args.format, deterministic: true, sourcePreserved: true }) }] };
     if (name === "apply_sprite_grain") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: args.format, deterministic: true, sourcePreserved: true }) }] };
+    if (name === "apply_sprite_dither") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: args.format, deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_rain_overlay") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_motion_pack") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "upscale_pixel_art") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, scale: args.scale, frames: 1, format: "png", deterministic: true, sourcePreserved: true }) }] };
@@ -194,6 +195,13 @@ describe("AssetStudioService enhancement use cases", () => {
     const result = await new AssetStudioService(gateway).applySpriteEffect("grain", "source.gif", "source-grain.gif", { seed: 17, intensity: 0.8, scale: 2 });
     expect(result).toMatchObject({ operation: "apply_sprite_grain", output: "source-grain.gif", format: "gif", sourcePreserved: true });
     expect(gateway.calls.at(-1)).toMatchObject({ name: "apply_sprite_grain", args: { input_filename: "source.gif", output_filename: "source-grain.gif", seed: 17, intensity: 0.8, scale: 2, format: "gif" } });
+  });
+
+  it("maps Bayer sprite dithering to the shared MCP effects service", async () => {
+    const gateway = new FakeGateway();
+    const result = await new AssetStudioService(gateway).applySpriteEffect("dither", "source.gif", "source-dither.gif", { dark_color: "#202030", light_color: "#F0E8C8", strength: 1, scale: 2 });
+    expect(result).toMatchObject({ operation: "apply_sprite_dither", output: "source-dither.gif", format: "gif", sourcePreserved: true });
+    expect(gateway.calls.at(-1)).toMatchObject({ name: "apply_sprite_dither", args: { input_filename: "source.gif", output_filename: "source-dither.gif", dark_color: "#202030", light_color: "#F0E8C8", strength: 1, scale: 2, format: "gif" } });
   });
 
   it("normalizes raster frames through the shared MCP gateway and keeps pivot metadata", async () => {
