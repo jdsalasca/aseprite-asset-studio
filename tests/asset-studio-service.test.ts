@@ -28,6 +28,7 @@ class FakeGateway implements AssetGateway {
     if (name === "generate_sprite_glow") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: args.format, deterministic: true, sourcePreserved: true }) }] };
     if (name === "apply_sprite_rim_light") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: args.format, deterministic: true, sourcePreserved: true }) }] };
     if (name === "apply_sprite_ambient_occlusion") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: args.format, deterministic: true, sourcePreserved: true }) }] };
+    if (name === "apply_sprite_specular_highlight") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: args.format, deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_rain_overlay") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_motion_pack") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "upscale_pixel_art") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, scale: args.scale, frames: 1, format: "png", deterministic: true, sourcePreserved: true }) }] };
@@ -170,6 +171,13 @@ describe("AssetStudioService enhancement use cases", () => {
     const result = await new AssetStudioService(gateway).applySpriteEffect("ambient_occlusion", "source.png", "source-ambient.png", { color: "#000000", radius: 1, strength: 0.6 });
     expect(result).toMatchObject({ operation: "apply_sprite_ambient_occlusion", output: "source-ambient.png", format: "png", sourcePreserved: true });
     expect(gateway.calls.at(-1)).toMatchObject({ name: "apply_sprite_ambient_occlusion", args: { input_filename: "source.png", output_filename: "source-ambient.png", color: "#000000", radius: 1, strength: 0.6, format: "png" } });
+  });
+
+  it("maps sprite specular highlight to the shared MCP effects service", async () => {
+    const gateway = new FakeGateway();
+    const result = await new AssetStudioService(gateway).applySpriteEffect("specular_highlight", "source.png", "source-specular.png", { color: "#FFFFFF", direction: "north", radius: 2, strength: 0.8 });
+    expect(result).toMatchObject({ operation: "apply_sprite_specular_highlight", output: "source-specular.png", format: "png", sourcePreserved: true });
+    expect(gateway.calls.at(-1)).toMatchObject({ name: "apply_sprite_specular_highlight", args: { input_filename: "source.png", output_filename: "source-specular.png", color: "#FFFFFF", direction: "north", radius: 2, strength: 0.8, format: "png" } });
   });
 
   it("normalizes raster frames through the shared MCP gateway and keeps pivot metadata", async () => {
