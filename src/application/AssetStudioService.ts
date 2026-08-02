@@ -1,4 +1,4 @@
-import type { AssetGateway, EnhancementApplyView, EnhancementPlanView, MaterialTextureKind, MaterialTextureView, RuntimeConfig, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { AssetGateway, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, RuntimeConfig, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { OperationEvent, OperationLogPort } from "../ports/OperationLogPort.js";
 import { ToolResponseParser } from "./ToolResponseParser.js";
 
@@ -35,6 +35,13 @@ export class AssetStudioService {
       const response = await this.gateway.callTool("apply_material_texture", { input_filename: filename, output_filename: outputFilename, material, seed, intensity, format: "png" });
       return this.responseParser.parseJson<MaterialTextureView>(response, "El MCP no devolvió el resultado de textura");
     }, { filename, outputFilename, material, seed, intensity });
+  }
+
+  public async applyDepthLighting(filename: string, outputFilename: string, direction: LightDirection, strength: number, ambient: number): Promise<DepthLightingView> {
+    return this.trace("apply_depth_lighting", async () => {
+      const response = await this.gateway.callTool("apply_depth_lighting", { input_filename: filename, output_filename: outputFilename, direction, strength, ambient, format: "png" });
+      return this.responseParser.parseJson<DepthLightingView>(response, "El MCP no devolvió el resultado de iluminación");
+    }, { filename, outputFilename, direction, strength, ambient });
   }
 
   public assetPreviewUrl(path: string): string { return this.gateway.assetPreviewUrl(path); }

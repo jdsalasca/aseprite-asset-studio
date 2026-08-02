@@ -73,6 +73,18 @@ export interface MaterialTextureView {
   sourcePreserved: true;
 }
 
+export type LightDirection = "north" | "south" | "east" | "west" | "north_east" | "north_west" | "south_east" | "south_west";
+
+export interface DepthLightingView {
+  outputFilename: string;
+  direction: LightDirection;
+  strength: number;
+  ambient: number;
+  frames: number;
+  format: "png" | "gif";
+  sourcePreserved: true;
+}
+
 export type AssetRecipe = "pixel_art" | "animation_pixel_art" | "gif" | "atlas";
 export type AssetJobStatus = "queued" | "running" | "completed" | "failed" | "cancelled";
 

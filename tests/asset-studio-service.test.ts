@@ -21,6 +21,7 @@ class FakeGateway implements AssetGateway {
     this.calls.push({ name, args });
     if (name === "suggest_enhancement_plan") return { content: [{ text: JSON.stringify({ planId: "plan-1", algorithmVersion: "v1", filename: args.filename, seed: 1, detectedSignals: [], warnings: [], passes: [], destructive: false }) }] };
     if (name === "apply_material_texture") return { content: [{ text: JSON.stringify({ outputFilename: args.output_filename, material: args.material, seed: args.seed, intensity: args.intensity, frames: 1, format: "png", sourcePreserved: true }) }] };
+    if (name === "apply_depth_lighting") return { content: [{ text: JSON.stringify({ outputFilename: args.output_filename, direction: args.direction, strength: args.strength, ambient: args.ambient, frames: 1, format: "png", sourcePreserved: true }) }] };
     return { content: [{ text: JSON.stringify({ applied: { planId: "plan-1", outputFilename: args.output_filename, format: "png", frames: 1, passesApplied: ["cleanup"], sourcePreserved: true }, quality: { valid: true, violations: [] } }) }] };
   }
   public async upload(file: File): Promise<StoredAsset> { return { filename: file.name, path: `/tmp/${file.name}`, sizeBytes: file.size }; }
@@ -53,6 +54,14 @@ describe("AssetStudioService enhancement use cases", () => {
 
     expect(result).toMatchObject({ outputFilename: "source-textured.png", material: "water", seed: 42, intensity: 0.7, sourcePreserved: true });
     expect(gateway.calls[0]).toMatchObject({ name: "apply_material_texture", args: { input_filename: "source.png", output_filename: "source-textured.png", material: "water" } });
+  });
+
+  it("executes the depth lighting pass through the generic gateway contract", async () => {
+    const gateway = new FakeGateway();
+    const result = await new AssetStudioService(gateway).applyDepthLighting("source.png", "source-lit.png", "north_east", 0.8, 0.25);
+
+    expect(result).toMatchObject({ outputFilename: "source-lit.png", direction: "north_east", strength: 0.8, ambient: 0.25, sourcePreserved: true });
+    expect(gateway.calls[0]).toMatchObject({ name: "apply_depth_lighting", args: { input_filename: "source.png", output_filename: "source-lit.png", direction: "north_east" } });
   });
 
   it("surfaces the MCP error instead of replacing it with a missing-plan message", async () => {
