@@ -253,7 +253,7 @@ export function useAssetStudioController(): AssetStudioController {
   async function applySpriteEffect(kind: SpriteEffectKind, options: Record<string, number | string | boolean>): Promise<void> {
     if (!assetPath || status.state !== "online") return;
     const suffix = kind.replaceAll("_", "-");
-    const outputFilename = kind === "particles" || kind === "rain" || kind === "motion" || kind === "reflection" || kind === "caustics" || kind === "day_night" || ((kind === "background" || kind === "cleanup" || kind === "glow") && /\.gif$/i.test(assetPath)) ? `${assetPath.replace(/\.[^./\\]+$/, "")}-${suffix}.gif` : `${assetPath.replace(/\.[^./\\]+$/, "")}-${suffix}.png`;
+    const outputFilename = kind === "particles" || kind === "rain" || kind === "motion" || kind === "reflection" || kind === "caustics" || kind === "day_night" || ((kind === "background" || kind === "cleanup" || kind === "glow" || kind === "rim_light") && /\.gif$/i.test(assetPath)) ? `${assetPath.replace(/\.[^./\\]+$/, "")}-${suffix}.gif` : `${assetPath.replace(/\.[^./\\]+$/, "")}-${suffix}.png`;
     setBusy(true); setToolOutput(null); setNotice(`Aplicando efecto ${kind}...`);
     try { const result = await service.applySpriteEffect(kind, assetPath, outputFilename, options); setEnhancedPreviewUrl(service.assetPreviewUrl(result.output)); setToolOutput(JSON.stringify(result, null, 2)); setNotice(`Efecto ${kind} aplicado; salida preservada.`); }
     catch (error) { setNotice(errorMessage(error)); }
