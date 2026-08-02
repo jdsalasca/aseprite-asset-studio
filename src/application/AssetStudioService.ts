@@ -48,7 +48,7 @@ export class AssetStudioService {
 
   public async applySpriteEffect(kind: SpriteEffectKind, filename: string, outputFilename: string, options: Record<string, number | string | boolean> = {}): Promise<SpriteEffectView> {
     return this.trace(`apply_${kind}`, async () => {
-      const operation = kind === "outline" ? "apply_pixel_outline" : kind === "color_grade" ? "apply_color_grade" : kind === "shadow" ? "generate_sprite_shadow" : kind === "particles" ? "generate_particle_burst" : kind === "normal_map" ? "generate_normal_map" : kind === "rain" ? "generate_rain_overlay" : kind === "motion" ? "generate_motion_pack" : kind === "upscale" ? "upscale_pixel_art" : kind === "reflection" ? "generate_water_reflection" : "generate_seamless_texture";
+      const operation = kind === "outline" ? "apply_pixel_outline" : kind === "color_grade" ? "apply_color_grade" : kind === "shadow" ? "generate_sprite_shadow" : kind === "particles" ? "generate_particle_burst" : kind === "normal_map" ? "generate_normal_map" : kind === "rain" ? "generate_rain_overlay" : kind === "motion" ? "generate_motion_pack" : kind === "upscale" ? "upscale_pixel_art" : kind === "reflection" ? "generate_water_reflection" : kind === "caustics" ? "generate_water_caustics" : "generate_seamless_texture";
       const args: Record<string, unknown> = kind === "particles"
         ? { output_filename: outputFilename, width: options.width ?? 64, height: options.height ?? 64, frames: options.frames ?? 8, particle_count: options.particle_count ?? 24, seed: options.seed ?? 1, color: options.color ?? "#FFD166", delay_ms: options.delay_ms ?? 80 }
         : kind === "rain"
@@ -59,6 +59,8 @@ export class AssetStudioService {
               ? { input_filename: filename, output_filename: outputFilename, format: "png", scale: options.scale ?? 2 }
               : kind === "reflection"
                 ? { input_filename: filename, output_filename: outputFilename, format: "gif", waterline: options.waterline ?? 16, frames: options.frames ?? 8, seed: options.seed ?? 1, amplitude: options.amplitude ?? 1, opacity: options.opacity ?? 0.6, delay_ms: options.delay_ms ?? 90 }
+                : kind === "caustics"
+                  ? { input_filename: filename, output_filename: outputFilename, format: "gif", frames: options.frames ?? 8, seed: options.seed ?? 1, intensity: options.intensity ?? 0.7, scale: options.scale ?? 4, color: options.color ?? "#DFF6FF", delay_ms: options.delay_ms ?? 90 }
                 : kind === "seamless"
                   ? { input_filename: filename, output_filename: outputFilename, format: "png", seam_width: options.seam_width ?? 1 }
                   : { input_filename: filename, output_filename: outputFilename, format: "png", ...options };

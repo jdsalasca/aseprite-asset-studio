@@ -20,6 +20,7 @@ const EFFECTS: Array<{ value: SpriteEffectKind; label: string }> = [
   { value: "upscale", label: "NEAREST UPSCALE" },
   { value: "seamless", label: "SEAMLESS TEXTURE" },
   { value: "reflection", label: "WATER REFLECTION" },
+  { value: "caustics", label: "WATER CAUSTICS" },
 ];
 
 export function SpriteEffectsPanel({ busy, online, assetName, onApply }: SpriteEffectsPanelProps) {
@@ -32,6 +33,9 @@ export function SpriteEffectsPanel({ busy, online, assetName, onApply }: SpriteE
   const [waterline, setWaterline] = useState("16");
   const [opacity, setOpacity] = useState("0.6");
   const [seed, setSeed] = useState("1");
+  const [causticsIntensity, setCausticsIntensity] = useState("0.7");
+  const [causticsScale, setCausticsScale] = useState("4");
+  const [causticsSeed, setCausticsSeed] = useState("1");
 
   const disabled = busy || !online;
 
@@ -56,6 +60,15 @@ export function SpriteEffectsPanel({ busy, online, assetName, onApply }: SpriteE
       const parsedSeed = Number(seed);
       if (!Number.isInteger(parsedWaterline) || parsedWaterline < 1 || parsedWaterline > 2048 || !Number.isInteger(parsedFrames) || parsedFrames < 2 || parsedFrames > 24 || !Number.isFinite(parsedAmplitude) || parsedAmplitude < 0 || parsedAmplitude > 8 || !Number.isFinite(parsedOpacity) || parsedOpacity < 0 || parsedOpacity > 1 || !Number.isInteger(parsedSeed)) return;
       onApply(kind, { waterline: parsedWaterline, frames: parsedFrames, amplitude: parsedAmplitude, opacity: parsedOpacity, seed: parsedSeed });
+      return;
+    }
+    if (kind === "caustics") {
+      const parsedFrames = Number(frames);
+      const parsedIntensity = Number(causticsIntensity);
+      const parsedScale = Number(causticsScale);
+      const parsedSeed = Number(causticsSeed);
+      if (!Number.isInteger(parsedFrames) || parsedFrames < 2 || parsedFrames > 24 || !Number.isFinite(parsedIntensity) || parsedIntensity < 0 || parsedIntensity > 1 || !Number.isInteger(parsedScale) || parsedScale < 1 || parsedScale > 32 || !Number.isInteger(parsedSeed)) return;
+      onApply(kind, { frames: parsedFrames, intensity: parsedIntensity, scale: parsedScale, seed: parsedSeed, color });
       return;
     }
     if (kind === "particles") {
@@ -96,6 +109,11 @@ export function SpriteEffectsPanel({ busy, online, assetName, onApply }: SpriteE
           <PixelSlider label={`AMPLITUDE · ${strength}`} min={0} max={8} step={1} value={Number(strength)} onChange={(event) => setStrength(event.target.value)} disabled={disabled} />
           <PixelSlider label={`OPACITY · ${opacity}`} min={0} max={1} step={0.05} value={Number(opacity)} onChange={(event) => setOpacity(event.target.value)} disabled={disabled} />
           <PixelField label="SEED" type="number" value={seed} onChange={(event) => setSeed(event.target.value)} disabled={disabled} />
+        </> : kind === "caustics" ? <>
+          <PixelField label="FRAMES" type="number" min="2" max="24" value={frames} onChange={(event) => setFrames(event.target.value)} disabled={disabled} />
+          <PixelSlider label={`INTENSITY · ${causticsIntensity}`} min={0} max={1} step={0.05} value={Number(causticsIntensity)} onChange={(event) => setCausticsIntensity(event.target.value)} disabled={disabled} />
+          <PixelField label="SCALE" type="number" min="1" max="32" value={causticsScale} onChange={(event) => setCausticsScale(event.target.value)} disabled={disabled} />
+          <PixelField label="SEED" type="number" value={causticsSeed} onChange={(event) => setCausticsSeed(event.target.value)} disabled={disabled} />
         </> : <PixelSlider label={kind === "upscale" ? `SCALE · ${strength}` : kind === "seamless" ? `SEAM WIDTH · ${strength}` : kind === "normal_map" ? `STRENGTH · ${strength}` : kind === "rain" ? `RAIN INTENSITY · ${strength}` : `THICKNESS · ${strength}`} min={kind === "upscale" ? 2 : kind === "normal_map" ? 0 : 1} max={kind === "upscale" ? 16 : kind === "seamless" ? 32 : 8} step={1} value={Number(strength)} onChange={(event) => setStrength(event.target.value)} disabled={disabled} />}
       </div>
       <div className="tool-runner-actions"><PixelButton tone="pink" disabled={disabled} onClick={apply}>{busy ? "APPLYING..." : "APPLY SPRITE EFFECT"}</PixelButton></div>
