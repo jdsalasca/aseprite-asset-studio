@@ -1,4 +1,5 @@
 import type { AssetGateway, HealthResponse, RuntimeConfig, StoredAsset, ToolDescriptor, ToolRuntimeStatus } from "../../domain/contracts.js";
+import type { RuntimeDiagnostics } from "../../domain/aseprite.js";
 
 interface RuntimeConfigPayload { mcpRepoPath: string; asepritePath: string; gatewayPort: number; }
 interface HealthPayload { ok: boolean; service: string; version: string; mcp: ToolRuntimeStatus; }
@@ -18,6 +19,7 @@ export class HttpAssetGateway implements AssetGateway {
     return this.request<ToolRuntimeStatus>("/api/mcp/start", { method: "POST", body: JSON.stringify({ mcpRepoPath: config.workspacePath, asepritePath: config.executablePath, gatewayPort: config.gatewayPort }) });
   }
   public stopRuntime() { return this.request<ToolRuntimeStatus>("/api/mcp/stop", { method: "POST" }); }
+  public diagnostics() { return this.request<RuntimeDiagnostics>("/api/diagnostics"); }
   public tools() { return this.request<ToolDescriptor[]>("/api/mcp/tools"); }
   public callTool(name: string, args: Record<string, unknown>) { return this.request<unknown>("/api/mcp/call", { method: "POST", body: JSON.stringify({ name, args }) }); }
   public async upload(file: File): Promise<StoredAsset> {

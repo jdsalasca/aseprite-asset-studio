@@ -1,9 +1,12 @@
+import type { RuntimeDiagnostics } from "./aseprite.js";
+
 export type ConnectionState = "offline" | "starting" | "online" | "error";
 
 export interface RuntimeConfig {
   workspacePath: string;
   executablePath: string;
   gatewayPort: number;
+  mcpRestPort?: number;
 }
 
 export interface ToolRuntimeStatus {
@@ -134,4 +137,5 @@ export interface AssetGateway {
   callTool(name: string, args: Record<string, unknown>): Promise<unknown>;
   upload(file: File): Promise<StoredAsset>;
   assetPreviewUrl(path: string): string;
+  diagnostics?(): Promise<RuntimeDiagnostics>;
 }

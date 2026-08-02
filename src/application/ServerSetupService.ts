@@ -1,8 +1,12 @@
 import type { AssetContent, RuntimeConfig, StoredAsset, ToolDescriptor, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { AsepriteDetection, RuntimeDiagnostics } from "../domain/aseprite.js";
 import type { AssetStoragePort } from "../ports/AssetStoragePort.js";
 import type { ConfigStorePort } from "../ports/ConfigStorePort.js";
 import type { ToolSessionPort } from "../ports/ToolSessionPort.js";
 import type { WorkspaceValidatorPort } from "../ports/WorkspaceValidatorPort.js";
+import type { AsepriteDiscoveryPort } from "../ports/AsepriteDiscoveryPort.js";
+
+class PreferredPathDiscovery implements AsepriteDiscoveryPort { public async detect(preferredPath?: string): Promise<AsepriteDetection> { return preferredPath ? { found: true, executablePath: preferredPath, source: "configured", candidatesChecked: 1, message: `Aseprite configurado en ${preferredPath}` } : { found: false, executablePath: null, source: "not_found", candidatesChecked: 0, message: "No se configuró un detector de Aseprite" }; } }
 
 export class ServerSetupService {
   public constructor(
@@ -10,7 +14,10 @@ export class ServerSetupService {
     private readonly validator: WorkspaceValidatorPort<RuntimeConfig>,
     private readonly configStore: ConfigStorePort<RuntimeConfig>,
     private readonly assetStorage: AssetStoragePort,
+    private readonly aseprite: AsepriteDiscoveryPort = new PreferredPathDiscovery(),
   ) {}
+
+  private lastError: string | null = null;
 
   public status(): ToolRuntimeStatus { return this.toRuntimeStatus(this.session.status()); }
 
@@ -19,16 +26,23 @@ export class ServerSetupService {
   }
 
   public async start(config: RuntimeConfig): Promise<ToolRuntimeStatus> {
-    const validationError = await this.validator.validate(config);
-    if (validationError) throw new Error(validationError);
-    await this.configStore.save(config);
-    return this.toRuntimeStatus(await this.session.start({
-      workingDirectory: config.workspacePath.trim(),
-      environmentOverrides: config.executablePath.trim() ? { ASEPRITE_PATH: config.executablePath.trim() } : {},
-    }));
+    try {
+      const validationError = await this.validator.validate(config);
+      if (validationError) throw new Error(validationError);
+      const detection = await this.aseprite.detect(config.executablePath.trim() || undefined);
+      if (!detection.found || !detection.executablePath) throw new Error(detection.message);
+      const resolvedConfig = { ...config, executablePath: detection.executablePath };
+      await this.configStore.save(resolvedConfig);
+      const environmentOverrides = { ASEPRITE_PATH: detection.executablePath, ...(config.mcpRestPort === undefined ? {} : { MCP_REST_PORT: String(config.mcpRestPort) }) };
+      const status = this.toRuntimeStatus(await this.session.start({ workingDirectory: config.workspacePath.trim(), environmentOverrides }));
+      this.lastError = null;
+      return { ...status, message: `${status.message} · ${detection.message}` };
+    } catch (error) { this.lastError = error instanceof Error ? error.message : String(error); throw error; }
   }
 
-  public async stop(): Promise<ToolRuntimeStatus> { return this.toRuntimeStatus(await this.session.stop()); }
+  public async stop(): Promise<ToolRuntimeStatus> { try { const status = this.toRuntimeStatus(await this.session.stop()); this.lastError = null; return status; } catch (error) { this.lastError = error instanceof Error ? error.message : String(error); throw error; } }
+  public async detectAseprite(preferredPath?: string): Promise<AsepriteDetection> { return this.aseprite.detect(preferredPath); }
+  public async diagnostics(config: RuntimeConfig): Promise<RuntimeDiagnostics> { const detection = await this.aseprite.detect(config.executablePath.trim() || undefined); return { runtime: this.status(), aseprite: detection, lastError: this.lastError, restEndpoint: config.mcpRestPort ? `http://127.0.0.1:${config.mcpRestPort}` : null }; }
   public async tools(): Promise<ToolDescriptor[]> { return this.session.listTools(); }
   public callTool(name: string, args: Record<string, unknown>): Promise<unknown> { return this.session.call(name, args); }
   public uploadAsset(filename: string, data: Uint8Array): Promise<StoredAsset> { return this.assetStorage.store(filename, data); }

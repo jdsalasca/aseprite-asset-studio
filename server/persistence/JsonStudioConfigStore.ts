@@ -3,7 +3,7 @@ import { dirname } from "node:path";
 import type { ConfigStorePort } from "../../src/ports/ConfigStorePort.js";
 import type { RuntimeConfig } from "../../src/domain/contracts.js";
 
-interface StoredRuntimeConfig { mcpRepoPath?: string; asepritePath?: string; }
+interface StoredRuntimeConfig { mcpRepoPath?: string; asepritePath?: string; mcpRestPort?: number; }
 
 export class JsonStudioConfigStore implements ConfigStorePort<RuntimeConfig> {
   public constructor(private readonly filename: string) {}
@@ -11,7 +11,7 @@ export class JsonStudioConfigStore implements ConfigStorePort<RuntimeConfig> {
   public async load(fallback: RuntimeConfig): Promise<RuntimeConfig> {
     try {
       const saved = JSON.parse(await readFile(this.filename, "utf8")) as StoredRuntimeConfig;
-      return { ...fallback, workspacePath: saved.mcpRepoPath ?? fallback.workspacePath, executablePath: saved.asepritePath ?? fallback.executablePath, gatewayPort: fallback.gatewayPort };
+      return { ...fallback, workspacePath: saved.mcpRepoPath ?? fallback.workspacePath, executablePath: saved.asepritePath ?? fallback.executablePath, gatewayPort: fallback.gatewayPort, mcpRestPort: saved.mcpRestPort ?? fallback.mcpRestPort };
     } catch {
       return fallback;
     }
@@ -19,6 +19,6 @@ export class JsonStudioConfigStore implements ConfigStorePort<RuntimeConfig> {
 
   public async save(config: RuntimeConfig): Promise<void> {
     await mkdir(dirname(this.filename), { recursive: true });
-    await writeFile(this.filename, `${JSON.stringify({ mcpRepoPath: config.workspacePath, asepritePath: config.executablePath }, null, 2)}\n`, "utf8");
+    await writeFile(this.filename, `${JSON.stringify({ mcpRepoPath: config.workspacePath, asepritePath: config.executablePath, mcpRestPort: config.mcpRestPort }, null, 2)}\n`, "utf8");
   }
 }

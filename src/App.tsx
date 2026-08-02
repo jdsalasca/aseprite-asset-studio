@@ -20,7 +20,7 @@ import { summarizeRuntimeMetrics } from "./application/runtimeMetrics.js";
 import { shortcutAction } from "./application/keyboardShortcuts.js";
 
 export default function App() {
-  const { config, status, tools, logs, toolOutput, busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, recipe, job, notice, updateConfig, updateRecipe, start, stop, inspect, applyPlan, startJob, cancelJob, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, createAssetRecipe, upload } = useAssetStudioController();
+  const { config, status, diagnostics, tools, logs, toolOutput, busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, recipe, job, notice, updateConfig, updateRecipe, start, stop, detectAseprite, inspect, applyPlan, startJob, cancelJob, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, createAssetRecipe, upload } = useAssetStudioController();
   const [selectedToolName, setSelectedToolName] = useState("");
   const stages = useMemo(() => buildPipelineStages({ online: status.state === "online", hasAsset: Boolean(assetPath), hasPlan: Boolean(plan), hasQuality: Boolean(quality) }), [assetPath, plan, quality, status.state]);
   const metrics = useMemo(() => summarizeRuntimeMetrics(logs), [logs]);
@@ -68,7 +68,7 @@ export default function App() {
         <PixelPanel title="ENHANCEMENT PIPELINE" accent="pink"><div className="pipeline"><span>INSPECT</span><i>→</i><span>MATERIALS</span><i>→</i><span>LIGHTING</span><i>→</i><span>QUALITY</span></div><PixelProgress value={progressValue} label={progressLabel} /></PixelPanel>
         {tools.length ? <><ToolRunnerPanel tools={tools} selectedToolName={selectedToolName} initialArgs={initialToolArgs} busy={busy} output={toolOutput} onToolChange={setSelectedToolName} onRun={(name, args) => void executeTool(name, args)} /><ToolGrid tools={tools} selectedName={selectedToolName} onSelect={setSelectedToolName} /></> : <PixelPanel title="QUICK START"><p className="muted">Carga un PNG, GIF, WebP o Aseprite y arranca el MCP. Después podrás ejecutar cualquier herramienta tipada con argumentos JSON.</p></PixelPanel>}
       </div>
-      <aside className="studio-side"><ServerSetup config={config} status={status} busy={busy} onConfigChange={updateConfig} onStart={() => void start()} onStop={() => void stop()} /><PixelPanel title="LATEST EVENT"><PixelNotice tone={noticeTone} title="LATEST EVENT">{notice}</PixelNotice><p className="muted">PID: {status.pid ?? "—"} · Tools: {status.toolCount} · Shortcuts: Ctrl+I inspect, Ctrl+Enter apply, Ctrl+J job</p></PixelPanel><ActivityLogPanel entries={logs} /><RuntimeMetricsPanel metrics={metrics} /></aside>
+      <aside className="studio-side"><ServerSetup config={config} status={status} diagnostics={diagnostics} busy={busy} onConfigChange={updateConfig} onStart={() => void start()} onStop={() => void stop()} onDetect={() => void detectAseprite()} /><PixelPanel title="LATEST EVENT"><PixelNotice tone={noticeTone} title="LATEST EVENT">{notice}</PixelNotice><p className="muted">PID: {status.pid ?? "—"} · Tools: {status.toolCount} · REST: {config.mcpRestPort ? `127.0.0.1:${config.mcpRestPort}` : "disabled"} · Shortcuts: Ctrl+I inspect, Ctrl+Enter apply, Ctrl+J job</p></PixelPanel><ActivityLogPanel entries={logs} /><RuntimeMetricsPanel metrics={metrics} /></aside>
     </div>
   </main>;
 }

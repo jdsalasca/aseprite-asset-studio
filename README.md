@@ -1,5 +1,9 @@
 # Aseprite Asset Studio
 
+## Diagnóstico y REST
+
+El gateway expone GET /api/diagnostics y GET /api/aseprite/detect. Las llamadas de edición pasan por el gateway y el protocolo MCP; el MCP también puede publicar controles REST locales cuando se inicia con MCP_REST_PORT. Esos controles son adaptadores del mismo dominio, no una segunda implementación.
+
 Interfaz Vite + React + TypeScript para operar `aseprite-asset-mcp` con una guía de configuración humana. Los componentes visuales provienen del paquete independiente [`@jdsalasc/pixel-ui`](https://github.com/jdsalasca/pixel-art-ui). Mientras se completa la primera publicación npm, la dependencia usa un commit Git fijado para reproducibilidad.
 
 ## Arranque local

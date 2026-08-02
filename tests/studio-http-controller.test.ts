@@ -8,6 +8,8 @@ import type { AssetStoragePort } from "../src/ports/AssetStoragePort.js";
 import type { ConfigStorePort } from "../src/ports/ConfigStorePort.js";
 import type { ToolSessionLaunchOptions, ToolSessionPort, ToolSessionStatus } from "../src/ports/ToolSessionPort.js";
 import type { WorkspaceValidatorPort } from "../src/ports/WorkspaceValidatorPort.js";
+import type { AsepriteDiscoveryPort } from "../src/ports/AsepriteDiscoveryPort.js";
+import type { AsepriteDetection } from "../src/domain/aseprite.js";
 
 const defaultConfig: RuntimeConfig = { workspacePath: "", executablePath: "", gatewayPort: 3765 };
 
@@ -52,8 +54,15 @@ class MemoryAssetStorage implements AssetStoragePort {
   }
 }
 
+class MemoryAsepriteDiscovery implements AsepriteDiscoveryPort {
+  public async detect(preferredPath?: string): Promise<AsepriteDetection> {
+    const executablePath = preferredPath ?? "C:\\Program Files\\Aseprite\\Aseprite.exe";
+    return { found: true, executablePath, source: preferredPath ? "configured" : "common_path", candidatesChecked: 1, message: `Aseprite detectado en ${executablePath}` };
+  }
+}
+
 async function openGateway(): Promise<{ baseUrl: string; close(): Promise<void> }> {
-  const setup = new ServerSetupService(new MemorySession(), new AcceptAllWorkspace(), new MemoryConfig(), new MemoryAssetStorage());
+  const setup = new ServerSetupService(new MemorySession(), new AcceptAllWorkspace(), new MemoryConfig(), new MemoryAssetStorage(), new MemoryAsepriteDiscovery());
   const controller = new StudioHttpController(setup, defaultConfig);
   const server = createServer((request: IncomingMessage, response: ServerResponse) => { void controller.handle(request, response); });
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
@@ -72,6 +81,10 @@ describe("StudioHttpController integration", () => {
     const health = await fetch(`${gateway.baseUrl}/api/health`);
     expect(health.status).toBe(200);
     expect((await health.json()).data.mcp.state).toBe("offline");
+
+    const diagnostics = await fetch(`${gateway.baseUrl}/api/diagnostics`);
+    expect(diagnostics.status).toBe(200);
+    expect((await diagnostics.json()).data.aseprite.found).toBe(true);
 
     const upload = await fetch(`${gateway.baseUrl}/api/assets/upload?filename=beach.png`, { method: "POST", body: new Uint8Array([1, 2, 3]) });
     const uploaded = (await upload.json()).data as StoredAsset;

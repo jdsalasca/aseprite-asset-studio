@@ -8,6 +8,7 @@ import { InMemoryOperationLogger } from "../adapters/observability/InMemoryOpera
 import { validateAssetFile } from "./assetValidation.js";
 import type { AssetJobView, AssetRecipe, AssetRecipeStep, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, RuntimeConfig, SpriteEffectKind, ToolDescriptor, ToolRuntimeStatus } from "../domain/contracts.js";
 import type { OperationLogEntry } from "../ports/OperationLogPort.js";
+import type { RuntimeDiagnostics } from "../domain/aseprite.js";
 
 const defaultConfig: RuntimeConfig = { workspacePath: "", executablePath: "", gatewayPort: 3765 };
 const offlineStatus: ToolRuntimeStatus = { state: "offline", pid: null, serverName: null, serverVersion: null, toolCount: 0, message: "Gateway local no iniciado" };
@@ -15,6 +16,7 @@ const offlineStatus: ToolRuntimeStatus = { state: "offline", pid: null, serverNa
 export interface AssetStudioController {
   config: RuntimeConfig;
   status: ToolRuntimeStatus;
+  diagnostics: RuntimeDiagnostics | null;
   tools: ToolDescriptor[];
   logs: OperationLogEntry[];
   toolOutput: string | null;
@@ -32,6 +34,7 @@ export interface AssetStudioController {
   updateConfig(config: RuntimeConfig): void;
   start(): Promise<void>;
   stop(): Promise<void>;
+  detectAseprite(): Promise<void>;
   inspect(): Promise<void>;
   applyPlan(): Promise<void>;
   startJob(): Promise<void>;
@@ -54,6 +57,7 @@ export function useAssetStudioController(): AssetStudioController {
   const uploadGuard = useMemo(() => new RequestGenerationGuard(), []);
   const [config, setConfig] = useState(defaultConfig);
   const [status, setStatus] = useState(offlineStatus);
+  const [diagnostics, setDiagnostics] = useState<RuntimeDiagnostics | null>(null);
   const [tools, setTools] = useState<ToolDescriptor[]>([]);
   const [logs, setLogs] = useState<OperationLogEntry[]>(() => logger.list());
   const [toolOutput, setToolOutput] = useState<string | null>(null);
@@ -71,21 +75,33 @@ export function useAssetStudioController(): AssetStudioController {
   useEffect(() => {
     void service.config().then(setConfig).catch(() => undefined);
     void service.health().then((health) => { setStatus(health.runtime); }).catch(() => undefined);
+    void service.diagnostics().then(setDiagnostics).catch(() => undefined);
   }, [service]);
 
   const jobController = useAssetJobController(jobs, assetPath, status.state === "online", setNotice);
 
   async function start(): Promise<void> {
     setBusy(true); setNotice("Lanzando aseprite-mcp y comprobando herramientas...");
-    try { const next = await service.startRuntime(config); setStatus(next); setTools(await service.tools()); setNotice(next.message); }
+    try { const next = await service.startRuntime(config); setStatus(next); setConfig(await service.config()); setDiagnostics(await service.diagnostics()); setTools(await service.tools()); setNotice(next.message); }
     catch (error) { setStatus({ ...offlineStatus, state: "error", message: errorMessage(error) }); setNotice("No se pudo iniciar el servidor. Revisa la guía y las rutas."); }
     finally { setBusy(false); }
   }
 
   async function stop(): Promise<void> {
     setBusy(true);
-    try { const next = await service.stopRuntime(); setStatus(next); setTools([]); setNotice(next.message); }
+    try { const next = await service.stopRuntime(); setStatus(next); setDiagnostics(await service.diagnostics()); setTools([]); setNotice(next.message); }
     catch (error) { setNotice(errorMessage(error)); }
+    finally { setBusy(false); }
+  }
+
+  async function detectAseprite(): Promise<void> {
+    setBusy(true); setNotice("Detectando la instalación local de Aseprite...");
+    try {
+      const next = await service.diagnostics();
+      setDiagnostics(next);
+      if (next.aseprite.found && next.aseprite.executablePath && !config.executablePath) setConfig((current) => ({ ...current, executablePath: next.aseprite.executablePath! }));
+      setNotice(next.aseprite.message);
+    } catch (error) { setNotice(errorMessage(error)); }
     finally { setBusy(false); }
   }
 
@@ -181,5 +197,5 @@ export function useAssetStudioController(): AssetStudioController {
     }).catch((error) => { if (uploadGuard.accepts(request)) { setNotice(errorMessage(error)); setBusy(false); } });
   }
 
-  return { config, status, tools, logs, toolOutput, busy: busy || jobController.busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, recipe: jobController.recipe, updateRecipe: jobController.updateRecipe, job: jobController.job, notice, updateConfig: setConfig, start, stop, inspect, applyPlan, startJob: jobController.start, cancelJob: jobController.cancel, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, createAssetRecipe, upload };
+  return { config, status, diagnostics, tools, logs, toolOutput, busy: busy || jobController.busy, assetName, assetPath, plan, previewUrl, enhancedPreviewUrl, quality, recipe: jobController.recipe, updateRecipe: jobController.updateRecipe, job: jobController.job, notice, updateConfig: setConfig, start, stop, detectAseprite, inspect, applyPlan, startJob: jobController.start, cancelJob: jobController.cancel, executeTool, applyMaterialTexture, applyDepthLighting, applySpriteEffect, createAssetRecipe, upload };
 }

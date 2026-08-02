@@ -1,4 +1,5 @@
 import type { AssetGateway, AssetRecipePlanView, AssetRecipeStep, DepthLightingView, EnhancementApplyView, EnhancementPlanView, LightDirection, MaterialTextureKind, MaterialTextureView, RuntimeConfig, SpriteEffectKind, SpriteEffectView, StoredAsset, ToolRuntimeStatus } from "../domain/contracts.js";
+import type { RuntimeDiagnostics } from "../domain/aseprite.js";
 import type { OperationEvent, OperationLogPort } from "../ports/OperationLogPort.js";
 import { ToolResponseParser } from "./ToolResponseParser.js";
 
@@ -12,6 +13,7 @@ export class AssetStudioService {
   public tools() { return this.trace("tools", () => this.gateway.tools()); }
   public callTool(name: string, args: Record<string, unknown>) { return this.trace("call_tool", () => this.gateway.callTool(name, args), { tool: name }); }
   public upload(file: File): Promise<StoredAsset> { return this.trace("upload_asset", () => this.gateway.upload(file), { filename: file.name, sizeBytes: file.size }); }
+  public diagnostics(): Promise<RuntimeDiagnostics> { if (!this.gateway.diagnostics) return Promise.reject(new Error("Diagnostics are not available in this gateway")); return this.trace("diagnostics", () => this.gateway.diagnostics!()); }
 
   public async suggestEnhancementPlan(filename: string): Promise<EnhancementPlanView> {
     return this.trace("suggest_enhancement_plan", async () => {
