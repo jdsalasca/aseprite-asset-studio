@@ -75,7 +75,7 @@ Los assets cargados se validan por extensión, limitan a 32 MB y se guardan medi
 - `COLOR TEMPERATURE` ajusta un asset hacia frío nocturno o cálido de atardecer/fuego con temperatura e intensidad deterministas mediante el mismo servicio MCP.
 - `ENVIRONMENT VARIANT PACK` genera lluvia, fuego, terremoto, pájaros, noche, ciclos día/noche, walk, reflejos y caústicas desde un único asset, usando una sola llamada MCP y mostrando el manifiesto de artifacts.
 - `ENHANCE COLLECTION` aplica cleanup, granularidad, oleaje, iluminación y partículas al asset y sus variantes en un batch único, con errores aislados y salidas separadas.
-- `SCENE EFFECT STACK` agrupa materiales, iluminación, lluvia, niebla, nieve, humo, fuego, relámpagos, oleaje/espuma, viento, sombras, glow, partículas, reflejos/caústicas y ciclo día-noche en una sola llamada tipada a `generate_scene_effect_stack`; el orden de pasadas, la salida y los fallos quedan visibles en la UX.
+- `SCENE EFFECT STACK` agrupa materiales, iluminación, lluvia, niebla, nieve, humo, fuego, relámpagos, oleaje/espuma, spray marino, viento, sombras, glow, partículas, reflejos/caústicas y ciclo día-noche en una sola llamada tipada a `generate_scene_effect_stack`; el orden de pasadas, la salida y los fallos quedan visibles en la UX.
 - `BLEND BIOMES` calcula desde el panel de mapas una banda determinista de transición entre terrenos y crea un preview sin modificar el mapa fuente.
 - `VARIANT PREVIEWS` muestra todas las salidas del pack en una galería horizontal reutilizable de Pixel UI, con links de preview y metadatos de frames/formato.
 - `BUILD CONTACT SHEET` reúne las variantes del pack en una rejilla nearest-neighbor y enlaza su manifest JSON para inspección rápida con una sola llamada al MCP.
