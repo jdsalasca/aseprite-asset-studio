@@ -37,6 +37,7 @@ class FakeGateway implements AssetGateway {
     if (name === "apply_sprite_color_temperature") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: args.format, deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_rain_overlay") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_fog_overlay") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
+    if (name === "generate_snow_overlay") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_motion_pack") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_wind_sway") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "upscale_pixel_art") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, scale: args.scale, frames: 1, format: "png", deterministic: true, sourcePreserved: true }) }] };
@@ -158,6 +159,13 @@ describe("AssetStudioService enhancement use cases", () => {
     const result = await new AssetStudioService(gateway).applySpriteEffect("fog", "scene.png", "scene-fog.gif", { frames: 6, seed: 23, density: 0.72, drift: -0.35, color: "#DDEBFF", delay_ms: 110 });
     expect(result).toMatchObject({ operation: "generate_fog_overlay", output: "scene-fog.gif", format: "gif" });
     expect(gateway.calls.at(-1)).toMatchObject({ name: "generate_fog_overlay", args: { input_filename: "scene.png", output_filename: "scene-fog.gif", frames: 6, seed: 23, density: 0.72, drift: -0.35, color: "#DDEBFF", delay_ms: 110, format: "gif" } });
+  });
+
+  it("maps snow controls to the shared MCP environmental generator", async () => {
+    const gateway = new FakeGateway();
+    const result = await new AssetStudioService(gateway).applySpriteEffect("snow", "scene.png", "scene-snow.gif", { frames: 6, seed: 31, density: 0.8, wind: -0.25, color: "#F5FBFF", delay_ms: 100 });
+    expect(result).toMatchObject({ operation: "generate_snow_overlay", output: "scene-snow.gif", format: "gif" });
+    expect(gateway.calls.at(-1)).toMatchObject({ name: "generate_snow_overlay", args: { input_filename: "scene.png", output_filename: "scene-snow.gif", frames: 6, seed: 31, density: 0.8, wind: -0.25, color: "#F5FBFF", delay_ms: 100, format: "gif" } });
   });
 
   it("maps background removal to the shared MCP effects service", async () => {
