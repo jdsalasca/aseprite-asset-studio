@@ -133,7 +133,7 @@ export interface SpriteHitboxView { operation: "generate_sprite_hitboxes"; manif
 export interface SpriteRuntimeBundleView { operation: "build_sprite_runtime_bundle"; manifest: string; filename: string; frames: number; artifacts: 2; deterministic: true; sourcePreserved: true; }
 export interface SpriteAnchorsView { operation: "generate_sprite_anchors"; manifest: string; filename: string; frames: number; anchorTypes: 6; baselineDrift: number; deterministic: true; sourcePreserved: true; }
 export interface AssetPresetGenerationView { operation: "generate_asset_preset"; presetId: string; environmentKind: "beach" | "forest" | "village" | "cave"; composition: AssetLibraryPresetCompositionView; generation: { operation: string; artifacts?: { previewPng?: string; timeGif?: string; waveGif?: string } }; deterministic: true; sourcePreserved: true; }
-export type SceneEffectKind = "rain" | "water_reflection" | "water_caustics" | "day_night" | "material_texture" | "depth_lighting" | "particles";
+export type SceneEffectKind = "rain" | "water_reflection" | "water_caustics" | "wind_sway" | "day_night" | "material_texture" | "depth_lighting" | "particles";
 export interface SceneEffectArtifactView { effect: SceneEffectKind; outputFilename: string; operation: string; frames: number; format: "png" | "gif"; deterministic: true; sourcePreserved: true; }
 export interface SceneEffectStackView { operation: "generate_scene_effect_stack"; input: string; outputPrefix: string; seed: number; effects: SceneEffectKind[]; artifacts: SceneEffectArtifactView[]; deterministic: true; sourcePreserved: true; }
 export type AssetRecipeStep = "outline" | "color_grade" | "material_texture" | "depth_lighting" | "shadow" | "particles" | "normal_map" | "quality_gate";

@@ -379,10 +379,10 @@ describe("AssetStudioService enhancement use cases", () => {
 
   it("generates a compact scene effect stack through one shared MCP call", async () => {
     const gateway = new FakeGateway();
-    const result = await new AssetStudioService(gateway).generateSceneEffectStack({ filename: "scene.png", outputPrefix: "scene-stack", effects: ["material_texture", "rain", "particles"], frames: 6, seed: 9, material: "earth", direction: "south_east" });
+    const result = await new AssetStudioService(gateway).generateSceneEffectStack({ filename: "scene.png", outputPrefix: "scene-stack", effects: ["material_texture", "rain", "wind_sway", "particles"], frames: 6, seed: 9, material: "earth", direction: "south_east" });
     expect(result).toMatchObject({ operation: "generate_scene_effect_stack", input: "scene.png", seed: 9, deterministic: true, sourcePreserved: true });
-    expect(result.artifacts.map((artifact) => artifact.effect)).toEqual(["material_texture", "rain", "particles"]);
-    expect(gateway.calls.at(-1)).toMatchObject({ name: "generate_scene_effect_stack", args: { input_filename: "scene.png", output_prefix: "scene-stack", effects: ["material_texture", "rain", "particles"], frames: 6, seed: 9, material: "earth", direction: "south_east" } });
+    expect(result.artifacts.map((artifact) => artifact.effect)).toEqual(["material_texture", "rain", "wind_sway", "particles"]);
+    expect(gateway.calls.at(-1)).toMatchObject({ name: "generate_scene_effect_stack", args: { input_filename: "scene.png", output_prefix: "scene-stack", effects: ["material_texture", "rain", "wind_sway", "particles"], frames: 6, seed: 9, material: "earth", direction: "south_east" } });
   });
 
   it("executes a recipe through the shared MCP tool and preserves typed output", async () => {

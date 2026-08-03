@@ -89,7 +89,11 @@ describe("studio feature contracts", () => {
     const variantPackMarkup = renderToStaticMarkup(<VariantPackPanel busy={false} online assetName="oak.png" onGenerate={() => undefined} />);
     expect(variantPackMarkup).toContain("ENVIRONMENT VARIANT PACK");
     expect(variantPackMarkup).toContain("WIND SWAY");
-    expect(renderToStaticMarkup(<SceneEffectStackPanel busy={false} online assetName="oak.png" onGenerate={() => undefined} />)).toContain("SCENE EFFECT STACK");
+    const sceneStackMarkup = renderToStaticMarkup(<SceneEffectStackPanel busy={false} online assetName="oak.png" onGenerate={() => undefined} />);
+      expect(sceneStackMarkup).toContain("SCENE EFFECT STACK");
+      expect(sceneStackMarkup).toContain("WIND SWAY");
+      expect(sceneStackMarkup).toContain("EXECUTION ORDER");
+      expect(sceneStackMarkup).toContain("1. MATERIAL GRAIN");
     expect(renderToStaticMarkup(<VariantPreviewPanel previewUrl={(path) => `/preview?path=${encodeURIComponent(path)}`} artifacts={[{ variant: "rain", outputFilename: "oak-rain.gif", operation: "generate_rain_overlay", frames: 8, format: "gif", deterministic: true, sourcePreserved: true }]} />)).toContain("VARIANT PREVIEWS");
     expect(renderToStaticMarkup(<QualityRecommendationsPanel recommendations={["Reduce the palette before export."]} />)).toContain("QUALITY RECOMMENDATIONS");
     const markup = renderToStaticMarkup(<RecipeCreatorPanel busy={false} online assetName="hero.png" onCreate={() => undefined} onExecute={() => undefined} />);
