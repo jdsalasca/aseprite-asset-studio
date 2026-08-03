@@ -116,7 +116,7 @@ export interface DepthLightingView {
   sourcePreserved: true;
 }
 
-export type SpriteEffectKind = "outline" | "color_grade" | "shadow" | "particles" | "normal_map" | "rain" | "fog" | "snow" | "smoke" | "motion" | "wind_sway" | "upscale" | "seamless" | "reflection" | "caustics" | "day_night" | "background" | "cleanup" | "glow" | "silhouette" | "rim_light" | "ambient_occlusion" | "specular_highlight" | "color_ramp" | "grain" | "dither" | "color_temperature";
+export type SpriteEffectKind = "outline" | "color_grade" | "shadow" | "particles" | "normal_map" | "rain" | "fog" | "snow" | "smoke" | "fire" | "motion" | "wind_sway" | "upscale" | "seamless" | "reflection" | "caustics" | "day_night" | "background" | "cleanup" | "glow" | "silhouette" | "rim_light" | "ambient_occlusion" | "specular_highlight" | "color_ramp" | "grain" | "dither" | "color_temperature";
 export type AssetVariantKind = "rain" | "fire" | "earthquake" | "birds" | "night" | "day_night" | "walk" | "water_reflection" | "water_caustics" | "wind_sway" | "wind";
 export interface AssetVariantArtifactView { variant: AssetVariantKind; outputFilename: string; operation: string; frames: number; format: "png" | "gif"; deterministic: true; sourcePreserved: true; }
 export interface AssetVariantPackView { operation: "generate_variant_pack"; input: string; outputPrefix: string; seed: number; artifacts: AssetVariantArtifactView[]; deterministic: true; sourcePreserved: true; }
@@ -133,7 +133,7 @@ export interface SpriteHitboxView { operation: "generate_sprite_hitboxes"; manif
 export interface SpriteRuntimeBundleView { operation: "build_sprite_runtime_bundle"; manifest: string; filename: string; frames: number; artifacts: 2; deterministic: true; sourcePreserved: true; }
 export interface SpriteAnchorsView { operation: "generate_sprite_anchors"; manifest: string; filename: string; frames: number; anchorTypes: 6; baselineDrift: number; deterministic: true; sourcePreserved: true; }
 export interface AssetPresetGenerationView { operation: "generate_asset_preset"; presetId: string; environmentKind: "beach" | "forest" | "village" | "cave"; composition: AssetLibraryPresetCompositionView; generation: { operation: string; artifacts?: { previewPng?: string; timeGif?: string; waveGif?: string } }; deterministic: true; sourcePreserved: true; }
-export type SceneEffectKind = "rain" | "fog" | "snow" | "smoke" | "water_reflection" | "water_caustics" | "wind_sway" | "sprite_shadow" | "sprite_glow" | "day_night" | "material_texture" | "depth_lighting" | "particles";
+export type SceneEffectKind = "rain" | "fog" | "snow" | "smoke" | "fire" | "water_reflection" | "water_caustics" | "wind_sway" | "sprite_shadow" | "sprite_glow" | "day_night" | "material_texture" | "depth_lighting" | "particles";
 export interface SceneEffectArtifactView { effect: SceneEffectKind; outputFilename: string; operation: string; frames: number; format: "png" | "gif"; deterministic: true; sourcePreserved: true; }
 export interface SceneEffectStackView { operation: "generate_scene_effect_stack"; input: string; outputPrefix: string; seed: number; effects: SceneEffectKind[]; artifacts: SceneEffectArtifactView[]; deterministic: true; sourcePreserved: true; }
 export type AssetRecipeStep = "outline" | "color_grade" | "material_texture" | "depth_lighting" | "shadow" | "particles" | "normal_map" | "quality_gate";

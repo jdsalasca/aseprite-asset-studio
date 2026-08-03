@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PixelAmbientOcclusionControls, PixelBackgroundRemoval, PixelButton, PixelCleanupControls, PixelColorRampControls, PixelColorTemperatureControls, PixelDitherControls, PixelField, PixelFogControls, PixelGlowControls, PixelGrainControls, PixelPanel, PixelRimLightControls, PixelSelect, PixelShadowControls, PixelSilhouetteControls, PixelSlider, PixelSmokeControls, PixelSnowControls, PixelSpecularHighlightControls, PixelTimeline, PixelWindSwayControls } from "@jdsalasc/pixel-ui";
+import { PixelAmbientOcclusionControls, PixelBackgroundRemoval, PixelButton, PixelCleanupControls, PixelColorRampControls, PixelColorTemperatureControls, PixelDitherControls, PixelField, PixelFireControls, PixelFogControls, PixelGlowControls, PixelGrainControls, PixelPanel, PixelRimLightControls, PixelSelect, PixelShadowControls, PixelSilhouetteControls, PixelSlider, PixelSmokeControls, PixelSnowControls, PixelSpecularHighlightControls, PixelTimeline, PixelWindSwayControls } from "@jdsalasc/pixel-ui";
 import type { PixelRimLightDirection, PixelWindSwayDirection } from "@jdsalasc/pixel-ui";
 import type { SpriteEffectKind } from "../domain/contracts.js";
 
@@ -20,6 +20,7 @@ const EFFECTS: Array<{ value: SpriteEffectKind; label: string }> = [
   { value: "fog", label: "FOG OVERLAY" },
   { value: "snow", label: "SNOW OVERLAY" },
   { value: "smoke", label: "SMOKE OVERLAY" },
+  { value: "fire", label: "FIRE OVERLAY" },
   { value: "motion", label: "MOTION PACK" },
   { value: "wind_sway", label: "WIND SWAY" },
   { value: "upscale", label: "NEAREST UPSCALE" },
@@ -101,6 +102,10 @@ export function SpriteEffectsPanel({ busy, online, assetName, onApply }: SpriteE
   const [smokeRise, setSmokeRise] = useState(0.65);
   const [smokeSeed, setSmokeSeed] = useState(1);
   const [smokeFrames, setSmokeFrames] = useState(8);
+  const [fireIntensity, setFireIntensity] = useState(0.65);
+  const [fireFlicker, setFireFlicker] = useState(0.55);
+  const [fireSeed, setFireSeed] = useState(1);
+  const [fireFrames, setFireFrames] = useState(8);
 
   const disabled = busy || !online;
 
@@ -188,6 +193,11 @@ export function SpriteEffectsPanel({ busy, online, assetName, onApply }: SpriteE
       onApply(kind, { frames: smokeFrames, seed: smokeSeed, density: smokeDensity, drift: smokeDrift, rise: smokeRise, color, delay_ms: 90 });
       return;
     }
+    if (kind === "fire") {
+      if (!Number.isInteger(fireFrames) || fireFrames < 1 || fireFrames > 24 || !Number.isInteger(fireSeed) || !Number.isFinite(fireIntensity) || fireIntensity < 0 || fireIntensity > 1 || !Number.isFinite(fireFlicker) || fireFlicker < 0 || fireFlicker > 1) return;
+      onApply(kind, { frames: fireFrames, seed: fireSeed, intensity: fireIntensity, flicker: fireFlicker, color, delay_ms: 90 });
+      return;
+    }
     if (kind === "seamless") {
       const parsedSeamWidth = Number(strength);
       if (!Number.isInteger(parsedSeamWidth) || parsedSeamWidth < 1 || parsedSeamWidth > 32) return;
@@ -240,7 +250,7 @@ export function SpriteEffectsPanel({ busy, online, assetName, onApply }: SpriteE
     onApply(kind, kind === "normal_map" ? { strength: parsedStrength } : kind === "rain" ? { color, intensity: Math.max(0, Math.min(1, parsedStrength / 8)), wind: 0, seed: 1 } : { color, thickness: Math.max(1, Math.min(8, Math.round(parsedStrength))) });
   }
 
-  const showColor = kind !== "motion" && kind !== "wind_sway" && kind !== "fog" && kind !== "snow" && kind !== "smoke" && kind !== "upscale" && kind !== "seamless" && kind !== "reflection" && kind !== "day_night" && kind !== "background" && kind !== "cleanup" && kind !== "glow" && kind !== "rim_light" && kind !== "ambient_occlusion" && kind !== "specular_highlight" && kind !== "color_ramp" && kind !== "grain" && kind !== "dither" && kind !== "shadow" && kind !== "color_temperature";
+  const showColor = kind !== "motion" && kind !== "wind_sway" && kind !== "fog" && kind !== "snow" && kind !== "smoke" && kind !== "fire" && kind !== "upscale" && kind !== "seamless" && kind !== "reflection" && kind !== "day_night" && kind !== "background" && kind !== "cleanup" && kind !== "glow" && kind !== "rim_light" && kind !== "ambient_occlusion" && kind !== "specular_highlight" && kind !== "color_ramp" && kind !== "grain" && kind !== "dither" && kind !== "shadow" && kind !== "color_temperature";
 
   return (
     <PixelPanel title="SPRITE EFFECTS" accent="pink">
@@ -250,6 +260,7 @@ export function SpriteEffectsPanel({ busy, online, assetName, onApply }: SpriteE
       </PixelSelect>
       {kind === "motion" ? <PixelSelect label="MOTION" value={motion} onChange={(event) => setMotion(event.target.value)} disabled={disabled}><option value="idle">IDLE</option><option value="walk">WALK</option><option value="run">RUN</option><option value="jump">JUMP</option><option value="attack">ATTACK</option></PixelSelect> : kind === "wind_sway" ? <PixelWindSwayControls frames={Number(frames)} seed={Number(seed)} amplitude={Number(strength)} direction={windDirection} disabled={disabled} onFramesChange={(value) => setFrames(String(value))} onSeedChange={(value) => setSeed(String(value))} onAmplitudeChange={(value) => setStrength(String(value))} onDirectionChange={setWindDirection} /> : kind === "fog" ? <PixelFogControls frames={fogFrames} seed={fogSeed} density={fogDensity} drift={fogDrift} color={color} disabled={disabled} onFramesChange={setFogFrames} onSeedChange={setFogSeed} onDensityChange={setFogDensity} onDriftChange={setFogDrift} onColorChange={setColor} /> : kind === "snow" ? <PixelSnowControls frames={snowFrames} seed={snowSeed} density={snowDensity} wind={snowWind} color={color} disabled={disabled} onFramesChange={setSnowFrames} onSeedChange={setSnowSeed} onDensityChange={setSnowDensity} onWindChange={setSnowWind} onColorChange={setColor} /> : kind === "background" ? <PixelBackgroundRemoval color={color} tolerance={Number(strength)} connectedOnly={connectedOnly} disabled={disabled} onColorChange={setColor} onToleranceChange={(value) => setStrength(String(value))} onConnectedOnlyChange={setConnectedOnly} /> : kind === "cleanup" ? <PixelCleanupControls minNeighbors={minNeighbors} iterations={cleanupIterations} disabled={disabled} onMinNeighborsChange={setMinNeighbors} onIterationsChange={setCleanupIterations} /> : kind === "glow" ? <PixelGlowControls color={color} radius={glowRadius} opacity={glowOpacity} disabled={disabled} onColorChange={setColor} onRadiusChange={setGlowRadius} onOpacityChange={setGlowOpacity} /> : kind === "silhouette" ? <PixelSilhouetteControls color={silhouetteColor} opacity={silhouetteOpacity} disabled={disabled} onColorChange={setSilhouetteColor} onOpacityChange={setSilhouetteOpacity} /> : kind === "rim_light" ? <PixelRimLightControls color={color} direction={rimDirection} strength={rimStrength} disabled={disabled} onColorChange={setColor} onDirectionChange={setRimDirection} onStrengthChange={setRimStrength} /> : kind === "ambient_occlusion" ? <PixelAmbientOcclusionControls color={color} radius={ambientRadius} strength={ambientStrength} disabled={disabled} onColorChange={setColor} onRadiusChange={setAmbientRadius} onStrengthChange={setAmbientStrength} /> : kind === "specular_highlight" ? <PixelSpecularHighlightControls color={color} direction={specularDirection} radius={specularRadius} strength={specularStrength} disabled={disabled} onColorChange={setColor} onDirectionChange={setSpecularDirection} onRadiusChange={setSpecularRadius} onStrengthChange={setSpecularStrength} /> : kind === "color_ramp" ? <PixelColorRampControls shadowColor={rampShadowColor} midColor={rampMidColor} highlightColor={rampHighlightColor} shadowThreshold={rampShadowThreshold} highlightThreshold={rampHighlightThreshold} disabled={disabled} onShadowColorChange={setRampShadowColor} onMidColorChange={setRampMidColor} onHighlightColorChange={setRampHighlightColor} onShadowThresholdChange={setRampShadowThreshold} onHighlightThresholdChange={setRampHighlightThreshold} /> : kind === "grain" ? <PixelGrainControls seed={grainSeed} intensity={grainIntensity} scale={grainScale} disabled={disabled} onSeedChange={setGrainSeed} onIntensityChange={setGrainIntensity} onScaleChange={setGrainScale} /> : kind === "dither" ? <PixelDitherControls darkColor={ditherDarkColor} lightColor={ditherLightColor} strength={ditherStrength} scale={ditherScale} disabled={disabled} onDarkColorChange={setDitherDarkColor} onLightColorChange={setDitherLightColor} onStrengthChange={setDitherStrength} onScaleChange={setDitherScale} /> : kind === "shadow" ? <PixelShadowControls color={shadowColor} offsetX={shadowOffsetX} offsetY={shadowOffsetY} opacity={shadowOpacity} disabled={disabled} onColorChange={setShadowColor} onOffsetXChange={setShadowOffsetX} onOffsetYChange={setShadowOffsetY} onOpacityChange={setShadowOpacity} /> : kind === "color_temperature" ? <PixelColorTemperatureControls temperature={temperature} intensity={temperatureIntensity} disabled={disabled} onTemperatureChange={setTemperature} onIntensityChange={setTemperatureIntensity} /> : showColor ? <PixelField label="COLOR" value={color} onChange={(event) => setColor(event.target.value)} disabled={disabled} /> : null}
       {kind === "smoke" ? <PixelSmokeControls frames={smokeFrames} seed={smokeSeed} density={smokeDensity} drift={smokeDrift} rise={smokeRise} color={color} disabled={disabled} onFramesChange={setSmokeFrames} onSeedChange={setSmokeSeed} onDensityChange={setSmokeDensity} onDriftChange={setSmokeDrift} onRiseChange={setSmokeRise} onColorChange={setColor} /> : null}
+      {kind === "fire" ? <PixelFireControls frames={fireFrames} seed={fireSeed} intensity={fireIntensity} flicker={fireFlicker} color={color} disabled={disabled} onFramesChange={setFireFrames} onSeedChange={setFireSeed} onIntensityChange={setFireIntensity} onFlickerChange={setFireFlicker} onColorChange={setColor} /> : null}
       <div className="effect-controls">
         {kind === "particles" || kind === "motion" ? <>
           <PixelField label="FRAMES" type="number" min="2" max="24" value={frames} onChange={(event) => setFrames(event.target.value)} disabled={disabled} />
@@ -270,7 +281,7 @@ export function SpriteEffectsPanel({ busy, online, assetName, onApply }: SpriteE
           <PixelField label="FRAMES" type="number" min="4" max="24" value={frames} onChange={(event) => setFrames(event.target.value)} disabled={disabled} />
           <PixelSlider label={`INTENSITY · ${dayNightIntensity}`} min={0.05} max={1} step={0.05} value={Number(dayNightIntensity)} onChange={(event) => setDayNightIntensity(event.target.value)} disabled={disabled} />
           <PixelField label="SEED" type="number" value={dayNightSeed} onChange={(event) => setDayNightSeed(event.target.value)} disabled={disabled} />
-        </> : kind === "wind_sway" || kind === "fog" || kind === "snow" || kind === "smoke" || kind === "background" || kind === "cleanup" || kind === "glow" || kind === "silhouette" || kind === "rim_light" || kind === "ambient_occlusion" || kind === "specular_highlight" || kind === "color_ramp" || kind === "grain" || kind === "dither" || kind === "shadow" || kind === "color_temperature" ? null : <PixelSlider label={kind === "upscale" ? `SCALE · ${strength}` : kind === "seamless" ? `SEAM WIDTH · ${strength}` : kind === "normal_map" ? `STRENGTH · ${strength}` : kind === "rain" ? `RAIN INTENSITY · ${strength}` : `THICKNESS · ${strength}`} min={kind === "upscale" ? 2 : kind === "normal_map" ? 0 : 1} max={kind === "upscale" ? 16 : kind === "seamless" ? 32 : 8} step={1} value={Number(strength)} onChange={(event) => setStrength(event.target.value)} disabled={disabled} />}
+        </> : kind === "wind_sway" || kind === "fog" || kind === "snow" || kind === "smoke" || kind === "fire" || kind === "background" || kind === "cleanup" || kind === "glow" || kind === "silhouette" || kind === "rim_light" || kind === "ambient_occlusion" || kind === "specular_highlight" || kind === "color_ramp" || kind === "grain" || kind === "dither" || kind === "shadow" || kind === "color_temperature" ? null : <PixelSlider label={kind === "upscale" ? `SCALE · ${strength}` : kind === "seamless" ? `SEAM WIDTH · ${strength}` : kind === "normal_map" ? `STRENGTH · ${strength}` : kind === "rain" ? `RAIN INTENSITY · ${strength}` : `THICKNESS · ${strength}`} min={kind === "upscale" ? 2 : kind === "normal_map" ? 0 : 1} max={kind === "upscale" ? 16 : kind === "seamless" ? 32 : 8} step={1} value={Number(strength)} onChange={(event) => setStrength(event.target.value)} disabled={disabled} />}
       </div>
       <div className="tool-runner-actions"><PixelButton tone="pink" disabled={disabled} onClick={apply}>{busy ? "APPLYING..." : "APPLY SPRITE EFFECT"}</PixelButton></div>
     </PixelPanel>
