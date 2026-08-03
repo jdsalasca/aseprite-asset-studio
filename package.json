@@ -13,7 +13,7 @@
     "gateway:dev": "tsx watch server/index.ts"
   },
   "dependencies": {
-    "@jdsalasc/pixel-ui": "github:jdsalasca/pixel-art-ui#0807694",
+    "@jdsalasc/pixel-ui": "github:jdsalasca/pixel-art-ui#46b5b768493ec1eb0d21c037442f4a5db89e9413",
     "@modelcontextprotocol/sdk": "^1.30.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
