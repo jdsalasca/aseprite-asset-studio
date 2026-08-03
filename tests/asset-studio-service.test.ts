@@ -37,7 +37,7 @@ class FakeGateway implements AssetGateway {
     if (name === "apply_sprite_color_temperature") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: args.format, deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_rain_overlay") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_fog_overlay") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
-    if (name === "generate_snow_overlay" || name === "generate_smoke_overlay" || name === "generate_fire_overlay") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
+    if (name === "generate_snow_overlay" || name === "generate_smoke_overlay" || name === "generate_fire_overlay" || name === "generate_lightning_overlay") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_motion_pack") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_wind_sway") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "upscale_pixel_art") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, scale: args.scale, frames: 1, format: "png", deterministic: true, sourcePreserved: true }) }] };
@@ -180,6 +180,13 @@ describe("AssetStudioService enhancement use cases", () => {
     const result = await new AssetStudioService(gateway).applySpriteEffect("fire", "scene.png", "scene-fire.gif", { frames: 6, seed: 53, intensity: 0.82, flicker: 0.7, color: "#FFD65A", delay_ms: 100 });
     expect(result).toMatchObject({ operation: "generate_fire_overlay", output: "scene-fire.gif", format: "gif" });
     expect(gateway.calls.at(-1)).toMatchObject({ name: "generate_fire_overlay", args: { input_filename: "scene.png", output_filename: "scene-fire.gif", frames: 6, seed: 53, intensity: 0.82, flicker: 0.7, color: "#FFD65A", delay_ms: 100, format: "gif" } });
+  });
+
+  it("maps lightning controls to the shared MCP environmental generator", async () => {
+    const gateway = new FakeGateway();
+    const result = await new AssetStudioService(gateway).applySpriteEffect("lightning", "scene.png", "scene-lightning.gif", { frames: 6, seed: 67, intensity: 0.72, flash: 0.8, color: "#D8F3FF", delay_ms: 100 });
+    expect(result).toMatchObject({ operation: "generate_lightning_overlay", output: "scene-lightning.gif", format: "gif" });
+    expect(gateway.calls.at(-1)).toMatchObject({ name: "generate_lightning_overlay", args: { input_filename: "scene.png", output_filename: "scene-lightning.gif", frames: 6, seed: 67, intensity: 0.72, flash: 0.8, color: "#D8F3FF", delay_ms: 100, format: "gif" } });
   });
 
   it("maps background removal to the shared MCP effects service", async () => {
