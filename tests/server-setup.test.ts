@@ -11,9 +11,10 @@ const config: RuntimeConfig = { workspacePath: "C:\\work\\mcp", executablePath: 
 
 class FakeSession implements ToolSessionPort {
   public options: ToolSessionLaunchOptions | undefined;
+  public failOnStart = false;
   private state: ToolSessionStatus = { state: "offline", pid: null, providerName: null, providerVersion: null, toolCount: 0, message: "offline" };
   public status() { return this.state; }
-  public async start(options: ToolSessionLaunchOptions) { this.options = options; this.state = { state: "online", pid: 42, providerName: "fake", providerVersion: "1", toolCount: 2, message: "online" }; return this.state; }
+  public async start(options: ToolSessionLaunchOptions) { this.options = options; if (this.failOnStart) throw new Error("MCP process failed"); this.state = { state: "online", pid: 42, providerName: "fake", providerVersion: "1", toolCount: 2, message: "online" }; return this.state; }
   public async stop() { this.state = { state: "offline", pid: null, providerName: null, providerVersion: null, toolCount: 0, message: "offline" }; return this.state; }
   public async listTools() { return [{ name: "inspect_asset" }]; }
   public async call() { return { ok: true }; }
@@ -86,5 +87,15 @@ describe("ServerSetupService", () => {
     expect(diagnostics.runtime.state).toBe("offline");
     expect(diagnostics.lastError).toBeNull();
     expect(diagnostics.restEndpoint).toBeNull();
+  });
+
+  it("does not persist a detected executable when MCP startup fails", async () => {
+    const session = new FakeSession();
+    session.failOnStart = true;
+    const store = new FakeStore();
+    const service = new ServerSetupService(session, new FakeValidator(), store, new FakeAssetStorage(), new FakeAsepriteDiscovery());
+
+    await expect(service.start({ ...config, executablePath: "" })).rejects.toThrow("MCP process failed");
+    expect(store.saved).toBeUndefined();
   });
 });

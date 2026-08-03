@@ -92,6 +92,8 @@ describe("studio feature contracts", () => {
     const sceneStackMarkup = renderToStaticMarkup(<SceneEffectStackPanel busy={false} online assetName="oak.png" onGenerate={() => undefined} />);
       expect(sceneStackMarkup).toContain("SCENE EFFECT STACK");
       expect(sceneStackMarkup).toContain("WIND SWAY");
+      expect(sceneStackMarkup).toContain("SPRITE SHADOW");
+      expect(sceneStackMarkup).toContain("SPRITE GLOW");
       expect(sceneStackMarkup).toContain("EXECUTION ORDER");
       expect(sceneStackMarkup).toContain("1. MATERIAL GRAIN");
     expect(renderToStaticMarkup(<VariantPreviewPanel previewUrl={(path) => `/preview?path=${encodeURIComponent(path)}`} artifacts={[{ variant: "rain", outputFilename: "oak-rain.gif", operation: "generate_rain_overlay", frames: 8, format: "gif", deterministic: true, sourcePreserved: true }]} />)).toContain("VARIANT PREVIEWS");

@@ -32,9 +32,9 @@ export class ServerSetupService {
       const detection = await this.aseprite.detect(config.executablePath.trim() || undefined);
       if (!detection.found || !detection.executablePath) throw new Error(detection.message);
       const resolvedConfig = { ...config, executablePath: detection.executablePath };
-      await this.configStore.save(resolvedConfig);
       const environmentOverrides = { ASEPRITE_PATH: detection.executablePath, ...(config.mcpRestPort === undefined ? {} : { MCP_REST_PORT: String(config.mcpRestPort) }) };
       const status = this.toRuntimeStatus(await this.session.start({ workingDirectory: config.workspacePath.trim(), environmentOverrides }));
+      await this.configStore.save(resolvedConfig);
       this.lastError = null;
       return { ...status, message: `${status.message} · ${detection.message}` };
     } catch (error) { this.lastError = error instanceof Error ? error.message : String(error); throw error; }
