@@ -36,6 +36,7 @@ class FakeGateway implements AssetGateway {
     if (name === "generate_sprite_shadow") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: args.format, deterministic: true, sourcePreserved: true }) }] };
     if (name === "apply_sprite_color_temperature") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: args.format, deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_rain_overlay") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: "gif", deterministic: true, sourcePreserved: true }) }] };
+    if (name === "generate_fog_overlay") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_motion_pack") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_wind_sway") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "upscale_pixel_art") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, scale: args.scale, frames: 1, format: "png", deterministic: true, sourcePreserved: true }) }] };
@@ -150,6 +151,13 @@ describe("AssetStudioService enhancement use cases", () => {
     const result = await new AssetStudioService(gateway).applySpriteEffect("wind_sway", "tree.png", "tree-wind.gif", { frames: 6, seed: 19, amplitude: 2, direction: "right", delay_ms: 75 });
     expect(result).toMatchObject({ operation: "generate_wind_sway", output: "tree-wind.gif", format: "gif" });
     expect(gateway.calls.at(-1)).toMatchObject({ name: "generate_wind_sway", args: { input_filename: "tree.png", output_filename: "tree-wind.gif", frames: 6, seed: 19, amplitude: 2, direction: "right", delay_ms: 75, format: "gif" } });
+  });
+
+  it("maps fog controls to the shared MCP environmental generator", async () => {
+    const gateway = new FakeGateway();
+    const result = await new AssetStudioService(gateway).applySpriteEffect("fog", "scene.png", "scene-fog.gif", { frames: 6, seed: 23, density: 0.72, drift: -0.35, color: "#DDEBFF", delay_ms: 110 });
+    expect(result).toMatchObject({ operation: "generate_fog_overlay", output: "scene-fog.gif", format: "gif" });
+    expect(gateway.calls.at(-1)).toMatchObject({ name: "generate_fog_overlay", args: { input_filename: "scene.png", output_filename: "scene-fog.gif", frames: 6, seed: 23, density: 0.72, drift: -0.35, color: "#DDEBFF", delay_ms: 110, format: "gif" } });
   });
 
   it("maps background removal to the shared MCP effects service", async () => {
@@ -379,10 +387,10 @@ describe("AssetStudioService enhancement use cases", () => {
 
   it("generates a compact scene effect stack through one shared MCP call", async () => {
     const gateway = new FakeGateway();
-    const result = await new AssetStudioService(gateway).generateSceneEffectStack({ filename: "scene.png", outputPrefix: "scene-stack", effects: ["material_texture", "rain", "wind_sway", "sprite_shadow", "sprite_glow", "particles"], frames: 6, seed: 9, material: "earth", direction: "south_east" });
+    const result = await new AssetStudioService(gateway).generateSceneEffectStack({ filename: "scene.png", outputPrefix: "scene-stack", effects: ["material_texture", "rain", "fog", "wind_sway", "sprite_shadow", "sprite_glow", "particles"], frames: 6, seed: 9, material: "earth", direction: "south_east" });
     expect(result).toMatchObject({ operation: "generate_scene_effect_stack", input: "scene.png", seed: 9, deterministic: true, sourcePreserved: true });
-    expect(result.artifacts.map((artifact) => artifact.effect)).toEqual(["material_texture", "rain", "wind_sway", "sprite_shadow", "sprite_glow", "particles"]);
-    expect(gateway.calls.at(-1)).toMatchObject({ name: "generate_scene_effect_stack", args: { input_filename: "scene.png", output_prefix: "scene-stack", effects: ["material_texture", "rain", "wind_sway", "sprite_shadow", "sprite_glow", "particles"], frames: 6, seed: 9, material: "earth", direction: "south_east" } });
+    expect(result.artifacts.map((artifact) => artifact.effect)).toEqual(["material_texture", "rain", "fog", "wind_sway", "sprite_shadow", "sprite_glow", "particles"]);
+    expect(gateway.calls.at(-1)).toMatchObject({ name: "generate_scene_effect_stack", args: { input_filename: "scene.png", output_prefix: "scene-stack", effects: ["material_texture", "rain", "fog", "wind_sway", "sprite_shadow", "sprite_glow", "particles"], frames: 6, seed: 9, material: "earth", direction: "south_east" } });
   });
 
   it("executes a recipe through the shared MCP tool and preserves typed output", async () => {

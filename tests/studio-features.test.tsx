@@ -84,6 +84,7 @@ describe("studio feature contracts", () => {
     expect(effectsMarkup).toContain("COLOR TEMPERATURE");
     expect(effectsMarkup).toContain("SPRITE SILHOUETTE");
     expect(effectsMarkup).toContain("WIND SWAY");
+    expect(effectsMarkup).toContain("FOG OVERLAY");
     expect(renderToStaticMarkup(<SceneExtensionPanel busy={false} online onExtend={() => undefined} onTransition={() => undefined} />)).toContain("SCENE EXTENSION");
     expect(renderToStaticMarkup(<SceneExtensionPanel busy={false} online onExtend={() => undefined} onTransition={() => undefined} />)).toContain("BLEND BIOMES");
     const variantPackMarkup = renderToStaticMarkup(<VariantPackPanel busy={false} online assetName="oak.png" onGenerate={() => undefined} />);
@@ -94,6 +95,7 @@ describe("studio feature contracts", () => {
       expect(sceneStackMarkup).toContain("WIND SWAY");
       expect(sceneStackMarkup).toContain("SPRITE SHADOW");
       expect(sceneStackMarkup).toContain("SPRITE GLOW");
+      expect(sceneStackMarkup).toContain("FOG");
       expect(sceneStackMarkup).toContain("EXECUTION ORDER");
       expect(sceneStackMarkup).toContain("1. MATERIAL GRAIN");
     expect(renderToStaticMarkup(<VariantPreviewPanel previewUrl={(path) => `/preview?path=${encodeURIComponent(path)}`} artifacts={[{ variant: "rain", outputFilename: "oak-rain.gif", operation: "generate_rain_overlay", frames: 8, format: "gif", deterministic: true, sourcePreserved: true }]} />)).toContain("VARIANT PREVIEWS");
