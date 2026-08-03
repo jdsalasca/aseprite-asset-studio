@@ -1,0 +1,24 @@
+$studio-breakpoint: 900px;
+$ink: #101522;
+$panel: #1b2638;
+$panel-2: #243550;
+$cyan: #7de2d1;
+$amber: #f7c873;
+$pink: #ff8fab;
+$danger: #ff6b6b;
+$text: #f3f7ff;
+$muted: #a9b7cf;
+$shadow: #080b13;
+
+:root {
+  --studio-ink: #{$ink};
+  --studio-panel: #{$panel};
+  --studio-panel-2: #{$panel-2};
+  --studio-cyan: #{$cyan};
+  --studio-amber: #{$amber};
+  --studio-pink: #{$pink};
+  --studio-danger: #{$danger};
+  --studio-text: #{$text};
+  --studio-muted: #{$muted};
+  --studio-shadow: #{$shadow};
+}

@@ -1,0 +1,18 @@
+@mixin studio-surface($accent: var(--studio-cyan)) {
+  background: var(--studio-panel);
+  border: 1px solid var(--studio-panel-2);
+  border-left: 3px solid $accent;
+  box-shadow: 3px 3px 0 var(--studio-shadow);
+  color: var(--studio-text);
+}
+
+@mixin studio-focus {
+  outline: 2px solid var(--studio-text);
+  outline-offset: 2px;
+}
+
+@mixin studio-grid($columns: repeat(2, minmax(0, 1fr))) {
+  display: grid;
+  gap: .8rem;
+  grid-template-columns: $columns;
+}

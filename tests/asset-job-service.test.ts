@@ -1,0 +1,54 @@
+import { describe, expect, it } from "vitest";
+import { AssetJobService } from "../src/application/AssetJobService.js";
+import { RequestGenerationGuard } from "../src/application/RequestGenerationGuard.js";
+import type { AssetGateway, HealthResponse, RuntimeConfig, StoredAsset, ToolDescriptor, ToolRuntimeStatus } from "../src/domain/contracts.js";
+
+const status: ToolRuntimeStatus = { state: "online", pid: 1, serverName: "fake", serverVersion: "1", toolCount: 1, message: "online" };
+
+class FakeGateway implements AssetGateway {
+  public calls: Array<{ name: string; args: Record<string, unknown> }> = [];
+  public async health(): Promise<HealthResponse> { return { ok: true, service: "fake", version: "1", runtime: status }; }
+  public async config(): Promise<RuntimeConfig> { return { workspacePath: "", executablePath: "", gatewayPort: 3765 }; }
+  public async startRuntime(): Promise<ToolRuntimeStatus> { return status; }
+  public async stopRuntime(): Promise<ToolRuntimeStatus> { return status; }
+  public async tools(): Promise<ToolDescriptor[]> { return []; }
+  public async callTool(name: string, args: Record<string, unknown>): Promise<unknown> {
+    this.calls.push({ name, args });
+    return { content: [{ text: JSON.stringify({ id: "job-1", status: "queued", jobs: [], createdAt: "now", updatedAt: "now" }) }] };
+  }
+  public async upload(file: File): Promise<StoredAsset> { return { filename: file.name, path: file.name, sizeBytes: file.size }; }
+  public assetPreviewUrl(path: string): string { return path; }
+}
+
+describe("AssetJobService", () => {
+  it("maps generic recipe contracts to the MCP wire schema", async () => {
+    const gateway = new FakeGateway();
+    await new AssetJobService(gateway).start({ jobs: [{ recipe: "gif", inputFilenames: ["source.png"], outputFilename: "source.gif", maxColors: 16 }] });
+    expect(gateway.calls[0]).toEqual({ name: "start_asset_job", args: { jobs: [{ recipe: "gif", input_filenames: ["source.png"], output_filename: "source.gif", max_colors: 16 }] } });
+  });
+
+  it("rejects an empty job before calling the external consumer", async () => {
+    const gateway = new FakeGateway();
+    await expect(new AssetJobService(gateway).start({ jobs: [] })).rejects.toThrow("al menos una receta");
+    expect(gateway.calls).toHaveLength(0);
+  });
+
+  it("rejects an in-flight poll after its lifecycle is invalidated", () => {
+    const guard = new RequestGenerationGuard();
+    const snapshot = guard.next();
+
+    guard.invalidate();
+
+    expect(guard.accepts(snapshot)).toBe(false);
+    expect(guard.accepts(guard.snapshot())).toBe(true);
+  });
+
+  it("preserves generic artifact metadata from the provider response", async () => {
+    const gateway = new FakeGateway();
+    gateway.callTool = async () => ({ content: [{ text: JSON.stringify({ id: "job-2", status: "completed", jobs: [], createdAt: "now", updatedAt: "now", artifacts: [{ id: "artifact-1", jobId: "job-2", filename: "output.gif", format: "gif", sizeBytes: 42, sha256: "a".repeat(64), createdAt: "now" }] }) }] });
+
+    const job = await new AssetJobService(gateway).status("job-2");
+
+    expect(job.artifacts?.[0]).toMatchObject({ filename: "output.gif", format: "gif", sizeBytes: 42 });
+  });
+});

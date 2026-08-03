@@ -1,0 +1,27 @@
+@use "mixins" as m;
+
+.quality-recommendations { color: #d4def0; display: grid; gap: .55rem; line-height: 1.5; margin: 0; padding-left: 1.2rem; }
+.quality-recommendations li::marker { color: var(--studio-amber); }
+.asset-library-audit-panel { margin-top: .8rem; }
+.asset-library-summary-panel { margin-top: .8rem; }
+.scene-plan-controls { align-items: end; display: grid; gap: .7rem; grid-template-columns: minmax(0, 1fr) auto; margin-top: .8rem; }
+.scene-compose-controls { @include m.studio-grid(repeat(7, minmax(0, 1fr))); align-items: end; margin-top: .8rem; }
+.scene-compose-controls .pixel-field:first-child { grid-column: span 2; }
+.scene-compose-actions { display: flex; flex-wrap: wrap; gap: .5rem; grid-column: span 2; }
+.library-variant-pack-controls { @include m.studio-grid(repeat(7, minmax(0, 1fr))); align-items: end; margin-top: .8rem; }
+.library-variant-pack-controls .pixel-field:nth-child(1), .library-variant-pack-controls .pixel-field:nth-child(2), .library-variant-pack-controls .pixel-field:nth-child(3) { grid-column: span 2; }
+.manifest-audit-controls { align-items: end; display: grid; gap: .7rem; grid-template-columns: minmax(0, 1fr) auto; margin-top: .8rem; }
+.scene-recommendation-controls { @include m.studio-grid(repeat(7, minmax(0, 1fr))); align-items: end; margin-top: .8rem; }
+.scene-recommendation-controls .pixel-field:nth-child(1), .scene-recommendation-controls .pixel-field:nth-child(2), .scene-recommendation-controls .pixel-field:nth-child(3), .scene-recommendation-controls .pixel-field:nth-child(4) { grid-column: span 2; }
+.scene-bundle-controls { @include m.studio-grid(repeat(8, minmax(0, 1fr))); align-items: end; margin-top: .8rem; }
+.scene-bundle-controls .pixel-field:nth-child(1), .scene-bundle-controls .pixel-field:nth-child(2) { grid-column: span 2; }
+.normalization-controls { @include m.studio-grid(repeat(2, minmax(0, 1fr))); margin-top: .8rem; }
+.normalization-controls label { color: var(--studio-muted); display: grid; font-size: .7rem; gap: .35rem; letter-spacing: .08em; }
+.normalization-controls input, .normalization-controls select { background: var(--studio-ink); border: 1px solid var(--studio-cyan); color: #d4def0; font: inherit; min-height: 2.2rem; padding: .45rem; }
+.animation-sheet-controls { @include m.studio-grid(repeat(2, minmax(0, 1fr))); margin-top: .8rem; }
+.animation-sheet-controls label { color: var(--studio-muted); display: grid; font-size: .7rem; gap: .35rem; letter-spacing: .08em; }
+.animation-sheet-controls input { background: var(--studio-ink); border: 1px solid var(--studio-pink); color: #d4def0; font: inherit; min-height: 2.2rem; padding: .45rem; }
+.hitbox-controls { @include m.studio-grid(repeat(2, minmax(0, 1fr))); margin-top: .8rem; }
+.hitbox-controls label { color: var(--studio-muted); display: grid; font-size: .7rem; gap: .35rem; letter-spacing: .08em; }
+.hitbox-controls input { background: var(--studio-ink); border: 1px solid var(--studio-cyan); color: #d4def0; font: inherit; min-height: 2.2rem; padding: .45rem; }
+.runtime-bundle-controls { @include m.studio-grid(repeat(2, minmax(0, 1fr))); margin-top: .8rem; }

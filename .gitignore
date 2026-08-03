@@ -2,3 +2,5 @@ node_modules/
 dist/
 coverage/
 .playwright-cli/
+.asset-studio/
+.aseprite-discovery-*/

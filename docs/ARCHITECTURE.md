@@ -1,0 +1,68 @@
+# Arquitectura
+
+Asset Studio separa la UX del control de procesos:
+
+```text
+React UX → casos de uso → puertos → adaptadores Node/MCP/filesystem
+```
+
+El navegador no conoce `child_process`, MCP SDK ni rutas de Aseprite. El proceso gateway compone adaptadores concretos y expone controladores HTTP locales.
+
+## Mejoras entregadas
+
+1. `ServerSetupService` inicia y detiene sesiones mediante un puerto genérico;
+2. `JsonStudioConfigStore` y `LocalAssetStore` son persistencias reemplazables;
+3. `StudioHttpController` es delgado y solo traduce HTTP;
+4. el upload de assets pasa por un puerto y valida tamaño/formato;
+5. `ToolResponseParser` centraliza la lectura de respuestas de herramientas, preserva `isError` y diagnostica JSON inválido;
+6. `QualityGatePanel` muestra resultado y violaciones con una primitive reusable, sin reglas de dominio en React;
+7. `AssetJobService` traduce recetas genéricas al contrato externo, mientras la UX solo consume estados tipados;
+8. `useAssetJobController` aísla polling, cancelación y selección de receta del controlador principal;
+9. `AssetArtifactView` conserva metadata genérica de outputs y `AssetJobPanel` muestra formato, tamaño y hash abreviado;
+10. `AssetPreviewPanel` usa `PixelCompare` para revisar el antes/después con teclado y ARIA;
+11. `ToolRunnerPanel` ejecuta cualquier herramienta MCP con argumentos JSON editables y `InMemoryOperationLogger` publica eventos en vivo hacia `PixelLogViewer`;
+12. `MaterialTexturePanel` ofrece presets de agua, tierra, grass, piedra y nieve con seed/intensidad y preview separado;
+13. `LightingPanel` expone dirección, ambiente y fuerza para `apply_depth_lighting`, reutilizando el mismo gateway y preview no destructivo;
+14. las pruebas TDD cubren los casos de uso de mejora, jobs, artifacts, HTTP, preview, runner, materiales, iluminación, observabilidad y límites de almacenamiento.
+15. `AssetJobPanel` muestra progreso `completed/total` sin cargar el resultado completo;
+16. `ToolGrid` filtra localmente el catálogo para reducir el tiempo de búsqueda humana;
+17. `ActivityLogPanel` filtra por operación, outcome, correlación o error;
+18. los artifacts tienen acción de copiar ruta para handoff rápido a un agente o artista;
+19. `RecipePresets` convierte recetas frecuentes en acciones de un clic;
+20. `Ctrl+I`, `Ctrl+Enter` y `Ctrl+J` aceleran inspección, aplicación y jobs sin romper inputs;
+21. `assetValidation` bloquea extensiones no soportadas y uploads mayores de 25 MB antes del gateway;
+22. `PipelineStatus` expone estados conect, inspect, enhance y quality;
+23. `RuntimeMetricsPanel` resume operaciones, éxitos, fallos y latencia promedio;
+24. las pruebas TDD de `studio-features.test.tsx` blindan estas rutas y detectaron el ajuste de JSX en el archivo de pruebas.
+25. `SpriteEffectsPanel` integra outline, color grade, shadow, partículas y normal map mediante el gateway tipado;
+26. `RecipeCreatorPanel` compone pasos, seed, material y dirección de luz sin ejecutar implícitamente;
+27. `AssetStudioService` traduce ambos flujos a puertos MCP y conserva el parseo de respuestas en aplicación;
+28. `PixelCheckboxGroup` permite seleccionar pasos reutilizables sin introducir lógica MCP en la librería visual.
+
+## Plan de implementación
+
+### Fase 3 · Jobs y artifacts — implementada
+
+- definir puertos genéricos para `JobRepository`, `ArtifactRepository` y reloj;
+- implementar persistencia local como adaptador reemplazable, con estados `queued`, `running`, `completed`, `failed` y `cancelled`;
+- exponer operaciones de inicio, consulta y cancelación mediante el controlador HTTP genérico de herramientas;
+- conservar el input y el output separados, con checksum y metadatos de receta;
+- mostrar los artifacts generados en la UX sin exponer detalles del proveedor;
+- probar primero las transiciones de estado y después el flujo contra el gateway real.
+
+### Fase 4 · UX de producción — comparación implementada
+
+- añadir comparación antes/después, selector de receta y navegación de frames;
+- `PixelCompare` ya está integrado; la navegación de frames queda como siguiente incremento;
+- el catálogo deja de ser informativo: las tarjetas seleccionan herramientas y el runner las ejecuta mediante el gateway local;
+- los eventos `started`, `success` y `failure` se muestran con duración y correlación, sin exponer detalles del proveedor en el dominio;
+- mostrar señales detectadas, warnings y quality gate sin mezclar reglas de dominio en React;
+- usar componentes de `pixel-art-ui` para estados accesibles, teclado y reduced motion; los estilos se importan explícitamente para no romper SSR;
+- añadir pruebas de interacción y un E2E del flujo upload → inspect → plan → apply.
+
+### Fase 5 · Contratos y releases
+
+- versionar un contrato JSON de planes y resultados;
+- generar fixtures compactos para agentes y evitar repetir contexto grande;
+- validar compatibilidad MCP/Studio en CI;
+- publicar la librería UI desde un workflow protegido por `NPM_TOKEN`.
