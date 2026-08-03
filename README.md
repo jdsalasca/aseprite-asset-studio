@@ -59,7 +59,7 @@ Los assets cargados se validan por extensión, limitan a 32 MB y se guardan medi
 - `INSPECT SPRITE GEOMETRY` muestra bounds, componentes alfa, baseline drift y pivotes para detectar jitter antes de usar un sprite en una escena.
 - Los paneles `MATERIAL ENHANCER` y `DEPTH LIGHTING` crean salidas separadas con seed, granularidad y luz direccional reproducibles.
 - `PALETTE HARMONIZER` unifica la familia cromática de un PNG/GIF hacia un color de acento, limita la paleta y muestra swatches del resultado sin tocar el origen.
-- `SPRITE EFFECTS` añade outline, color grade, sombra, partículas, normal map, lluvia, niebla, nieve con viento, humo ascendente con deriva, fuego/brasas con parpadeo, relámpagos con flash acotado, ciclos de movimiento, nearest upscale, seamless texture, reflejo animado, caústicas de agua y ciclo día/atardecer/noche/amanecer con outputs separados.
+- `SPRITE EFFECTS` añade outline, color grade, sombra, partículas, normal map, lluvia, niebla, nieve con viento, humo ascendente con deriva, fuego/brasas con parpadeo, relámpagos con flash acotado, oleaje, spray marino, polvo ascendente, ciclos de movimiento, nearest upscale, seamless texture, reflejo animado, caústicas de agua y ciclo día/atardecer/noche/amanecer con outputs separados.
 - `REMOVE BACKGROUND` elimina de forma determinista el color conectado al borde, permite tolerancia RGB y conserva colores encerrados; el origen siempre queda intacto.
 - `CLEAN ISOLATED PIXELS` corrige ruido de píxeles opacos aislados con vecinos mínimos e iteraciones acotadas, manteniendo los grupos conectados y el origen.
 - `SPRITE GLOW` agrega aura radial para magia, fuego, lámparas y campanas mediante color, radio y opacidad reproducibles, sin modificar la silueta fuente.
@@ -75,7 +75,7 @@ Los assets cargados se validan por extensión, limitan a 32 MB y se guardan medi
 - `COLOR TEMPERATURE` ajusta un asset hacia frío nocturno o cálido de atardecer/fuego con temperatura e intensidad deterministas mediante el mismo servicio MCP.
 - `ENVIRONMENT VARIANT PACK` genera lluvia, fuego, terremoto, pájaros, noche, ciclos día/noche, walk, reflejos y caústicas desde un único asset, usando una sola llamada MCP y mostrando el manifiesto de artifacts.
 - `ENHANCE COLLECTION` aplica cleanup, granularidad, oleaje, iluminación y partículas al asset y sus variantes en un batch único, con errores aislados y salidas separadas.
-- `SCENE EFFECT STACK` agrupa materiales, iluminación, lluvia, niebla, nieve, humo, fuego, relámpagos, oleaje/espuma, spray marino, viento, sombras, glow, partículas, reflejos/caústicas y ciclo día-noche en una sola llamada tipada a `generate_scene_effect_stack`; el orden de pasadas, la salida y los fallos quedan visibles en la UX.
+- `SCENE EFFECT STACK` agrupa materiales, iluminación, lluvia, niebla, nieve, humo, fuego, relámpagos, oleaje/espuma, spray marino, polvo, viento, sombras, glow, partículas, reflejos/caústicas y ciclo día-noche en una sola llamada tipada a `generate_scene_effect_stack`; el orden de pasadas, la salida y los fallos quedan visibles en la UX.
 - `BLEND BIOMES` calcula desde el panel de mapas una banda determinista de transición entre terrenos y crea un preview sin modificar el mapa fuente.
 - `VARIANT PREVIEWS` muestra todas las salidas del pack en una galería horizontal reutilizable de Pixel UI, con links de preview y metadatos de frames/formato.
 - `BUILD CONTACT SHEET` reúne las variantes del pack en una rejilla nearest-neighbor y enlaza su manifest JSON para inspección rápida con una sola llamada al MCP.
