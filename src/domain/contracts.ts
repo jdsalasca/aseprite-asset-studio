@@ -117,7 +117,7 @@ export interface DepthLightingView {
 }
 
 export type SpriteEffectKind = "outline" | "color_grade" | "shadow" | "particles" | "normal_map" | "rain" | "motion" | "wind_sway" | "upscale" | "seamless" | "reflection" | "caustics" | "day_night" | "background" | "cleanup" | "glow" | "silhouette" | "rim_light" | "ambient_occlusion" | "specular_highlight" | "color_ramp" | "grain" | "dither" | "color_temperature";
-export type AssetVariantKind = "rain" | "fire" | "earthquake" | "birds" | "night" | "day_night" | "walk" | "water_reflection" | "water_caustics";
+export type AssetVariantKind = "rain" | "fire" | "earthquake" | "birds" | "night" | "day_night" | "walk" | "water_reflection" | "water_caustics" | "wind_sway" | "wind";
 export interface AssetVariantArtifactView { variant: AssetVariantKind; outputFilename: string; operation: string; frames: number; format: "png" | "gif"; deterministic: true; sourcePreserved: true; }
 export interface AssetVariantPackView { operation: "generate_variant_pack"; input: string; outputPrefix: string; seed: number; artifacts: AssetVariantArtifactView[]; deterministic: true; sourcePreserved: true; }
 export interface AssetQualityBundleView { operation: "inspect_asset_bundle"; filename: string; inspection: { frameCount: number; width: number; height: number; totalColors: number; reports: Array<Record<string, number>>; delaysMs: number[] }; quality: { valid: boolean; maxColors: number; maxIsolatedPixels: number; violations: string[] }; recommendations: string[]; deterministic: true; sourcePreserved: true; }

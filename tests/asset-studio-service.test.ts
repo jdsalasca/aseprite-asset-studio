@@ -343,10 +343,10 @@ describe("AssetStudioService enhancement use cases", () => {
 
   it("generates a multi-output environmental variant pack through one MCP call", async () => {
     const gateway = new FakeGateway();
-    const result = await new AssetStudioService(gateway).generateVariantPack({ filename: "oak.png", outputPrefix: "oak-variants", variants: ["rain", "fire", "birds"], frames: 6, seed: 4 });
+    const result = await new AssetStudioService(gateway).generateVariantPack({ filename: "oak.png", outputPrefix: "oak-variants", variants: ["rain", "birds", "wind_sway"], frames: 6, seed: 4 });
     expect(result).toMatchObject({ operation: "generate_variant_pack", input: "oak.png", outputPrefix: "oak-variants", seed: 4, deterministic: true });
-    expect(result.artifacts.map((artifact) => artifact.variant)).toEqual(["rain", "fire", "birds"]);
-    expect(gateway.calls.at(-1)).toMatchObject({ name: "generate_variant_pack", args: { input_filename: "oak.png", output_prefix: "oak-variants", variants: ["rain", "fire", "birds"], frames: 6, seed: 4 } });
+    expect(result.artifacts.map((artifact) => artifact.variant)).toEqual(["rain", "birds", "wind_sway"]);
+    expect(gateway.calls.at(-1)).toMatchObject({ name: "generate_variant_pack", args: { input_filename: "oak.png", output_prefix: "oak-variants", variants: ["rain", "birds", "wind_sway"], frames: 6, seed: 4 } });
   });
 
   it("maps compact quality inspection to the shared MCP gateway", async () => {

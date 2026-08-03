@@ -86,7 +86,9 @@ describe("studio feature contracts", () => {
     expect(effectsMarkup).toContain("WIND SWAY");
     expect(renderToStaticMarkup(<SceneExtensionPanel busy={false} online onExtend={() => undefined} onTransition={() => undefined} />)).toContain("SCENE EXTENSION");
     expect(renderToStaticMarkup(<SceneExtensionPanel busy={false} online onExtend={() => undefined} onTransition={() => undefined} />)).toContain("BLEND BIOMES");
-    expect(renderToStaticMarkup(<VariantPackPanel busy={false} online assetName="oak.png" onGenerate={() => undefined} />)).toContain("ENVIRONMENT VARIANT PACK");
+    const variantPackMarkup = renderToStaticMarkup(<VariantPackPanel busy={false} online assetName="oak.png" onGenerate={() => undefined} />);
+    expect(variantPackMarkup).toContain("ENVIRONMENT VARIANT PACK");
+    expect(variantPackMarkup).toContain("WIND SWAY");
     expect(renderToStaticMarkup(<SceneEffectStackPanel busy={false} online assetName="oak.png" onGenerate={() => undefined} />)).toContain("SCENE EFFECT STACK");
     expect(renderToStaticMarkup(<VariantPreviewPanel previewUrl={(path) => `/preview?path=${encodeURIComponent(path)}`} artifacts={[{ variant: "rain", outputFilename: "oak-rain.gif", operation: "generate_rain_overlay", frames: 8, format: "gif", deterministic: true, sourcePreserved: true }]} />)).toContain("VARIANT PREVIEWS");
     expect(renderToStaticMarkup(<QualityRecommendationsPanel recommendations={["Reduce the palette before export."]} />)).toContain("QUALITY RECOMMENDATIONS");
