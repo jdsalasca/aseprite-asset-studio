@@ -44,10 +44,20 @@ describe("SCSS architecture", () => {
     const entry = await readStyleModule("app.scss");
     const main = await readFile(new URL("../src/main.tsx", import.meta.url), "utf8");
 
-    for (const moduleName of ["tokens", "foundation", "layout", "components", "typography", "workflow"]) {
+    for (const moduleName of ["tokens", "foundation", "layout", "components", "typography", "workflow", "interactions"]) {
       expect(entry).toContain(`@use \"./${moduleName}\"`);
     }
     expect(main).toContain('import "./styles/app.scss"');
     expect(main).not.toContain('import "./styles/app.css"');
+  });
+
+  it("keeps focus behavior owned by one interaction module", async () => {
+    const interactions = await readStyleModule("_interactions.scss");
+    const components = await readStyleModule("_components.scss");
+    const workflow = await readStyleModule("_workflow.scss");
+    expect(interactions).toContain(":where(button, input, select, textarea):focus-visible");
+    expect(interactions).toContain("studio-focus");
+    expect(components).not.toContain("button:focus-visible");
+    expect(workflow).not.toContain("button:focus-visible");
   });
 });

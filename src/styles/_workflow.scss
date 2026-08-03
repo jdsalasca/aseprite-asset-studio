@@ -25,4 +25,3 @@
 .hitbox-controls label { color: var(--studio-muted); display: grid; font-size: .7rem; gap: .35rem; letter-spacing: .08em; }
 .hitbox-controls input { background: var(--studio-ink); border: 1px solid var(--studio-cyan); color: #d4def0; font: inherit; min-height: 2.2rem; padding: .45rem; }
 .runtime-bundle-controls { @include m.studio-grid(repeat(2, minmax(0, 1fr))); margin-top: .8rem; }
-button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { @include m.studio-focus; }

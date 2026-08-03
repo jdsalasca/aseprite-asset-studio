@@ -1,0 +1,4 @@
+@use "mixins" as m;
+
+// One explicit accessibility owner for native controls rendered by the UX.
+:where(button, input, select, textarea):focus-visible { @include m.studio-focus; }

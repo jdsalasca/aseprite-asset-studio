@@ -32,4 +32,3 @@
 .log-line { align-items: flex-start; display: flex; gap: .6rem; line-height: 1.5; }
 .log-line .pixel-badge { flex: none; }
 .activity-log { display: grid; gap: .7rem; }
-button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { @include m.studio-focus; }

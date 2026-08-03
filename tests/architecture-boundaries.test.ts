@@ -21,6 +21,7 @@ describe("hexagonal boundaries", () => {
     const foundation = await readFile(new URL("../src/styles/_foundation.scss", import.meta.url), "utf8");
     const typography = await readFile(new URL("../src/styles/_typography.scss", import.meta.url), "utf8");
     const workflow = await readFile(new URL("../src/styles/_workflow.scss", import.meta.url), "utf8");
+    const interactions = await readFile(new URL("../src/styles/_interactions.scss", import.meta.url), "utf8");
     const components = await readFile(new URL("../src/styles/_components.scss", import.meta.url), "utf8");
     expect(entry).toContain('@use "./tokens"');
     expect(entry).toContain('@use "./foundation"');
@@ -37,6 +38,8 @@ describe("hexagonal boundaries", () => {
     expect(components).toContain(".preview-grid");
     expect(workflow).not.toContain(".preview-grid");
     expect(workflow).not.toContain("@extend");
+    expect(interactions).toContain("studio-focus");
+    expect(interactions).not.toContain("@extend");
     expect(workflow.match(/\.quality-recommendations \{/g)?.length).toBe(1);
     expect(components).not.toContain(".quality-recommendations {");
   });
