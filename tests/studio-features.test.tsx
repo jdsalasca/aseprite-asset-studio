@@ -83,6 +83,7 @@ describe("studio feature contracts", () => {
     expect(effectsMarkup).toContain("SPRITE SHADOW");
     expect(effectsMarkup).toContain("COLOR TEMPERATURE");
     expect(effectsMarkup).toContain("SPRITE SILHOUETTE");
+    expect(effectsMarkup).toContain("WIND SWAY");
     expect(renderToStaticMarkup(<SceneExtensionPanel busy={false} online onExtend={() => undefined} onTransition={() => undefined} />)).toContain("SCENE EXTENSION");
     expect(renderToStaticMarkup(<SceneExtensionPanel busy={false} online onExtend={() => undefined} onTransition={() => undefined} />)).toContain("BLEND BIOMES");
     expect(renderToStaticMarkup(<VariantPackPanel busy={false} online assetName="oak.png" onGenerate={() => undefined} />)).toContain("ENVIRONMENT VARIANT PACK");

@@ -37,6 +37,7 @@ class FakeGateway implements AssetGateway {
     if (name === "apply_sprite_color_temperature") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: args.format, deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_rain_overlay") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_motion_pack") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
+    if (name === "generate_wind_sway") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "upscale_pixel_art") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, scale: args.scale, frames: 1, format: "png", deterministic: true, sourcePreserved: true }) }] };
     if (name === "extend_scene") return { content: [{ text: JSON.stringify({ operation: name, input: args.input_map_filename, output: args.output_map_filename, preview: null, width: 32, height: 24, padding: { top: args.top, right: args.right, bottom: args.bottom, left: args.left }, seed: args.seed, layers: 3, deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_biome_transition") return { content: [{ text: JSON.stringify({ operation: name, input: args.input_map_filename, output: args.output_map_filename, preview: args.preview_filename ?? null, width: 32, height: 24, transitionWidth: args.transition_width, transitions: 42, seed: args.seed, deterministic: true, sourcePreserved: true }) }] };
@@ -142,6 +143,13 @@ describe("AssetStudioService enhancement use cases", () => {
     const result = await new AssetStudioService(gateway).applySpriteEffect("motion", "source.png", "source-walk.gif", { motion: "walk", frames: 8, amplitude: 2, seed: 3 });
     expect(result).toMatchObject({ operation: "generate_motion_pack", output: "source-walk.gif", format: "gif" });
     expect(gateway.calls.at(-1)).toMatchObject({ name: "generate_motion_pack", args: { motion: "walk", frames: 8, amplitude: 2, seed: 3, format: "gif" } });
+  });
+
+  it("maps wind sway controls to the shared MCP environmental generator", async () => {
+    const gateway = new FakeGateway();
+    const result = await new AssetStudioService(gateway).applySpriteEffect("wind_sway", "tree.png", "tree-wind.gif", { frames: 6, seed: 19, amplitude: 2, direction: "right", delay_ms: 75 });
+    expect(result).toMatchObject({ operation: "generate_wind_sway", output: "tree-wind.gif", format: "gif" });
+    expect(gateway.calls.at(-1)).toMatchObject({ name: "generate_wind_sway", args: { input_filename: "tree.png", output_filename: "tree-wind.gif", frames: 6, seed: 19, amplitude: 2, direction: "right", delay_ms: 75, format: "gif" } });
   });
 
   it("maps background removal to the shared MCP effects service", async () => {
