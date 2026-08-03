@@ -37,7 +37,7 @@ class FakeGateway implements AssetGateway {
     if (name === "apply_sprite_color_temperature") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: args.format, deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_rain_overlay") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: 1, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_fog_overlay") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
-    if (name === "generate_snow_overlay" || name === "generate_smoke_overlay" || name === "generate_fire_overlay" || name === "generate_lightning_overlay" || name === "generate_wave_overlay" || name === "generate_water_spray" || name === "generate_dust_overlay" || name === "generate_leaf_fall_overlay") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
+    if (name === "generate_snow_overlay" || name === "generate_smoke_overlay" || name === "generate_fire_overlay" || name === "generate_lightning_overlay" || name === "generate_wave_overlay" || name === "generate_water_spray" || name === "generate_dust_overlay" || name === "generate_leaf_fall_overlay" || name === "generate_water_ripple_overlay") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_motion_pack") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "generate_wind_sway") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, frames: args.frames, format: "gif", deterministic: true, sourcePreserved: true }) }] };
     if (name === "upscale_pixel_art") return { content: [{ text: JSON.stringify({ operation: name, output: args.output_filename, scale: args.scale, frames: 1, format: "png", deterministic: true, sourcePreserved: true }) }] };
@@ -213,6 +213,13 @@ describe("AssetStudioService enhancement use cases", () => {
     const result = await new AssetStudioService(gateway).applySpriteEffect("leaf_fall", "tree.png", "tree-leaves.gif", { frames: 5, seed: 103, density: 0.68, wind: -0.2, color: "#D97732", delay_ms: 85 });
     expect(result).toMatchObject({ operation: "generate_leaf_fall_overlay", output: "tree-leaves.gif", format: "gif" });
     expect(gateway.calls.at(-1)).toMatchObject({ name: "generate_leaf_fall_overlay", args: { input_filename: "tree.png", output_filename: "tree-leaves.gif", frames: 5, seed: 103, density: 0.68, wind: -0.2, color: "#D97732", delay_ms: 85, format: "gif" } });
+  });
+
+  it("maps water-ripple controls to the shared MCP environmental generator", async () => {
+    const gateway = new FakeGateway();
+    const result = await new AssetStudioService(gateway).applySpriteEffect("ripple", "pond.png", "pond-ripple.gif", { frames: 5, seed: 109, density: 0.72, amplitude: 3, color: "#BDEBFF", delay_ms: 90 });
+    expect(result).toMatchObject({ operation: "generate_water_ripple_overlay", output: "pond-ripple.gif", format: "gif" });
+    expect(gateway.calls.at(-1)).toMatchObject({ name: "generate_water_ripple_overlay", args: { input_filename: "pond.png", output_filename: "pond-ripple.gif", frames: 5, seed: 109, density: 0.72, amplitude: 3, color: "#BDEBFF", delay_ms: 90, format: "gif" } });
   });
 
   it("maps background removal to the shared MCP effects service", async () => {
